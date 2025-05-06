@@ -3,8 +3,12 @@ body{
     background: linear-gradient(40deg,rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgba(255, 255, 255, 1) 100%);
     overflow: hidden;
 }
+a{
+    text-decoration: none;
+}
 .backg {
     position: relative;
+    width: 2000px;
     top: 20px;
     display: block;
     // right: 50%;
@@ -13,42 +17,95 @@ body{
 p{
     color: c.$white1;
     text-align: center;
-    font-size: 70px;
     font-weight: 800;
     line-height: 1;
     margin-bottom: 0; 
 }
+.monopoly{
+    margin-top: 15%;
+    // font-size: clamp(20px, 1.5vw, 70px);
+    font-size: 60px;
+}
 .logo{
     background-color: c.$red1;
+    // width: clamp(100px, 10%, 650px);
     width: 85%;
-    max-width: 650px;
+    max-width: 550px;
     height: 650px;
     position: absolute;
-    top: 15%;
+    top: 50px;
     right: 10%;
     border-radius: 40%;
+    box-shadow: 0 0 50px c.$red1;
+    // display: flex; 
 }
 .logo_main{
     width: 300px;
     display: block;
     align-items: center;
-    margin-top: 0; 
+    margin-top: 10%; 
     position: relative;
     left: 50%;
     transform: translateX(-50%);
 }
 .next{
-    align-items: center;
     position: relative;
-    width: 70px;
+    width: 140px;
     height: 70px;
-    background-color: c.$red2;
-    border: none;
+    background-color: c.$red1;
+    display: block;
+    // background: #fff;
+    border: 2px solid c.$mint;
     border-radius: 40%;
     color: c.$white1;
-    font-size: 40px;
+    font-size: 30px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    // margin-top: 30px; /* Dodajemy odstęp od obrazka */
+    margin-top: 30px;
+    box-shadow: 0px 0px 10px c.$mint;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.arrow{
+    margin-top: 0;
+    padding-top: 0;
+    position: relative;
+    display: block;
+    // color: c.$mint;
+    left: 50%;
+    top: 25%;
+    transform: translate(-50%);
+}
+// .button:hover{
+//     background: c.$red2;
+//   }
+@media (max-width: 1370px) {
+    .logo{
+        z-index: 1;
+    }
+    // .backg{
+    //     top: 100px;
+    //     // top: 20px;
+    // }
+}
+@media (max-width: 1000px) {
+    .monopoly{
+        font-size: 20px;
+    }
+    .logo_main{
+        width: 200px;
+    }
+    .next{
+        width: 70px;
+        height: 35px;
+    }
+    .arrow{
+        left: 50%;
+        top: -10%;
+        transform: translate(-50%);
+    }
+    .logo{
+        height: 400px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
