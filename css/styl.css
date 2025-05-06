@@ -1,6 +1,56 @@
 body {
-    background-image: linear-gradient(44deg, rgba(5, 34, 123, 1) 6%, rgb(97, 250, 255) 85%);
+  background: linear-gradient(40deg, rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgb(255, 255, 255) 100%);
+  overflow: hidden;
 }
-img{
-    width: 110%;
+
+.backg {
+  position: relative;
+  top: 20px;
+  display: block;
+  transform: translateX(-40%);
 }
+
+p {
+  color: #fcf9de;
+  text-align: center;
+  font-size: 70px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+.logo {
+  background-color: #ba2f2d;
+  width: 85%;
+  max-width: 650px;
+  height: 650px;
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  border-radius: 40%;
+}
+
+.logo_main {
+  width: 300px;
+  display: block;
+  align-items: center;
+  margin-top: 0;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.next {
+  align-items: center;
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background-color: #b92d34;
+  border: none;
+  border-radius: 40%;
+  color: #fcf9de;
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}/*# sourceMappingURL=styl.css.map */
