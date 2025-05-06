@@ -15,6 +15,14 @@ a {
   transform: translateX(-40%);
 }
 
+.backg1 {
+  position: relative;
+  width: 2000px;
+  top: 20px;
+  display: block;
+  transform: translateX(10%);
+}
+
 p {
   color: #fcf9de;
   text-align: center;
@@ -28,6 +36,11 @@ p {
   font-size: 60px;
 }
 
+.monopoly2 {
+  margin-top: 15%;
+  font-size: 40px;
+}
+
 .logo {
   background-color: #ba2f2d;
   width: 85%;
@@ -36,6 +49,18 @@ p {
   position: absolute;
   top: 50px;
   right: 10%;
+  border-radius: 40%;
+  box-shadow: 0 0 50px #ba2f2d;
+}
+
+.logo2 {
+  background-color: #ba2f2d;
+  width: 85%;
+  max-width: 550px;
+  height: 650px;
+  position: absolute;
+  top: 50px;
+  left: 10%;
   border-radius: 40%;
   box-shadow: 0 0 50px #ba2f2d;
 }
@@ -75,6 +100,13 @@ p {
   left: 50%;
   top: 25%;
   transform: translate(-50%);
+}
+
+.player {
+  background-color: #9f161d;
+  box-shadow: 0px 0px 10px #67e4aa;
+  height: 50px;
+  width: 85%;
 }
 
 @media (max-width: 1370px) {
