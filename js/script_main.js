@@ -14,21 +14,25 @@
     });
 
     function one() {
-       step1Div.style.opacity = '0';
+        step2Div.style.zIndex = '10';
+
+        step1Div.style.opacity = '0';
         step1Div.style.transition = 'opacity 0.5s ease-in-out';
-      
+
         setTimeout(() => {
-          step1Div.style.display = 'none';
-      
-          step2Div.style.opacity = '0';
-          step2Div.style.display = 'block';
-          step2Div.style.transition = 'opacity 0.5s ease-in-out';
-          setTimeout(() => {
+            step1Div.style.display = 'none';
+
+            step1Div.style.zIndex = '1';
+
+            step2Div.style.opacity = '0';
+            step2Div.style.display = 'flex';
+            step2Div.style.transition = 'opacity 0.5s ease-in-out';
+            setTimeout(() => {
             step2Div.style.opacity = '1';
-          }, 50);
-      
-          //tło
-          backgImg.style.transform = 'translateX(10%)';
-          backgImg.style.transition = 'transform 0.5s ease-in-out';
+            }, 50);
+
+            //tło
+            backgImg.style.transform = 'translateX(10%)';
+            backgImg.style.transition = 'transform 0.5s ease-in-out';
         }, 500);
-      }
+    }
