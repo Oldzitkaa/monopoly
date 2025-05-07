@@ -1,0 +1,138 @@
+body {
+  background: linear-gradient(40deg, rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgb(255, 255, 255) 100%);
+  overflow: hidden;
+}
+
+a {
+  text-decoration: none;
+}
+
+.backg {
+  position: relative;
+  width: 2000px;
+  top: 20px;
+  display: block;
+  transform: translateX(-40%);
+}
+
+.backg1 {
+  position: relative;
+  width: 2000px;
+  top: 20px;
+  display: block;
+  transform: translateX(10%);
+}
+
+p {
+  color: #fcf9de;
+  text-align: center;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+.monopoly {
+  margin-top: 15%;
+  font-size: 60px;
+}
+
+.monopoly2 {
+  margin-top: 15%;
+  font-size: 40px;
+}
+
+.logo {
+  background-color: #ba2f2d;
+  width: 85%;
+  max-width: 550px;
+  height: 650px;
+  position: absolute;
+  top: 50px;
+  right: 10%;
+  border-radius: 40%;
+  box-shadow: 0 0 50px #ba2f2d;
+}
+
+.logo2 {
+  background-color: #ba2f2d;
+  width: 85%;
+  max-width: 550px;
+  height: 650px;
+  position: absolute;
+  top: 50px;
+  left: 10%;
+  border-radius: 40%;
+  box-shadow: 0 0 50px #ba2f2d;
+}
+
+.logo_main {
+  width: 300px;
+  display: block;
+  align-items: center;
+  margin-top: 10%;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.next {
+  position: relative;
+  width: 140px;
+  height: 70px;
+  background-color: #ba2f2d;
+  display: block;
+  border: 2px solid #67e4aa;
+  border-radius: 40%;
+  color: #fcf9de;
+  font-size: 30px;
+  display: flex;
+  margin-top: 30px;
+  box-shadow: 0px 0px 10px #67e4aa;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.arrow {
+  margin-top: 0;
+  padding-top: 0;
+  position: relative;
+  display: block;
+  left: 50%;
+  top: 25%;
+  transform: translate(-50%);
+}
+
+.player {
+  background-color: #9f161d;
+  box-shadow: 0px 0px 10px #67e4aa;
+  height: 50px;
+  width: 85%;
+}
+
+@media (max-width: 1370px) {
+  .logo {
+    z-index: 1;
+  }
+}
+@media (max-width: 1000px) {
+  .monopoly {
+    font-size: 20px;
+  }
+  .logo_main {
+    width: 200px;
+  }
+  .next {
+    width: 70px;
+    height: 35px;
+  }
+  .arrow {
+    left: 50%;
+    top: -10%;
+    transform: translate(-50%);
+  }
+  .logo {
+    height: 400px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}/*# sourceMappingURL=styl.css.map */
