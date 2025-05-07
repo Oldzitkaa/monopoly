@@ -1,0 +1,6 @@
+git status - status gita
+git add . - dodaje pliki do scommitowania
+git commit -m "message" 
+git push - wysyla commity na serwer
+git pull - pobiera dane z sewera
+git checkout branch_name - przelacza się na brancha
