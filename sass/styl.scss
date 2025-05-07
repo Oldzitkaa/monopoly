@@ -31,41 +31,56 @@ p{
 }
 .monopoly{
     margin-top: 15%;
+    color: c.$white1;
     // font-size: clamp(20px, 1.5vw, 70px);
-    font-size: 60px;
+    &.size1{
+        font-size: 60px;
+        font-size: clamp(20px, 3.5vw, 60px);
+    }
 }
-.monopoly2{
-    margin-top: 15%;
-    // font-size: clamp(20px, 1.5vw, 70px);
-    font-size: 40px;
+.size2{
+    display: block; 
+    text-align: center; 
+    color: c.$white1;
+    size: 2em; 
+    margin-bottom: 10px
 }
-.logo{
-    background-color: c.$red1;
-    // width: clamp(100px, 10%, 650px);
-    width: 85%;
-    max-width: 550px;
-    height: 650px;
-    position: absolute;
-    top: 50px;
-    right: 10%;
-    border-radius: 40%;
-    box-shadow: 0 0 50px c.$red1;
-    // display: flex; 
+       
+// .monopoly2{
+//     margin-top: 15%;
+//     // font-size: clamp(20px, 1.5vw, 70px);
+//     font-size: 40px;
+// }
+.logo_div{
+        background-color: c.$red1;
+        // width: clamp(100px, 10%, 650px);
+        width: 85%;
+        max-width: 550px;
+        height: 650px;
+        position: absolute;
+        top: 50px;
+        border-radius: 40%;
+        box-shadow: 0 0 50px c.$red1;
+        z-index: 1;
+        // display: flex; 
+        &.step1{
+            right: 10%;
+        }
+        &.step2{
+            left: 10%;
+            // display: none; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            // justify-content: space-around;
+            align-items: center; 
+            opacity: 0;
+        }
+    }
+.disflexcol{
+    display: block;
 }
-.logo2{
-    background-color: c.$red1;
-    // width: clamp(100px, 10%, 650px);
-    width: 85%;
-    max-width: 550px;
-    height: 650px;
-    position: absolute;
-    top: 50px;
-    left: 10%;
-    border-radius: 40%;
-    box-shadow: 0 0 50px c.$red1;
-    // display: flex; 
-}
-.logo_main{
+.logo_zdj{
     width: 300px;
     display: block;
     align-items: center;
@@ -91,6 +106,7 @@ p{
     left: 50%;
     transform: translateX(-50%);
 }
+.rangeplayer
 .arrow{
     margin-top: 0;
     padding-top: 0;
@@ -107,25 +123,23 @@ p{
     height: 50px;
     width: 85%;
 }
-
-
 // .button:hover{
 //     background: c.$red2;
 //   }
-@media (max-width: 1370px) {
-    .logo{
-        z-index: 1;
-    }
+// @media (max-width: 1370px) {
+//     .logo_div{
+//         z-index: 1;
+//     }
     // .backg{
     //     top: 100px;
     //     // top: 20px;
     // }
-}
+// }
 @media (max-width: 1000px) {
     .monopoly{
-        font-size: 20px;
+        // font-size: 20px;
     }
-    .logo_main{
+    .logo_zdj{
         width: 200px;
     }
     .next{
@@ -137,9 +151,45 @@ p{
         top: -10%;
         transform: translate(-50%);
     }
-    .logo{
+    .logo_div{
         height: 400px;
-        left: 50%;
-        transform: translateX(-50%);
+        &.step1{
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        &.step2{
+            right: 50%;
+            transform: translateX(-5%);
+        }
     }
 }
+
+
+
+
+// .logo{
+//     background-color: c.$red1;
+//     // width: clamp(100px, 10%, 650px);
+//     width: 85%;
+//     max-width: 550px;
+//     height: 650px;
+//     position: absolute;
+//     top: 50px;
+//     right: 10%;
+//     border-radius: 40%;
+//     box-shadow: 0 0 50px c.$red1;
+//     // display: fleleft: 10%;x; 
+// }
+// .logo2{
+//     background-color: c.$red1;
+//     // width: clamp(100px, 10%, 650px);
+//     width: 85%;
+//     max-width: 550px;
+//     height: 650px;
+//     position: absolute;
+//     top: 50px;
+//     
+//     border-radius: 40%;
+//     box-shadow: 0 0 50px c.$red1;
+//     // display: flex; 
+// }
