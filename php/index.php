@@ -49,7 +49,7 @@
             $result2 = $query2->get_result();
             while ($row = $result2->fetch_object()) {
                 echo "<div>";
-                echo "<img src ='./zdj/postacie/" . $row->plik . "'>";
+                echo "<img src ='../zdj/postacie/" . $row->plik . "'>";
                 echo "<p>" . $row->name . "</p></div>";
             }
         ?>
@@ -58,7 +58,7 @@
 <!-- tlo -->
       <img src="./zdj/tlo3.png" alt="" class="backg">
       
-      <script src="./js/script_main.js"></script>
+      <script src="../js/script_main.js"></script>
 </body>
 </html>
 <!-- vw mixin
