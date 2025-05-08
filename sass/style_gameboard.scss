@@ -103,9 +103,9 @@ body {
     margin-top: 0.2em;
   }
 }
-.tile{
+// .tile{
 
-}
+// }
 
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
