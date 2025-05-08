@@ -62,7 +62,7 @@ p{
         background-color: c.$red1;
         // width: clamp(100px, 10%, 650px);
         width: 85%;
-        max-width: 550px;
+        // max-width: 550px;
         height: 650px;
         position: absolute;
         top: 50px;
@@ -70,11 +70,13 @@ p{
         box-shadow: 0 0 50px c.$red1;
         // display: flex; 
         &.step1{
+            max-width: 550px;
             right: 10%;
             z-index: 10;
         }
         &.step2{
             left: 10%;
+            max-width: 550px;
             // display: none; 
             display: flex; 
             flex-direction: column;
@@ -82,6 +84,36 @@ p{
             align-items: center; 
             opacity: 0;
             z-index: 1;
+        }
+        &.step3{
+            // left: 10%;
+            // display: none; 
+            // max-width: 300px;
+            
+            opacity: 0;
+            // z-index: 1;
+            &.characters{
+                right: 10px;
+                background-color: pink;
+                width: clamp(200px, 3.5vw, 800px);
+                height: auto;
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+                overflow-y: auto;
+                // top: 0px;
+            }
+            &.nick{
+                display: flex; 
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 45%;
+                max-width: 300px;
+                left: 10%;
+            }
         }
     }
 // .rangeplayer{

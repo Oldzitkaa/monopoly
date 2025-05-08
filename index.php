@@ -17,32 +17,48 @@
       
 <!-- div drugi -->
       <div class="logo_div step2" >
-        <!-- style="display: none; opacity: 0;" -->
         <p class="monopoly size1">Podaj liczbe <br> graczy</p><br>
         <p id="playerCount" class="size2">2</p>
-        <label for="quantity">
-            <input type="range" class=" rangeplayer" name="quantity" id="quantity" min="2" max="4" value="2">
-        </label>
+        <form action="" method="post">
+          <label for="quantity">
+              <input type="range" class=" rangeplayer" name="quantity" id="quantity" min="2" max="4" >
+          </label>
+        </form>
         <button class="next nextleft" onclick="two()"><p class="nextstep size3">	&rarr;</p></button>
       </div>
-
+      <!-- php dodawanie gry i startowanie -->
+      <?php 
+        $sql1 = 'INSERT INTO `games` (`current_turn`, `status`,	`created_at`) VALUES (0, "active", ?)';
+          $query1 = $mysqli -> prepare($sql1);
+          $c_d = date("Y-m-d");
+          $query1->bind_param('s', $c_d);
+          $query1->execute();
+      ?>
 <!-- div trzeci -->
-      <!-- <div class="logo_div step3" >
-        <p class="monopoly size1">Podaj niki <br> graczy</p><br>
-        <p id="playerCount" class="size2">2</p>
+      <div class="logo_div step3 nick" >
+        <p class="monopoly size1">Podaj nicki <br> graczy</p><br>
+    
         
         <button class="next nextleft" onclick="two()"><p class="nextstep size3">	&rarr;</p></button>
-        <!-- <div class="player">
-          <label for=""><p>Gracz 1</p><input type="text" name="" id=""></label>
-        </div>
-        <div class="player">
-          <label for=""><p>Gracz 2</p><input type="text" name="" id=""></label>
-        </div> -->
+      </div>
+      <div class="logo_div step3 characters">
+      <?php
+            $sql2 = 'SELECT name, plik FROM characters';
+            $query2 = $mysqli -> prepare($sql2);
+            $query2->execute();
+            $result2 = $query2->get_result();
+            while ($row = $result2->fetch_object()) {
+                echo "<div>";
+                echo "<img src ='./zdj/postacie/" . $row->plik . "'>";
+                echo "<p>" . $row->name . "</p></div>";
+            }
+        ?>
       </div>
       
+<!-- tlo -->
       <img src="./zdj/tlo3.png" alt="" class="backg">
       
-      <script src="./js/script_main.js"></script> -->
+      <script src="./js/script_main.js"></script>
 </body>
 </html>
 <!-- vw mixin
