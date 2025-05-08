@@ -1,4 +1,9 @@
 <?php
+include_once './database_connect.php';
+
+if (!isset($mysqli) || $mysqli->connect_errno) {
+    die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
+}
 
 ?>
 <!doctype html>
