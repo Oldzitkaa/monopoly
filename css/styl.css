@@ -59,7 +59,6 @@ p {
 .logo_div {
   background-color: #ba2f2d;
   width: 85%;
-  max-width: 550px;
   height: 650px;
   position: absolute;
   top: 50px;
@@ -67,17 +66,43 @@ p {
   box-shadow: 0 0 50px #ba2f2d;
 }
 .logo_div.step1 {
+  max-width: 550px;
   right: 10%;
   z-index: 10;
 }
 .logo_div.step2 {
   left: 10%;
+  max-width: 550px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   opacity: 0;
   z-index: 1;
+}
+.logo_div.step3 {
+  opacity: 0;
+}
+.logo_div.step3.characters {
+  right: 10px;
+  background-color: pink;
+  width: clamp(200px, 3.5vw, 800px);
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow-y: auto;
+}
+.logo_div.step3.nick {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 45%;
+  max-width: 300px;
+  left: 10%;
 }
 
 .rangeplayer {
