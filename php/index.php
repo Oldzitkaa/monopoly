@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Potęga Smaku</title>
-    <link rel="stylesheet" href="./css/styl.css">
+    <link rel="stylesheet" href="../css/styl.css">
 </head>
 <body>
 <!-- div pierwszy -->
     <div class="logo_div step1">
         <p class="monopoly size1">MONOPOLY</p>
-        <img src="./zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
         <button class="next nextright" onclick="one()"><p class="nextstep size3">	&larr;</p></button>
       </div>
       
@@ -40,9 +40,9 @@
         </div> -->
       </div>
       
-      <img src="./zdj/tlo3.png" alt="" class="backg">
+      <img src="../zdj/tlo3.png" alt="" class="backg">
       
-      <script src="./js/script_main.js"></script> -->
+      <script src="../js/script_main.js"></script> -->
 </body>
 </html>
 <!-- vw mixin
