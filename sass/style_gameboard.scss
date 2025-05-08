@@ -8,7 +8,7 @@ body {
   padding: 1vw;
   box-sizing: border-box;
   overflow: auto;
-  background-color: #f0f0f0;
+  background-color: c.$white1;
   font-family: sans-serif;
   font-size: 16px;
 }
@@ -19,7 +19,7 @@ body {
   grid-template-rows: minmax(7.5rem, 7.5vh) repeat(10, minmax(5rem, 5vh)) minmax(7.5rem, 7.5vh);
   gap: 0;
   border: 0.3rem solid black;
-  background-color: c.$red1;
+  background-color: c.$white1;
   box-sizing: border-box;
   position: relative;
   @media (max-width: 1200px) {
@@ -51,7 +51,7 @@ body {
   hyphens: auto;
   line-height: 1.2;
 
-  .tile-id {
+  &.tile-id {
     font-weight: bold;
     opacity: 0.8;
     font-size: 1.1em;
@@ -59,20 +59,24 @@ body {
     align-self: center;
   }
 
-  .tile-name {
-    background-color: c.$red1;
+  &.tile-name {
+    // background-color: c.$red1;
     font-weight: bold;
     font-size: 1em;
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
+
+    &.tile-start {
+      background-color: c.$lightred;
+    }
   }
 
-  .tile-price,
-  .tile-rent,
-  .tile-cost,
-  .tile-description {
+  &.tile-price,
+  &.tile-rent,
+  &.tile-cost,
+  &.tile-description {
     display: block;
     font-size: 0.8em;
     font-weight: normal;
@@ -81,7 +85,6 @@ body {
     width: 100%;
   }
 }
-
 .board-center-placeholder {
   grid-area: 2 / 2 / 12 / 12; 
   display: flex;
@@ -103,9 +106,6 @@ body {
     margin-top: 0.2em;
   }
 }
-// .tile{
-
-// }
 
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
