@@ -20,9 +20,6 @@ if ($result) {
 }
 $mysqli->close();
 
-
-
-
 function get_space_classes($tile) {
     $classes = ['tile'];
 
@@ -36,14 +33,14 @@ function get_space_classes($tile) {
     return implode(' ', $classes);
 }
 
-
 function get_space_content($tile) {
-     $displayed_id = $tile['id'] + 1; 
-     $content = '<div class="tile-id">' . $displayed_id . '</div>';
-     $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
+    //  $displayed_id = $tile['id'] + 1; 
+    //  $content = '<div class="tile-id">' . $displayed_id . '</div>';
+    //  $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
+     $content = '<div class="tile-name title-' . htmlspecialchars($tile['type']) . '">' . htmlspecialchars($tile['name']) . '</div>'; 
+      $content .= '<div class="tile-tile"></div>'; 
     return $content;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="pl">

@@ -1,3 +1,4 @@
+@use "./_color" as c;
 body {
   display: flex;
   justify-content: center;
@@ -18,7 +19,7 @@ body {
   grid-template-rows: minmax(7.5rem, 7.5vh) repeat(10, minmax(5rem, 5vh)) minmax(7.5rem, 7.5vh);
   gap: 0;
   border: 0.3rem solid black;
-  background-color: white;
+  background-color: c.$red1;
   box-sizing: border-box;
   position: relative;
   @media (max-width: 1200px) {
@@ -38,7 +39,7 @@ body {
   margin: 0;
   padding: 0.5rem;
   box-sizing: border-box;
-  background-color: #eee;
+  background-color: c.$white1;
   text-align: center;
   overflow: hidden;
   font-size: clamp(0.8rem, 1.2vw + 0.4rem, 1.1rem);
@@ -59,6 +60,7 @@ body {
   }
 
   .tile-name {
+    background-color: c.$red1;
     font-weight: bold;
     font-size: 1em;
     flex-grow: 1;
@@ -101,6 +103,10 @@ body {
     margin-top: 0.2em;
   }
 }
+.tile{
+
+}
+
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
     @if $i >= 2 and $i <= 12 {
