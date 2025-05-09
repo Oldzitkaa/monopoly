@@ -91,18 +91,21 @@ body {
   // align-items: center;
 
   &.tile-start {
-    background-color: c.$mint;
+    background-color: c.$start;
+  }
+  &.tile-training {
+    background-color: c.$start;
+  }
+  &.tile-vacation {
+    background-color: c.$start;
   }
   &.tile-duel{
     background-color: c.$duel;
   }
-  // &.tile-event {
-
-  // }
+  &.tile-event {
+    background-color: c.$action;
+  }
   // &.tile-region_entrance{
-
-  // }
-  // &.tile-training{
 
   // }
   &.tile-restaurant{
