@@ -3,6 +3,7 @@ include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
 }
+
 $mysqli->set_charset("utf8");
 $sql = "SELECT id, name, type, region, cost, base_rent, description FROM tiles ORDER BY id";
 $result = $mysqli->query($sql);
@@ -18,6 +19,7 @@ if ($result) {
 } else {
     echo "Błąd zapytania SQL: " . $mysqli->error;
 }
+
 $mysqli->close();
 
 

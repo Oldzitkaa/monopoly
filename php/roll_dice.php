@@ -6,6 +6,7 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
 }
 $wynik = rand(1, 6);
+
 ?>
 
 <!DOCTYPE html>

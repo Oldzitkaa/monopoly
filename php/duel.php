@@ -6,6 +6,8 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 
 ?>
+
+
 <!doctype html>
 <html lang="en">
 <head>
