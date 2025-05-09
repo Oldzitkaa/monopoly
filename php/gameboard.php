@@ -22,9 +22,6 @@ if ($result) {
 
 $mysqli->close();
 
-
-
-
 function get_space_classes($tile) {
     $classes = ['tile'];
 
@@ -38,14 +35,14 @@ function get_space_classes($tile) {
     return implode(' ', $classes);
 }
 
-
 function get_space_content($tile) {
-     $displayed_id = $tile['id'] + 1; 
-     $content = '<div class="tile-id">' . $displayed_id . '</div>';
-     $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
+    //  $displayed_id = $tile['id'] + 1; 
+    //  $content = '<div class="tile-id">' . $displayed_id . '</div>';
+    //  $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
+    $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>'; 
+    $content .= '<div class="tile-tile"></div>'; 
     return $content;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -53,7 +50,7 @@ function get_space_content($tile) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
-    <link rel="stylesheet" href="../sass/style_gameboard.css">
+    <link rel="stylesheet" href="../css/style_gameboard.css">
 </head>
 <body>
     <div class="monopoly-board" id="monopoly-board">
