@@ -59,19 +59,15 @@ body {
     align-self: center;
   }
 
-  &.tile-name {
-    // background-color: c.$red1;
-    font-weight: bold;
-    font-size: 1em;
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    &.tile-start {
-      background-color: c.$lightred;
-    }
-  }
+  // &.tile-name {
+  //   // background-color: c.$red1;
+  //   font-weight: bold;
+  //   font-size: 1em;
+  //   flex-grow: 1;
+  //   display: flex;
+  //   justify-content: center;
+  //   align-items: center;
+  // }
 
   &.tile-price,
   &.tile-rent,
@@ -83,6 +79,51 @@ body {
     margin-top: 0.2em;
     text-align: center;
     width: 100%;
+  }
+}
+.tile-name {
+  // background-color: c.$red1;
+  // font-weight: bold;
+  // font-size: 1em;
+  // flex-grow: 1;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+
+  &.tile-start {
+    background-color: c.$mint;
+  }
+  &.tile-duel{
+    background-color: c.$duel;
+  }
+  // &.tile-event {
+
+  // }
+  // &.tile-region_entrance{
+
+  // }
+  // &.tile-training{
+
+  // }
+  &.tile-restaurant{
+    &.Azja{
+      background-color: c.$azja;
+    }
+    &.Afryka{
+      background-color: c.$afr;
+    }
+    &.Australia{
+      background-color: c.$aus;
+    }
+    &.AmerykaN{
+      background-color: c.$amen;
+    }
+    &.AmerykaS{
+      background-color: c.$ames;
+    }
+    &.Europa{
+      background-color: c.$euro;
+    }
   }
 }
 .board-center-placeholder {

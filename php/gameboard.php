@@ -37,7 +37,7 @@ function get_space_content($tile) {
     //  $displayed_id = $tile['id'] + 1; 
     //  $content = '<div class="tile-id">' . $displayed_id . '</div>';
     //  $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
-    $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . '">' . htmlspecialchars($tile['name']) . '</div>'; 
+    $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>'; 
     $content .= '<div class="tile-tile"></div>'; 
     return $content;
 }
