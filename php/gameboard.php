@@ -5,7 +5,7 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 
 $mysqli->set_charset("utf8");
-$sql = "SELECT id, name, type, region, cost, base_rent, description FROM tiles ORDER BY id";
+$sql = "SELECT id, name, type, region, cost, base_rent, description, file FROM tiles ORDER BY id";
 $result = $mysqli->query($sql);
 
 $tiles = []; 
@@ -24,23 +24,37 @@ $mysqli->close();
 
 function get_space_classes($tile) {
     $classes = ['tile'];
-
     $type_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
+
     if ($tile['type'] === 'restaurant' && !empty($tile['region'])) {
          $region_part = strtolower(str_replace([' ', '/'], '_', $tile['region']));
          $classes[] = $region_part . '_restaurant';
     } else {
          $classes[] = $type_class;
     }
+
+    $id = $tile['id'];
+    if (in_array($id,[0,10,21,31])){
+        $classes[] ='corner';
+    }elseif ($id >= 1 && $id <= 9) {
+        $classes[] ='bottom-edge';
+    }elseif ($id >= 22 && $id <= 30) {
+        $classes[] ='top-edge';
+    }
+
+    if (!empty($tile['image_path'])) {
+        $classes[] = 'has-background-image';
+    }
+
     return implode(' ', $classes);
 }
 
 function get_space_content($tile) {
-    //  $displayed_id = $tile['id'] + 1; 
-    //  $content = '<div class="tile-id">' . $displayed_id . '</div>';
-    //  $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
-    $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>'; 
-    $content .= '<div class="tile-tile"></div>'; 
+    $displayed_id = $tile['id'] + 1;
+      $content = '<div class="tile-id">' . $displayed_id . '</div>';
+    $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>';
+    $content .= '<div class ="tile-tile"></div>';
+    $content .= '<div class="tile-color-bar"></div>';
     return $content;
 }
 ?>

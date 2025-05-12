@@ -37,9 +37,9 @@ body {
 }
 
 .tile {
-  border: 0.05rem solid #ccc;
+  border: 0.10rem solid #ccc;
   margin: 0;
-  padding: 0.5rem;
+  padding: 0;
   box-sizing: border-box;
   background-color: c.$white1;
   text-align: center;
@@ -52,34 +52,102 @@ body {
   hyphens: auto;
   line-height: 1.2;
   position: relative;
-  font-size: clamp(0.5rem, 1vw + 0.4rem, 1.1rem);
+  font-size: clamp(0.6rem, 0.8vw + 0.3rem, 0.9rem);
+  background-size: cover;
+  background-position: center;
+
+  .tile-name,
+  .tile-id,
+  .tile-price,
+  .tile-rent,
+  .tile-cost,
+  .tile-description {
+    position: relative;
+    z-index: 2;
+  }
+
+  &::before {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 40%;
+    pointer-events: none;
+  }
 
   .tile-name {
+    background-color: rgba(255, 255, 255, 0.7);
     font-weight: bold;
-    font-size: clamp(0.6rem, 1vw + 0.5rem, 1.1rem);
+    font-size: clamp(0.4rem, 0.8vw + 0.3rem, 0.7rem);
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 0.2em;
+    padding: 2px;
     word-break: break-word;
     hyphens: auto;
   }
 
   .tile-tile {
     width: 100%;
-    height: 0.6rem;
+    height: 100%;
     margin-top: auto;
     border-top: 1px solid #000;
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow: hidden;
   }
 
-  &.azja_restaurant .tile-tile     { background-color: c.$azja; }
-  &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
-  &.australia_restaurant .tile-tile { background-color: c.$aus; }
-  &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
-  &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
-  &.europa_restaurant .tile-tile   { background-color: c.$euro; }
+  .title-id {
+    transform: rotate(-30deg);
+    transform-origin: center;
+    display: inline-block;
+  }
+
+  .tile-image-container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .tile-image-container img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+  }
+
+  &.azja_restaurant .tile-tile     {
+    background-color: c.$azja; }
+
+  &.afryka_restaurant .tile-tile   {
+    background-color: c.$afr; }
+
+  &.australia_restaurant .tile-tile {
+    background-color: c.$aus; }
+
+  &.amerykan_restaurant .tile-tile {
+    background-color: c.$amen; }
+
+  &.amerykas_restaurant .tile-tile {
+    background-color: c.$ames; }
+
+  &.europa_restaurant .tile-tile   {
+    background-color: c.$euro; }
 
   &.duel .tile-tile      { background-color: c.$duel; }
   &.event .tile-tile     { background-color: c.$action; }
@@ -122,20 +190,63 @@ body {
   }
 }
 
+
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
+
     @if $i >= 2 and $i <= 12 {
       $col: 12 - ($i - 2);
       grid-area: 12 / #{$col};
+
+      .tile-name,
+      .tile-id {
+        transform: rotate(-45deg);
+        transform-origin: center;
+      }
     } @else if $i >= 13 and $i <= 23 {
       $row: 12 - ($i - 13);
       grid-area: #{$row} / 1;
-    } @else if $i >= 24 and $i <= 34 {
+
+    } @else if $i >= 25 and $i <= 34 {
       $col: 1 + ($i - 24);
       grid-area: 1 / #{$col};
+
+      .tile-name,
+      .tile-id {
+        transform: rotate(45deg);
+        transform-origin: center;
+      }
     } @else if $i >= 35 and $i <= 44 {
       $row: 1 + ($i - 35);
       grid-area: #{$row} / 12;
     }
   }
 }
+
+.tile.start::before {
+  background-image: url("../zdj/pola/start.png"); }
+
+.tile.event::before{
+  background-image: url("../zdj/pola/niespodzianka-Photoroom.png");
+}
+
+.tile.duel::before{
+  background-image: url("../zdj/pola/walka-Photoroom.png");
+}
+
+.tile.training::before{
+  background-image: url("../zdj/pola/szkolenie-Photoroom.png");
+}
+
+.tile.vacation::before{
+  background-image: url("../zdj/pola/urlop-Photoroom.png");
+}
+
+.tile.europa_restaurant::before{
+  background-image: url("../zdj/restauracje/polskaaa-Photoroom.png");
+}
+
+.tile.azja_restaurant::before{
+  background-image: url("../zdj/restauracje/sushi-Photoroom.png");
+}
+
