@@ -1151,7 +1151,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    margin-top: calc((c.$thumb-size / 2) - (8px / 2) - 1px);
+    margin-top: calc((20px / 2) - (8px / 2) - 1px);
     width: c.$thumb-size;
     height: c.$thumb-size;
     background: c.$white1;
