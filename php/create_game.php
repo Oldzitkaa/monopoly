@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode($response);
     exit;
 }
-$inputData = file_get_contents('php:
+$inputData = file_get_contents('php://input');
 $data = json_decode($inputData, true);
 $logFile = 'game_creation_log.txt'; 
 file_put_contents($logFile, date('Y-m-d H:i:s') . " - Otrzymane dane: " . $inputData . PHP_EOL, FILE_APPEND);
