@@ -1,4 +1,5 @@
 @use "./_color" as c;
+
 body {
   display: flex;
   justify-content: center;
@@ -22,6 +23,7 @@ body {
   background-color: c.$white1;
   box-sizing: border-box;
   position: relative;
+
   @media (max-width: 1200px) {
     padding: 0.3rem;
     width: 98vw;
@@ -35,14 +37,13 @@ body {
 }
 
 .tile {
-  border: 0.05rem solid #ccc;
+  border: 0.10rem solid #ccc;
   margin: 0;
-  padding: 0.5rem;
+  padding: 0;
   box-sizing: border-box;
-  background-color: c.$white1;
+  background-color: transparent;
   text-align: center;
   overflow: hidden;
-  font-size: clamp(0.8rem, 1.2vw + 0.4rem, 1.1rem);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -50,33 +51,102 @@ body {
   word-wrap: break-word;
   hyphens: auto;
   line-height: 1.2;
+  position: relative;
+  font-size: clamp(0.6rem, 0.8vw + 0.3rem, 0.9rem);
+  background-size: cover;
+  background-position: center;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
 
-  &.tile-id {
-    font-weight: bold;
-    opacity: 0.8;
-    font-size: 1.1em;
-    margin-bottom: 0.2em;
-    align-self: center;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--tile-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
-  &.tile-name {
-    // background-color: c.$red1;
+  .tile-id,
+  .tile-name,
+  .tile-name-text,
+  .tile-price,
+  .tile-rent,
+  .tile-cost,
+  .tile-description,
+  .tile-tile,
+  .tile-color-bar{
+    position: relative;
+    z-index: 2;
+  }
+
+   .tile-name {
+    position: relative;
+    z-index: 1;
     font-weight: bold;
-    font-size: 1em;
+    font-size: clamp(0.4rem, 0.8vw + 0.3rem, 0.7rem);
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &.tile-start {
-      background-color: c.$lightred;
-    }
+    text-align: center;
+    padding: 2px;
+    word-break: break-word;
+    hyphens: auto;
   }
 
-  &.tile-price,
-  &.tile-rent,
-  &.tile-cost,
-  &.tile-description {
+  .tile-name-text{
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px;
+  }
+
+  .tile-tile {
+    width: 100%;
+    height: 0.6rem;
+    margin-top: auto;
+    border-top: 1px solid #000;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+  }
+
+  .title-id {
+    transform: rotate(-30deg);
+    transform-origin: center;
+    display: inline-block;
+  }
+
+  .tile-color-bar{
+    position: relative;
+    z-index: 2;
+  }
+
+  &.azja_restaurant .tile-tile     { background-color: c.$azja; }
+  &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
+  &.australia_restaurant .tile-tile { background-color: c.$aus; }
+  &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
+  &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
+  &.europa_restaurant .tile-tile   { background-color: c.$euro; }
+  &.duel .tile-tile      { background-color: c.$duel; }
+  &.event .tile-tile     { background-color: c.$action; }
+  &.start .tile-tile,
+  &.training .tile-tile,
+  &.vacation .tile-tile  { background-color: c.$start; }
+
+  .tile-price,
+  .tile-rent,
+  .tile-cost,
+  .tile-description {
     display: block;
     font-size: 0.8em;
     font-weight: normal;
@@ -85,13 +155,14 @@ body {
     width: 100%;
   }
 }
+
 .board-center-placeholder {
-  grid-area: 2 / 2 / 12 / 12; 
+  grid-area: 2 / 2 / 12 / 12;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #aaa;
+  color: gray;
   font-size: clamp(1.5rem, 5vw, 3rem);
   font-weight: bold;
   pointer-events: none;
@@ -107,17 +178,68 @@ body {
   }
 }
 
+/* Player markers */
+.player-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 2px;
+    border: 2px solid white;
+}
+
+.players-on-tile {
+    position: absolute;
+    bottom: 5px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Dice roll button */
+.dice-roll-container {
+    margin-top: 20px;
+}
+
+.dice-roll-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.dice-roll-button:hover {
+    background-color: #45a049;
+}
+
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
+
     @if $i >= 2 and $i <= 12 {
-      $col: 12 - ($i - 2  );
+      $col: 12 - ($i - 2);
       grid-area: 12 / #{$col};
+
+      .tile-name,
+      .tile-id {
+        transform: rotate(-45deg);
+        transform-origin: center;
+      }
     } @else if $i >= 13 and $i <= 23 {
       $row: 12 - ($i - 13);
       grid-area: #{$row} / 1;
-    } @else if $i >= 24 and $i <= 34 {
+
+    } @else if $i >= 25 and $i <= 34 {
       $col: 1 + ($i - 24);
       grid-area: 1 / #{$col};
+
+      .tile-name,
+      .tile-id {
+        transform: rotate(45deg);
+        transform-origin: center;
+      }
     } @else if $i >= 35 and $i <= 44 {
       $row: 1 + ($i - 35);
       grid-area: #{$row} / 12;

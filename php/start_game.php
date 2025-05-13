@@ -1,4 +1,5 @@
 <?php
+
 include_once './database_connect.php';
 
 if (!isset($mysqli) || $mysqli->connect_errno) {
@@ -6,8 +7,6 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 
 ?>
-
-
 <!doctype html>
 <html lang="en">
 <head>
