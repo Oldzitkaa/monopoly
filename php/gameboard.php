@@ -1,12 +1,11 @@
 <?php
-include_once './php/database_connect.php';
+include_once 'database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
 }
 $mysqli->set_charset("utf8");
 $sql = "SELECT id, name, type, region, cost, base_rent, description FROM tiles ORDER BY id";
 $result = $mysqli->query($sql);
-
 $tiles = []; 
 if ($result) { 
     if ($result->num_rows > 0) {
@@ -19,10 +18,8 @@ if ($result) {
     echo "Błąd zapytania SQL: " . $mysqli->error;
 }
 $mysqli->close();
-
 function get_space_classes($tile) {
     $classes = ['tile'];
-
     $type_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
     if ($tile['type'] === 'restaurant' && !empty($tile['region'])) {
          $region_part = strtolower(str_replace([' ', '/'], '_', $tile['region']));
@@ -32,11 +29,7 @@ function get_space_classes($tile) {
     }
     return implode(' ', $classes);
 }
-
 function get_space_content($tile) {
-    //  $displayed_id = $tile['id'] + 1; 
-    //  $content = '<div class="tile-id">' . $displayed_id . '</div>';
-    //  $content .= '<div class="tile-name">' . htmlspecialchars($tile['name']) . '</div>'; 
     $content = '<div class="tile-name tile-' . htmlspecialchars($tile['type']) . '">' . htmlspecialchars($tile['name']) . '</div>'; 
     $content .= '<div class="tile-tile"></div>'; 
     return $content;
@@ -48,7 +41,7 @@ function get_space_content($tile) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
-    <link rel="stylesheet" href="../css/style_gameboard.css">
+    <link rel="stylesheet" href="../sass/style_gameboard.css">
 </head>
 <body>
     <div class="monopoly-board" id="monopoly-board">
