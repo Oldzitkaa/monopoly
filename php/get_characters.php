@@ -66,7 +66,7 @@ try {
         'error' => true,
     ];
 
-    error_log('Błąd w get-characters.php: ' . $e->getMessage());
+    error_log('Błąd w get_characters.php: ' . $e->getMessage());
 
 } finally {
     if ($stmt instanceof mysqli_stmt) {
