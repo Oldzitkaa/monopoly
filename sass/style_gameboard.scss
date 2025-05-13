@@ -66,23 +66,9 @@ body {
     z-index: 2;
   }
 
-  &::before {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 40%;
-    pointer-events: none;
-  }
-
   .tile-name {
-    background-color: rgba(255, 255, 255, 0.7);
+    position: relative;
+    z-index: 1;
     font-weight: bold;
     font-size: clamp(0.4rem, 0.8vw + 0.3rem, 0.7rem);
     flex-grow: 1;
@@ -95,17 +81,19 @@ body {
     hyphens: auto;
   }
 
+  .tile-name-text{
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px;
+  }
+
   .tile-tile {
     width: 100%;
-    height: 100%;
+    height: 0.6rem;
     margin-top: auto;
     border-top: 1px solid #000;
     position: absolute;
     bottom: 0;
-    top: 0;
     left: 0;
-    z-index: 1;
-    overflow: hidden;
   }
 
   .title-id {
@@ -114,41 +102,12 @@ body {
     display: inline-block;
   }
 
-  .tile-image-container{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-  }
-
-  .tile-image-container img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.4;
-  }
-
-  &.azja_restaurant .tile-tile     {
-    background-color: c.$azja; }
-
-  &.afryka_restaurant .tile-tile   {
-    background-color: c.$afr; }
-
-  &.australia_restaurant .tile-tile {
-    background-color: c.$aus; }
-
-  &.amerykan_restaurant .tile-tile {
-    background-color: c.$amen; }
-
-  &.amerykas_restaurant .tile-tile {
-    background-color: c.$ames; }
-
-  &.europa_restaurant .tile-tile   {
-    background-color: c.$euro; }
-
+  &.azja_restaurant .tile-tile     { background-color: c.$azja; }
+  &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
+  &.australia_restaurant .tile-tile { background-color: c.$aus; }
+  &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
+  &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
+  &.europa_restaurant .tile-tile   { background-color: c.$euro; }
   &.duel .tile-tile      { background-color: c.$duel; }
   &.event .tile-tile     { background-color: c.$action; }
   &.start .tile-tile,
@@ -222,31 +181,3 @@ body {
     }
   }
 }
-
-.tile.start::before {
-  background-image: url("../zdj/pola/start.png"); }
-
-.tile.event::before{
-  background-image: url("../zdj/pola/niespodzianka-Photoroom.png");
-}
-
-.tile.duel::before{
-  background-image: url("../zdj/pola/walka-Photoroom.png");
-}
-
-.tile.training::before{
-  background-image: url("../zdj/pola/szkolenie-Photoroom.png");
-}
-
-.tile.vacation::before{
-  background-image: url("../zdj/pola/urlop-Photoroom.png");
-}
-
-.tile.europa_restaurant::before{
-  background-image: url("../zdj/restauracje/polskaaa-Photoroom.png");
-}
-
-.tile.azja_restaurant::before{
-  background-image: url("../zdj/restauracje/sushi-Photoroom.png");
-}
-
