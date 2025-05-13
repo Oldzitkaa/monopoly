@@ -149,6 +149,42 @@ body {
   }
 }
 
+/* Player markers */
+.player-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 2px;
+    border: 2px solid white;
+}
+
+.players-on-tile {
+    position: absolute;
+    bottom: 5px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Dice roll button */
+.dice-roll-container {
+    margin-top: 20px;
+}
+
+.dice-roll-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.dice-roll-button:hover {
+    background-color: #45a049;
+}
 
 @for $i from 1 through 44 {
   .tile:nth-child(#{$i}) {
