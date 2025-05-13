@@ -41,7 +41,7 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: c.$white1;
+  background-color: transparent;
   text-align: center;
   overflow: hidden;
   display: flex;
@@ -55,18 +55,41 @@ body {
   font-size: clamp(0.6rem, 0.8vw + 0.3rem, 0.9rem);
   background-size: cover;
   background-position: center;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
 
-  .tile-name,
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--tile-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   .tile-id,
+  .tile-name,
+  .tile-name-text,
   .tile-price,
   .tile-rent,
   .tile-cost,
-  .tile-description {
+  .tile-description,
+  .tile-tile,
+  .tile-color-bar{
     position: relative;
     z-index: 2;
   }
 
-  .tile-name {
+   .tile-name {
     position: relative;
     z-index: 1;
     font-weight: bold;
@@ -94,12 +117,18 @@ body {
     position: absolute;
     bottom: 0;
     left: 0;
+    z-index: 3;
   }
 
   .title-id {
     transform: rotate(-30deg);
     transform-origin: center;
     display: inline-block;
+  }
+
+  .tile-color-bar{
+    position: relative;
+    z-index: 2;
   }
 
   &.azja_restaurant .tile-tile     { background-color: c.$azja; }

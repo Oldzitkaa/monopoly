@@ -5,7 +5,7 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 
 $mysqli->set_charset("utf8");
-$sql = "SELECT id, name, type, region, cost, base_rent, description, `file` FROM tiles ORDER BY id"; // Używamy backticków dla nazwy `file`
+$sql = "SELECT id, name, type, region, cost, base_rent, description, file FROM tiles ORDER BY id"; // Używamy backticków dla nazwy `file`
 $result = $mysqli->query($sql);
 
 $tiles = [];
@@ -48,9 +48,7 @@ function get_space_classes($tile) {
     return implode(' ', $classes);
 }
 function get_space_content($tile) {
-    $displayed_id = $tile['id'] + 1;
-    $content = '<div class="tile-id">' . $displayed_id . '</div>';
-    $content .= '<div class="tile-name">';
+    $content = '<div class="tile-name">';
     $content .= '<div class="tile-name-text tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>';
     $content .= '</div>';
     $content .= '<div class="tile-tile"></div>';
@@ -77,7 +75,12 @@ function get_space_content($tile) {
     if (!empty($tiles)) {
         foreach ($tiles as $tile) {
             $tile_counter++;
-            echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" style="background-image: url(\'' . htmlspecialchars($tile['file']) . '\');">';
+            $backgroundPath = '';
+            if (!empty($tile['file'])) {
+                $backgroundPath = '../zdj/pola/' . $tile['file'];
+            }
+            echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" style="--tile-bg: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\');">';
+
             echo get_space_content($tile);
             echo '</div>';
         }
