@@ -21,7 +21,6 @@ if ($result) {
 }
 
 $mysqli->close();
-
 function get_space_classes($tile) {
     $classes = ['tile'];
     $type_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
@@ -48,7 +47,6 @@ function get_space_classes($tile) {
 
     return implode(' ', $classes);
 }
-
 function get_space_content($tile) {
     $displayed_id = $tile['id'] + 1;
     $content = '<div class="tile-id">' . $displayed_id . '</div>';
@@ -66,7 +64,7 @@ function get_space_content($tile) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
-    <link rel="stylesheet" href="../css/style_gameboard.css">
+    <link rel="stylesheet" href="../sass/style_gameboard.css">
 </head>
 <body>
 <div class="monopoly-board" id="monopoly-board">
