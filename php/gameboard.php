@@ -64,7 +64,7 @@ function get_space_content($tile) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
-    <link rel="stylesheet" href="../sass/style_gameboard.css">
+    <link rel="stylesheet" href="../css/style_gameboard.css">
 </head>
 <body>
 <div class="monopoly-board" id="monopoly-board">
