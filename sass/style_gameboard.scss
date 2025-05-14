@@ -105,7 +105,8 @@ body {
   }
 
   .tile-name-text{
-    background-color: rgba(255, 255, 255, 0.7);
+    // background-color: rgba(255, 255, 255, 0.7);
+    background: rgba(252, 249, 222, 0.3);
     padding: 2px;
   }
 
@@ -137,6 +138,10 @@ body {
   &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
   &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
   &.europa_restaurant .tile-tile   { background-color: c.$euro; }
+
+  &.region_entrance .tile-tile    {background-color: c.$start;}
+  &.special .tile-tile    {background-color: c.$start;}
+
   &.duel .tile-tile      { background-color: c.$duel; }
   &.event .tile-tile     { background-color: c.$action; }
   &.start .tile-tile,
@@ -158,24 +163,18 @@ body {
 
 .board-center-placeholder {
   grid-area: 2 / 2 / 12 / 12;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: gray;
-  font-size: clamp(1.5rem, 5vw, 3rem);
-  font-weight: bold;
-  pointer-events: none;
-  user-select: none;
-  z-index: 1;
-  text-align: center;
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: center;
+  // align-items: center;
+  // color: gray;
+  // font-size: clamp(1.5rem, 5vw, 3rem);
+  // font-weight: bold;
+  // pointer-events: none;
+  // user-select: none;
+  // z-index: 1;
+  // text-align: center;
 
-  span {
-    display: block;
-    font-size: 0.5em;
-    font-weight: normal;
-    margin-top: 0.2em;
-  }
 }
 
 /* Player markers */

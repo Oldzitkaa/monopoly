@@ -35,3 +35,6 @@
 2025-05-12 15:47:49 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"sa","characterId":"4"},{"nickname":"dsa","characterId":"2"}]}
 2025-05-12 16:08:50 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"fdfasd","characterId":"2"},{"nickname":"dasdas","characterId":"9"}]}
 2025-05-12 16:09:29 - Otrzymane dane: {"numPlayers":3,"players":[{"nickname":"dsadsa","characterId":"12"},{"nickname":"qwe","characterId":"1"},{"nickname":"ads","characterId":"2"}]}
+2025-05-13 10:47:34 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"jh","characterId":"2"},{"nickname":"jhhjhj","characterId":"3"}]}
+2025-05-13 12:08:55 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"q","characterId":"8"},{"nickname":"a","characterId":"4"}]}
+2025-05-14 10:12:11 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"fddf","characterId":"2"},{"nickname":"fddff","characterId":"3"}]}
