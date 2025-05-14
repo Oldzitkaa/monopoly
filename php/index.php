@@ -9,7 +9,7 @@ include_once './database_connect.php';
     <title>Potęga Smaku - Konfiguracja Gry</title>
     <link rel="stylesheet" href="../css/styl.css"> 
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
     </head>
 <body>
     <div class="logo_div step1">
