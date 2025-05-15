@@ -34,7 +34,7 @@ $wynik = rand(1, 6);
         kostka.classList.add('animacja');
         setTimeout(() => {
             kostka.classList.remove('animacja');
-        }, 1000);
+        }, 110000);
     }
 </script>
 

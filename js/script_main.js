@@ -122,7 +122,7 @@ function hideLoading() {
 async function fetchCharacterData() {
     showLoading(); 
     try {
-        const response = await fetch('get-characters.php');
+        const response = await fetch('get_characters.php');
         if (!response.ok) {
              const errorBody = await response.json().catch(() => ({ message: `HTTP status ${response.status}`, detail: 'Błąd serwera bez szczegółów JSON.' }));
              console.error(`HTTP error! status: ${response.status}`, errorBody);
