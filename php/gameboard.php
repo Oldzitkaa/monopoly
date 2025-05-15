@@ -56,6 +56,8 @@ function get_space_classes($tile) {
         $classes[] ='bottom-edge';
     }elseif ($id >= 22 && $id <= 30) {
         $classes[] ='top-edge';
+    }elseif ($id >= 32 && $id <= 40) {
+        $classes[] = 'right-edge';
     }
 
     if (!empty($tile['file'])) {
@@ -80,477 +82,71 @@ function get_space_content($tile) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
     <link rel="stylesheet" href="../css/style_gameboard.css">
-    <link rel="stylesheet" href="../css/gameboard_inner.css">
+    <link rel="stylesheet" href="../css/roll_dice.css">
+    <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 </head>
 <body>
-<div class="monopoly-board" id="monopoly-board">
-    <div class="board-center-placeholder">
+
+    <div class="game-container">
+
+        <div class="monopoly-board" id="monopoly-board">
+            <div class="board-center-placeholder">
+                MONOPOLY
+                <span>Custom Edition</span>
+            </div>
+
+            <?php
+            if (!empty($tiles)) {
+                foreach ($tiles as $tile) {
+                    echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" ';
+
+                    if (!empty($tile['file'])) {
+                         echo 'style="--tile-bg: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\');"';
+                    }
+                    echo '>';
+
+                    echo get_space_content($tile);
+
+                    echo '<div class="players-on-tile"></div>';
+
+                    echo '</div>';
+                }
+            } else {
+
+                echo "<p style='grid-area: 6 / 5 / 8 / 9; z-index: 20; text-align: center;'>Nie udało się pobrać danych pól z bazy danych lub brak pól do wyświetlenia.</p>";
+            }
+            ?>
+        </div>
+
         <?php
-if (!empty($player)) {
-    foreach ($player as $p) {
-        echo "<div class='player-info player". htmlspecialchars($p['id_player']) ."'>";
-        echo "<p>" . htmlspecialchars($p['name_player']). "<br>";
-        echo htmlspecialchars($p['name']). "<br>";
-        echo "Pojemność brzucha: " . htmlspecialchars($p['belly_capacity']). "<br>";
-        echo "Tolerancja ostrości: " . htmlspecialchars($p['tolerance']). "<br>";
-        echo "Czas przygotowania: " . htmlspecialchars($p['prep_time']). "<br>";
-        echo "Przywiązanie do tradycji: " . htmlspecialchars($p['tradition_affinity']). "<br>";
-        echo "Umiejętności gotowania: " . htmlspecialchars($p['cook_skill']). "<br>";
-        echo "Zmysł do przypraw: " . htmlspecialchars($p['spice_sense']). "<br>";
-        echo "Łeb do biznesu: " . htmlspecialchars($p['business_acumen']). "<br>";
-        echo "</div>";
-    }
-} else {
-    echo "<p>Brak graczy w bazie danych.</p>";
-}
-?>
-
-        
-        <!-- MONOPOLY
-        <span>Custom Edition</span> -->
-
-    </div>
-    <?php
-    $tile_counter = 0;
-    if (!empty($tiles)) {
-        foreach ($tiles as $tile) {
-            $tile_counter++;
-            $backgroundPath = '';
-            if (!empty($tile['file'])) {
-                $backgroundPath = '../zdj/pola/' . $tile['file'];
+        if (!empty($player)) {
+            foreach ($player as $p) {
+                echo "<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tile = document.getElementById('space-" . intval($p['location_player']) . "');
+            if (tile) {
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('player-token');
+                playerDiv.classList.add('player-" . intval($p['id_player']) . "');
+                playerDiv.title = '" . htmlspecialchars($p['name_player']) . "';
+                tile.querySelector('.players-on-tile').appendChild(playerDiv);
             }
-// Pionki
-            echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" style="--tile-bg: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\');">';
-            echo get_space_content($tile);
-            echo '<div class="players-on-tile">';
-            if ($tile['id'] == 0) {
-                echo '<div class="player-marker pawn1" id="player1"></div>';
-                echo '<div class="player-marker pawn2" id="player2"></div>';
-                echo '<div class="player-marker pawn3" id="player3"></div>';
-                echo '<div class="player-marker pawn4" id="player4"></div>';
+        });
+        </script>";
             }
-            echo '</div>';
-            echo '</div>';
         }
 
-    } else {
-        echo "<p>Nie udało się pobrać danych pól z bazy danych lub brak pól do wyświetlenia.</p>";
-    }
-    ?>
-</div>
+        ?>
+
+        <div class="dice-section">
+             <p class="roll-result-text">Wyrzucono: <strong id="wynikTekst">-</strong></p>
+             <img id="diceImage" src="../zdj/kostki/1.png" alt="Kostka" class="dice-image">
+             <button id="rollDiceButton" class="roll-dice-button">Rzuć kostką</button>
+        </div>
+    </div>
+
+    <script src="../js/gameboard.js"> </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
