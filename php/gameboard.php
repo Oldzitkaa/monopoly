@@ -104,12 +104,12 @@ function get_space_content($tile) {
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 </head>
 <body>
-<<div class="monopoly-board" id="monopoly-board">
+<div class="monopoly-board" id="monopoly-board">
     <div class="board-center-placeholder">
         <?php
         if (!empty($player)) {
-            foreach ($player as $index => $p) { // Dodaliśmy $index do pętli foreach
-                $playerClassNumber = $index + 1; // Indeks zaczyna się od 0, więc dodajemy 1
+            foreach ($player as $index => $p) { 
+                $playerClassNumber = $index + 1; 
                 echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
                 echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['name']). "</b><br>";
                 echo "Monety: " . htmlspecialchars($p['coins']). " $ <br>";
@@ -170,13 +170,15 @@ function get_space_content($tile) {
         </script>";
             }
         }
-
         ?>
 
         <div class="dice-section">
              <p class="roll-result-text">Wyrzucono: <strong id="wynikTekst">-</strong></p>
              <img id="diceImage" src="../zdj/kostki/1.png" alt="Kostka" class="dice-image">
              <button id="rollDiceButton" class="roll-dice-button">Rzuć kostką</button>
+        </div>
+        <div class="end-game-div">
+             <a href="./end_game.php"><button class="btn-end-game">Zakończ gre</button></a>
         </div>
     </div>
 

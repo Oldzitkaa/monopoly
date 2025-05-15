@@ -1,0 +1,121 @@
+@use "./_color" as c;
+
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+$spacing-xl: 30px;
+$spacing-xxl: 50px;
+
+$border-radius-sm: 8px;
+$border-radius-md: 10px;
+$border-radius-lg: 15px;
+$border-radius-round: 50%;
+$border-radius-logo-div: 40%;
+
+$shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+$shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
+$shadow-logo-div: 0 0 50px c.$red1;
+$shadow-button: 0px 0px 10px c.$mint;
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', Arial, sans-serif;
+    height: 100%;
+    background: linear-gradient(40deg,rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgba(255, 255, 255, 1) 100%);
+    overflow: hidden;
+    color: c.$white1;
+}
+a {
+    text-decoration: none;
+}
+.logo_div{
+    background-color: c.$red1;
+    width: 85%;
+    // max-width: 550px;
+    height: auto;
+    position: absolute;
+    top: 50px;
+    border-radius: $border-radius-logo-div;
+    box-shadow: $shadow-logo-div;
+    // z-index: 10;
+    // overflow-y: auto;
+    // overflow-x: hidden;
+    // display: none;
+    // opacity: 0;
+    // transition: opacity $transition-duration $transition-ease;
+    // box-sizing: border-box;
+    // padding: $spacing-xl;
+    // left: 50%;
+    // transform: translateX(-50%);
+}
+.logo_zdj {
+    width: 300px;
+    max-width: 80%;
+    height: auto;
+    display: block;
+    margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    // margin-bottom: $spacing-lg;
+    // animation: pulse 2s infinite;
+}
+// .backg {
+//     position: relative;
+//     width: 2000px;
+//     top: 20px;
+//     display: block;
+//     transform: translateX(-40%);
+// }
+.step-title {
+    font-size: clamp(1rem, 5vw, 2rem);
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+    color: c.$white1;
+}
+.end-btn {
+    position: relative;
+    background-color: c.$red1;
+    border: 2px solid c.$mint;
+    border-radius: 40%;
+    color: c.$white1;
+    font-size: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 0px 10px c.$mint;
+    box-sizing: border-box;
+    padding: 15px 20px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+
+    cursor: pointer;
+    // transition: all $transition-fast $transition-ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+
+
+    &:hover {
+        background-color: c.$red2;
+        box-shadow: 0px 0px 15px c.$mint;
+        transform: translateY(-2px);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: $shadow-button;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
