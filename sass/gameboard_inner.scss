@@ -9,13 +9,16 @@
     height: clamp(50px, 27.3vw, 250px);
     padding: 0.5vw;
 
-    font-size: clamp(7px, 1.6vw, 20px); /* Skaluje się z ekranem */
+    font-size: clamp(7px, 1.4vw, 18px);
+    // font-size: 10px;
     line-height: 1.2;
     word-wrap: break-word;
 
     border: 1px solid #ccc;
     box-sizing: border-box;
+    // overflow: hidden;
     overflow: hidden;
+    overflow-y: auto;
 }
 .player1 {
     top: 0;

@@ -1,4 +1,12 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['game_id'])) {
+    echo '<script>sessionStorage.removeItem("gameIdSet");</script>';
+} else {
+    echo '<script>sessionStorage.setItem("gameIdSet", "true");</script>';
+}
+
 include_once './database_connect.php'; 
 ?>
 <!DOCTYPE html>
