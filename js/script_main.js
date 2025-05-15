@@ -497,6 +497,7 @@ function handleCharacterCardClick(event) {
         updateCharacterSelectionScreen(); 
     }, 300); 
 }
+
 async function submitGameSetup() {
     if (playerCharacterSelections.some(selection => selection === null || selection.characterId === null)) {
         showErrorMessage('Proces konfiguracji nie został ukończony. Upewnij się, że wszyscy gracze wybrali postacie.');
@@ -529,7 +530,7 @@ async function submitGameSetup() {
         if (result.success) {
             showSuccessMessage('Gra utworzona pomyślnie!', 3000); 
             setTimeout(() => {
-                 window.location.href = `gameboard.php?game_id=${result.gameId}`;
+                 window.location.href = 'gameboard.php';
             }, 1000);
         } else {
             console.error('Błąd API podczas tworzenia gry:', result.message);

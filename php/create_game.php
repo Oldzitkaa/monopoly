@@ -1,11 +1,12 @@
 <?php
 header('Content-Type: application/json');
 require_once './database_connect.php';
+
 $response = [
     'success' => false,
-    'message' => 'Wystąpił nieznany błąd serwera.', 
+    'message' => 'Wystąpił nieznany błąd serwera.',
     'gameId' => null,
-    'debugInfo' => [] 
+    'debugInfo' => []
 ];
 $stmtGame = null;
 $stmtCharData = null;
@@ -213,6 +214,11 @@ try {
     $response['message'] = 'Gra i gracze zostali pomyślnie utworzeni.';
     $response['gameId'] = $gameId; 
     $response['players'] = $playerIds; 
+
+// sesja
+    session_start();
+    $_SESSION['game_id'] = $gameId;
+
 } catch (Exception $e) {
     $mysqli->rollback();
     error_log('Błąd tworzenia gry w create_game.php: ' . $e->getMessage());

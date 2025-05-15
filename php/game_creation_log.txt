@@ -38,3 +38,10 @@
 2025-05-13 10:47:34 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"jh","characterId":"2"},{"nickname":"jhhjhj","characterId":"3"}]}
 2025-05-13 12:08:55 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"q","characterId":"8"},{"nickname":"a","characterId":"4"}]}
 2025-05-14 10:12:11 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"fddf","characterId":"2"},{"nickname":"fddff","characterId":"3"}]}
+2025-05-15 07:55:16 - Otrzymane dane: {"numPlayers":3,"players":[{"nickname":"1","characterId":"11"},{"nickname":"2","characterId":"3"},{"nickname":"3","characterId":"2"}]}
+2025-05-15 07:57:09 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"33","characterId":"1"},{"nickname":"44","characterId":"2"}]}
+2025-05-15 08:02:58 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"wqwe","characterId":"2"},{"nickname":"qweq","characterId":"4"}]}
+2025-05-15 08:06:39 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"ee","characterId":"2"},{"nickname":"eee","characterId":"3"}]}
+2025-05-15 08:07:21 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"pp","characterId":"1"},{"nickname":"oo","characterId":"2"}]}
+2025-05-15 08:26:40 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"22","characterId":"2"},{"nickname":"33","characterId":"5"}]}
+2025-05-15 08:48:35 - Otrzymane dane: {"numPlayers":2,"players":[{"nickname":"Batman","characterId":"9"},{"nickname":"Spiderman","characterId":"12"}]}
