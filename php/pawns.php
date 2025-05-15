@@ -62,7 +62,7 @@ function get_space_content($tile) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
-    <link rel="stylesheet" href="../css/style_gameboard.css">
+    <link rel="stylesheet" href="../css/pawns.css">
 </head>
 <body>
 <div class="monopoly-board" id="monopoly-board">
@@ -91,15 +91,62 @@ function get_space_content($tile) {
             }
             echo '</div>';
             echo '</div>';
-        }
 
+        }
     } else {
         echo "<p>Nie udało się pobrać danych pól z bazy danych lub brak pól do wyświetlenia.</p>";
     }
     ?>
+
+<!--kostka-->
 </div>
+
+<div class="dice-roll-container">
+    <button id="rollDiceButton">Rzuć kostką</button>
+    <p>Wyrzucono: <span id="diceResult">-</span></p>
+</div>
+
 </body>
 </html>
+
+<!--skrypt do pionków-->
+<script>
+    const totalSpaces = <?= count($tiles) ?>;
+    const playerPositions = [0, 0, 0, 0];
+    let currentPlayer = 0;
+
+    document.getElementById("rollDiceButton").addEventListener("click", () => {
+        const diceRoll = Math.floor(Math.random() * 6) + 1;
+        document.getElementById("diceResult").textContent = diceRoll;
+
+        movePlayer(currentPlayer, diceRoll);
+
+        // zmiana gracza po 2 sek.
+        setTimeout(() => {
+            currentPlayer = (currentPlayer + 1) % 4;
+            alert("Tura gracza " + (currentPlayer + 1));
+        }, diceRoll * 500 + 500);
+    });
+
+    function movePlayer(playerIndex, steps) {
+        const playerId = "player" + (playerIndex + 1);
+        const player = document.getElementById(playerId);
+
+        for (let i = 1; i <= steps; i++) {
+            setTimeout(() => {
+                playerPositions[playerIndex] = (playerPositions[playerIndex] + 1) % totalSpaces;
+                const newTile = document.getElementById("space-" + playerPositions[playerIndex]);
+                const playersContainer = newTile.querySelector(".players-on-tile");
+                if (playersContainer) {
+                    playersContainer.appendChild(player);
+                }
+            }, i * 500);
+        }
+    }
+</script>
+
+
+
 
 
 

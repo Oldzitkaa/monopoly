@@ -89,7 +89,7 @@ body {
     z-index: 2;
   }
 
-   .tile-name {
+  .tile-name {
     position: relative;
     z-index: 1;
     font-weight: bold;
@@ -180,59 +180,61 @@ body {
 
 //Pionki
 .player-marker {
-    width: 25px;
-    height: 25px;
-    background-color: red;
-    border-radius: 50%;
-    position: relative;
-    top: 5px;
-    left: 5px;
-    transition: all 0.4s ease-in-out;
-    border: 2px solid black;
-    z-index: 5;
-}
-
-.pawn1 {
+  width: 25px;
+  height: 25px;
   background-color: red;
+  border: 2px solid black;
+  border-radius: 50%;
+  position: relative;
+  top: 5px;
+  left: 5px;
+  transition: all 0.4s ease-in-out;
+  z-index: 5;
 }
 
-.pawn2 {
-  background-color: blue;
-}
+  .pawn1 {
+    background-color: red;
+  }
 
-.pawn3 {
-  background-color: green;
-}
+  .pawn2 {
+    background-color: blue;
+  }
 
-.pawn4 {
-  background-color: yellow;
-}
+  .pawn3 {
+    background-color: green;
+  }
+
+  .pawn4 {
+    background-color: yellow;
+  }
+
 
 .players-on-tile {
-    position: absolute;
-    bottom: 5px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+  position: absolute;
+  bottom: 5px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 }
+
 
 /* Dice roll button */
 .dice-roll-container {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .dice-roll-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
 }
 
 .dice-roll-button:hover {
-    background-color: #45a049;
+  background-color: #45a049;
 }
 
 @for $i from 1 through 44 {
