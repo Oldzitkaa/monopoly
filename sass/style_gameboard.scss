@@ -1,404 +1,456 @@
 @use "./_color" as c;
 
-// Wspólny układ strony
+// Zmienne dla spójności z styl.scss
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+$spacing-xl: 30px;
+$spacing-xxl: 50px;
+
+$border-radius-sm: 8px;
+$border-radius-md: 10px;
+$border-radius-lg: 15px;
+$border-radius-round: 50%;
+// $border-radius-logo-div: 40%; // Nie potrzebne w tym pliku
+
+$shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+$shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
+// $shadow-logo-div: 0 0 50px c.$red1; // Nie potrzebne w tym pliku
+$shadow-button: 0px 0px 10px c.$mint; // Użyjemy tej zmiennej dla przycisku
+
+$transition-duration: 0.5s;
+$transition-ease: ease-in-out;
+$transition-fast: 0.3s;
+
+// Nowa zmienna dla maksymalnej szerokości planszy
+$max-board-size: 800px;
+
+// --- Wspólne style strony (przywrócono poprzednie tło i kolor tekstu) ---
+// --- Wspólne style strony ---
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  padding: 1vw;
-  box-sizing: border-box;
-  overflow: auto;
-  background-color: c.$white1;
-  font-family: sans-serif;
-  font-size: 16px;
-  
-  @media (max-width: 1000px) {
+    margin: 0;
+    padding: $spacing-md;
+    font-family: 'Poppins', Arial, sans-serif;
+    min-height: 100vh;
+    background-color: c.$white1;
+    overflow: auto;
+    color: black;
+
+    display: flex;
     flex-direction: column;
-  }
+    justify-content: flex-start;
+    align-items: center;
+
+    box-sizing: border-box;
 }
 
-.monopoly-board {
-  display: grid;
-  grid-template-columns: minmax(7.5rem, 7.5vw) repeat(10, minmax(5rem, 5vw)) minmax(7.5rem, 7.5vw);
-  grid-template-rows: minmax(7.5rem, 7.5vh) repeat(10, minmax(5rem, 5vh)) minmax(7.5rem, 7.5vh);
-  gap: 0;
-  border: 0.3rem solid black;
-  background-color: c.$white1;
-  box-sizing: border-box;
-  position: relative;
+html {
+    height: 100%; // HTML również na 100% wysokości, aby body mogło użyć min-height: 100vh
+}
 
-  @media (max-width: 1200px) {
+a {
+    text-decoration: none; // Usuń podkreślenie linków
+}
+
+// Główny kontener planszy i sterowania - dodany nowy
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px; // Maksymalna szerokość całego kontenera gry
+    margin: 0 auto; // Wyśrodkowanie
+}
+
+// --- Stylizacja Planszy ---
+.monopoly-board {
+    display: grid;
     padding: 0.3rem;
-    width: 98vw;
-    aspect-ratio: 1 / 1;
-    max-height: calc(100vh - 2 * 1vw);
+    width: 98vw; // Szerokość oparta na viewport dla małych ekranów
+    max-width: $max-board-size; // Maksymalna szerokość planszy
+    aspect-ratio: 1 / 1; // Zachowanie proporcji kwadratu
+    // Dostosuj max-height, aby plansza mieściła się na ekranie, uwzględniając padding body i marginesy innych elementów
+    max-height: calc(100vh - 2 * $spacing-md - $spacing-lg * 2);
     grid-template-columns: 1.5fr repeat(10, 1fr) 1.5fr;
     grid-template-rows: 1.5fr repeat(10, 1fr) 1.5fr;
-    border-width: 0.4rem;
+    border: 0.4vw solid black;
+    background-color: c.$white1; // Tło planszy (pozostaje białe)
+    box-sizing: border-box;
+    position: relative;
+    margin: 0 auto $spacing-lg auto; // Wyśrodkowanie i margines dolny
     font-size: clamp(1rem, 5vw, 2rem);
-  }
+
+    // Zapewnij stałą grubość ramki na większych ekranach
+    @media (min-width: 1200px) {
+        border-width: 4px; // Stała grubość ramki zamiast 0.4vw
+    }
 }
 
 .tile {
-  border: 0.10rem solid #ccc;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background-color: transparent;
-  text-align: center;
-  overflow: visible;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  word-wrap: break-word;
-  hyphens: auto;
-  line-height: 1.2;
-  position: relative;
-  font-size: clamp(0.6rem, 0.8vw + 0.3rem, 0.9rem);
-  background-size: cover;
-  background-position: center;
-  background-image: none;
-  background-repeat: no-repeat;
-  background-blend-mode: overlay;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: var(--tile-bg);
+    border: 0.10rem solid #ccc;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: transparent;
+    text-align: center;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    word-wrap: break-word;
+    hyphens: auto;
+    line-height: 1.2;
+    position: relative;
+    font-size: clamp(0.6rem, 0.8vw + 0.3rem, 0.9rem);
     background-size: cover;
     background-position: center;
+    background-image: none;
     background-repeat: no-repeat;
-    opacity: 0.5;
-    z-index: 0;
-    pointer-events: none;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
+    background-blend-mode: overlay;
 
-  .tile-id,
-  .tile-name,
-  .tile-name-text,
-  .tile-price,
-  .tile-rent,
-  .tile-cost,
-  .tile-description,
-  .tile-tile,
-  .tile-color-bar{
-    position: relative;
-    z-index: 2;
-  }
+    // Na większych ekranach używaj stałego rozmiaru czcionki
+    @media (min-width: 1200px) {
+        font-size: 0.9rem;
+    }
 
-   .tile-name {
-    position: relative;
-    z-index: 1;
-    font-weight: bold;
-    font-size: clamp(0.4rem, 0.8vw + 0.3rem, 0.7rem);
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 2px;
-    word-break: break-word;
-    hyphens: auto;
-  }
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: var(--tile-bg);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.5;
+        z-index: 0;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 
-  .tile-name-text{
-    // background-color: rgba(255, 255, 255, 0.7);
-    background: rgba(252, 249, 222, 0.3);
-    padding: 2px;
-  }
+    .tile-id,
+    .tile-name,
+    .tile-name-text,
+    .tile-price,
+    .tile-rent,
+    .tile-cost,
+    .tile-description,
+    .tile-tile,
+    .tile-color-bar {
+        position: relative;
+        z-index: 2;
+    }
 
-  .tile-tile {
-    width: 100%;
-    height: 0.6rem;
-    margin-top: auto;
-    border-top: 1px solid #000;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 3;
-  }
+    .tile-name {
+        position: relative;
+        z-index: 1;
+        font-weight: bold;
+        font-size: clamp(0.4rem, 0.8vw + 0.3rem, 0.7rem);
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2px;
+        word-break: break-word;
+        hyphens: auto;
 
-  .title-id {
-    transform: rotate(-30deg);
-    transform-origin: center;
-    display: inline-block;
-  }
+        // Na większych ekranach używaj stałego rozmiaru czcionki
+        @media (min-width: 1200px) {
+            font-size: 0.7rem;
+        }
+    }
 
-  .tile-color-bar{
-    position: relative;
-    z-index: 2;
-  }
+    .tile-name-text {
+        // Użyj półprzezroczystego tła z koloru białego z pliku kolorów (dla czytelności tekstu na tle/obrazku)
+        background: rgba(c.$white1, 0.3);
+        padding: 2px;
+    }
 
-  &.azja_restaurant .tile-tile     { background-color: c.$azja; }
-  &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
-  &.australia_restaurant .tile-tile { background-color: c.$aus; }
-  &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
-  &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
-  &.europa_restaurant .tile-tile   { background-color: c.$euro; }
 
-  &.region_entrance .tile-tile    {background-color: c.$start;}
-  &.special .tile-tile    {background-color: c.$start;}
+    .tile-tile {
+        width: 100%;
+        height: 0.6rem;
+        margin-top: auto;
+        border-top: 1px solid #000;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+    }
 
-  &.duel .tile-tile      { background-color: c.$duel; }
-  &.event .tile-tile     { background-color: c.$action; }
-  &.start .tile-tile,
-  &.training .tile-tile,
-  &.vacation .tile-tile  { background-color: c.$start; }
+    .title-id {
+        transform: rotate(-30deg);
+        transform-origin: center;
+        display: inline-block;
+    }
 
-  .tile-price,
-  .tile-rent,
-  .tile-cost,
-  .tile-description {
-    display: block;
-    font-size: 0.8em;
-    font-weight: normal;
-    margin-top: 0.2em;
-    text-align: center;
-    width: 100%;
-  }
+    .tile-color-bar {
+        position: relative;
+        z-index: 2;
+    }
+
+    // Przypisanie kolorów do pasków na podstawie typu/regionu pola
+    &.azja_restaurant .tile-tile     { background-color: c.$azja; }
+    &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
+    &.australia_restaurant .tile-tile { background-color: c.$aus; }
+    &.amerykan_restaurant .tile-tile { background-color: c.$amen; } // Sprawdź nazwę klasy dla regionu Ameryki Północnej
+    &.amerykas_restaurant .tile-tile { background-color: c.$ames; } // Sprawdź nazwę klasy dla regionu Ameryki Południowej
+    &.europa_restaurant .tile-tile   { background-color: c.$euro; }
+
+    &.region_entrance .tile-tile    {background-color: c.$start;} // Kolor dla wejścia do regionu
+    &.special .tile-tile    {background-color: c.$start;} // Kolor dla pól specjalnych (np. Szansa, Kasa Społeczna, Podatek)
+
+    &.duel .tile-tile      { background-color: c.$duel; }
+    &.event .tile-tile     { background-color: c.$action; }
+    &.start .tile-tile,
+    &.training .tile-tile,
+    &.vacation .tile-tile  { background-color: c.$start; } // Kolor dla pól startowych/specjalnych
+
+    .tile-price,
+    .tile-rent,
+    .tile-cost,
+    .tile-description {
+        display: block;
+        font-size: 0.8em;
+        font-weight: normal;
+        margin-top: 0.2em;
+        text-align: center;
+        width: 100%;
+        color: black; // Upewnij się, że tekst na polach jest czarny
+    }
 }
 
+// --- Stylizacja Centralnego Obszaru Planszy ---
 .board-center-placeholder {
-  grid-area: 2 / 2 / 12 / 12;
-  // display: flex;
-  // flex-direction: column;
-  // justify-content: center;
-  // align-items: center;
-  // color: gray;
-  // font-size: clamp(1.5rem, 5vw, 3rem);
-  // font-weight: bold;
-  // pointer-events: none;
-  // user-select: none;
-  // z-index: 1;
-  // text-align: center;
-
+    grid-area: 2 / 2 / 12 / 12; // Umieszcza w środku siatki 12x12
+    z-index: 1;
+    // Skomentowane lub usunięte wewnętrzne style display/flex/color -
+    // Ostateczny wygląd tego obszaru jest definiowany przez elementy wewnątrz
+    // (np. .player-info ze stylów w gameboard_inner.css)
 }
 
-//Pionki
+
+// --- Stylizacja Pionków Graczy ---
 .player-token {
     width: 16px;
     height: 16px;
     border-radius: 50%;
     margin: 2px;
     display: inline-block;
-    border: 2px solid white;
+    border: 2px solid white; // Biała ramka wokół pionka
+    // Kolor tła pionka jest ustawiany przez klasy .player-1, .player-2, etc.
 }
 
-.player-1 {
-  background-color: red; }
-
-.player-2 {
-  background-color: blue; }
-
-.player-3 {
-  background-color: green; }
-
-.player-4 {
-  background-color: yellow; }
+// Kolory pionków (zgodne z kolorami z gameboard_inner.css/pawns.css)
+.player-1 { background-color: red; }
+.player-2 { background-color: blue; }
+.player-3 { background-color: green; }
+.player-4 { background-color: yellow; }
 
 
 .players-on-tile {
-    position: absolute;
-    bottom: 5px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    position: absolute; // Absolutne pozycjonowanie wewnątrz pola (.tile jest relative)
+    bottom: 5px; // Umieszczenie na dole pola
+    width: 100%; // Na całą szerokość pola
+    display: flex; // Układ flexbox
+    justify-content: center; // Centrowanie pionków poziomo wewnątrz kontenera
+    flex-wrap: wrap; // Zawijanie pionków w rzędy, jeśli jest ich za dużo w jednej linii
 }
 
-/* Dice roll button */
-.dice-roll-container {
-    margin-top: 20px;
-}
 
-.dice-roll-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.dice-roll-button:hover {
-    background-color: #45a049;
-}
-
-@for $i from 1 through 44 {
-  .tile:nth-child(#{$i}) {
-
-    @if $i >= 2 and $i <= 12 {
-      $col: 12 - ($i - 2);
-      grid-area: 12 / #{$col};
-
-      .tile-name,
-      .tile-id {
-        transform: rotate(-45deg);
-        transform-origin: center;
-      }
-    } @else if $i >= 13 and $i <= 23 {
-      $row: 12 - ($i - 13);
-      grid-area: #{$row} / 1;
-
-    } @else if $i >= 25 and $i <= 34 {
-      $col: 1 + ($i - 24);
-      grid-area: 1 / #{$col};
-
-      .tile-name,
-      .tile-id {
-        transform: rotate(45deg);
-        transform-origin: center;
-      }
-    } @else if $i >= 35 and $i <= 44 {
-      $row: 1 + ($i - 35);
-      grid-area: #{$row} / 12;
-    }
-  }
-}
-
-// Główny kontener - cała strona
-body {
-  @media (max-width: 1000px) {
-    flex-direction: column;
-  }
-}
-
-// Kontener dla kostki i przycisków (panel po prawej stronie)
-#dice-container, 
-.dice-container,
+// --- Stylizacja Kontenera Sterowania Grą (Kostka, Wynik, Przycisk) ---
+// Kontener dla kostki i przycisków (panel pod planszą)
 .game-controls-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: white;
-    padding: 15px;
-    border-radius: 10px;
-    margin-left: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    width: 220px;
-    
-    // Przy mniejszych ekranach, umieszczamy pod planszą
-    @media (max-width: 1000px) {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 20px;
-    }
+    flex-direction: column; // Elementy (sekcja kostki) ułożone w kolumnie
+    align-items: center; // Elementy wyśrodkowane poziomo
+    background-color: c.$white1; // Tło kontenera (biały z palety kolorów)
+    padding: $spacing-md; // Wewnętrzne odstępy
+    border-radius: $border-radius-md; // Zaokrąglone rogi
+    margin-left: 0; // Brak marginesu z lewej strony w układzie kolumnowym body
+    margin-top: $spacing-lg; // Margines z góry, oddzielający od planszy lub poprzedniego elementu
+    box-shadow: $shadow-md; // Średni cień
+    width: 100%; // Domyślnie pełna szerokość w kontenerze flexbox (body)
+    max-width: 300px; // Ograniczenie maksymalnej szerokości na większych ekranach
+    box-sizing: border-box; // Padding wewnątrz elementu
+    position: relative; // Dodanie pozycji relative
 }
 
-// Styl dla kontenera kostki i przycisku
+// Styl dla sekcji zawierającej kostkę i przycisk wewnątrz game-controls-container
 .dice-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
+}
 
 // Style dla obrazka kostki
 .dice-image {
     display: block;
-    width: clamp(80px, 10vw, 120px); 
-    height: clamp(80px, 10vw, 120px);
-    margin: 10px auto;
-    transition: transform .5s ease-out;
-    cursor: pointer;
+    width: clamp(60px, 15vw, 100px);
+    height: clamp(60px, 15vw, 100px);
+    margin: 10px auto; // Centrowanie poziome
+    transition: transform .5s ease-out; // Płynne przejścia transformacji
+    cursor: pointer; // Kursor wskazujący na klikalność
 
-    &.animacja {
-        animation: roll-animation 1s ease-out forwards;
-    }
-    
-    // Dostosowanie rozmiaru kostki na mniejszych ekranach
-    @media (max-width: 1000px) {
-        width: clamp(60px, 15vw, 100px);
-        height: clamp(60px, 15vw, 100px);
+    &.animacja { // Gdy element ma dodatkowo klasę .animacja
+        animation: roll-animation 1s ease-out forwards; // Uruchom animację rzutu
     }
 }
 
-// Definicja animacji rzutu
+// Definicja animacji rzutu kostką
 @keyframes roll-animation {
-    0% {
-        transform: rotateX(0deg) rotateY(0deg) scale(1);
-    }
-    25% {
-        transform: rotateX(180deg) rotateY(90deg) scale(1.1);
-    }
-    50% {
-        transform: rotateX(360deg) rotateY(180deg) scale(1.2);
-    }
-    75% {
-        transform: rotateX(540deg) rotateY(270deg) scale(1.1);
-    }
-    100% {
-        transform: rotateX(720deg) rotateY(360deg) scale(1);
-    }
+    0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
+    25% { transform: rotateX(180deg) rotateY(90deg) scale(1.1); }
+    50% { transform: rotateX(360deg) rotateY(180deg) scale(1.2); }
+    75% { transform: rotateX(540deg) rotateY(270deg) scale(1.1); }
+    100% { transform: rotateX(720deg) rotateY(360deg) scale(1); }
 }
 
 // Style dla tekstu wyświetlającego wynik rzutu
 .roll-result-text {
     text-align: center;
-    font-size: clamp(1.2em, 2vw, 1.8em);
+    font-size: clamp(1em, 4vw, 1.5em);
     font-weight: bold;
-    color: c.$red1;
+    color: c.$red1; // Kolor tekstu (czerwony z palety)
     margin-top: 5px;
     margin-bottom: 10px;
-    min-height: 1.8em;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    
-    // Dostosowanie rozmiaru tekstu na mniejszych ekranach
-    @media (max-width: 1000px) {
-        font-size: clamp(1em, 4vw, 1.5em);
-    }
+    min-height: 1.8em; // Zapewnia stałą wysokość, zapobiegając przesunięciom layoutu
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); // Cień tekstu
 }
 
-// Style dla przycisku rzutu kostką
+// Style dla przycisku rzutu kostką (pasujące do reszty przycisków, ale z innymi kolorami)
 .roll-dice-button {
-    padding: 10px 20px;
-    font-size: clamp(0.9em, 1.5vw, 1.1em);
-    cursor: pointer;
-    background-color: c.$mint;
-    color: c.$red1;
-    border: 2px solid c.$red1;
-    border-radius: 8px;
-    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-top: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 8px 16px;
+    font-size: clamp(0.8em, 3vw, 1em);
+    cursor: pointer; // Kursor wskazujący na klikalność
+    background-color: c.$mint; // Tło przycisku (miętowy)
+    color: c.$red1; // Kolor tekstu (czerwony)
+    border: 2px solid c.$red1; // Ramka (czerwona)
+    border-radius: 8px; // Zaokrąglone rogi
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease; // Płynne przejścia
+    text-transform: uppercase; // Tekst dużymi literami
+    font-weight: bold; // Gruba czcionka
+    margin-top: 15px; // Margines z góry, oddzielający od wyniku rzutu
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); // Lekki cień
 
-    &:hover {
-        background-color: darken(c.$mint, 10%);
-        border-color: darken(c.$red1, 10%);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    &:hover { // Styl po najechaniu myszą
+        background-color: darken(c.$mint, 10%); // Lekko przyciemnij tło
+        border-color: darken(c.$red1, 10%); // Lekko przyciemnij ramkę
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3); // Zwiększ cień
     }
-    
-    &:active {
-        transform: translateY(1px);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+    &:active { // Styl po kliknięciu (stan aktywny)
+        transform: translateY(1px); // Lekkie przesunięcie w dół
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2); // Zmniejsz cień
     }
-    
-    &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-    
-    // Dostosowanie przycisku na mniejszych ekranach
-    @media (max-width: 1000px) {
-        padding: 8px 16px;
-        font-size: clamp(0.8em, 3vw, 1em);
+
+    &:disabled { // Styl dla wyłączonego przycisku
+        opacity: 0.6; // Zmniejsz przezroczystość
+        cursor: not-allowed; // Kursor wskazujący na brak możliwości kliknięcia
+        transform: none; // Usuń transformacje
+        box-shadow: none; // Usuń cień
     }
 }
 
-// Usunięcie kontenerów z środka planszy i używanie wyłącznie zewnętrznego kontenera
-.board-center-placeholder {
-    grid-area: 2 / 2 / 12 / 12;
-    z-index: 1;
-}}
+// --- Stylizacja Przycisku Zakończ Gre ---
+.end-game-div {
+    display: flex; // Użyj flexbox, aby wyśrodkować przycisk
+    justify-content: center; // Centruj zawartość (przycisk) poziomo
+    margin-top: $spacing-lg; // Margines z góry, oddzielający od panelu sterowania
+    width: 100%; // Div zajmuje pełną szerokość, co pomaga w centrowaniu
+    margin-bottom: $spacing-lg; // Dodaj margines na dole strony
+}
+
+.btn-end-game {
+    // Style skopiowane i zaadoptowane z przycisków w styl.scss (start-button, back-button, next-button)
+    position: relative; // Jeśli potrzebne do wewnętrznych elementów pozycjonowanych
+    background-color: c.$red1; // Tło przycisku (czerwony)
+    border: 2px solid c.$mint; // Ramka (miętowa)
+    border-radius: 40%; // Mocno zaokrąglone rogi (jak w styl.scss)
+    color: c.$white1; // Kolor tekstu (biały)
+    font-size: 1rem; // Stały rozmiar czcionki
+    display: inline-flex; // Wyświetlanie inline-flex
+    justify-content: center; // Centrowanie zawartości w pionie i poziomie
+    align-items: center;
+    box-shadow: $shadow-button; // Cień (miętowy)
+    box-sizing: border-box; // Padding wewnątrz elementu
+    padding: $spacing-sm $spacing-md; // Wewnętrzne odstępy
+    text-align: center; // Wyrównanie tekstu do środka
+    white-space: normal; // Normalne zawijanie tekstu
+    line-height: 1.2; // Wysokość linii
+
+    cursor: pointer; // Kursor wskazujący na klikalność
+    transition: all $transition-fast $transition-ease; // Płynne przejścia przy najechaniu/kliknięciu
+    font-weight: 600; // Gruba czcionka
+    text-transform: uppercase; // Tekst dużymi literami
+    letter-spacing: 1px; // Odstępy między literami
+    text-decoration: none; // Brak podkreślenia (dla <a> elementu)
+
+    &:hover { // Styl po najechaniu myszą
+        background-color: c.$red2; // Lekko przyciemnij tło
+        box-shadow: 0px 0px 15px c.$mint; // Zwiększ cień
+        transform: translateY(-2px); // Lekkie przesunięcie w górę
+    }
+
+    &:active { // Styl po kliknięciu (stan aktywny)
+        transform: translateY(0); // Powrót do pozycji
+        box-shadow: $shadow-button; // Przywróć cień
+    }
+
+    &:disabled { // Styl dla wyłączonego przycisku (mniej prawdopodobne dla tego przycisku, ale dobra praktyka)
+        opacity: 0.5; // Zmniejsz przezroczystość
+        cursor: not-allowed; // Kursor wskazujący na brak możliwości kliknięcia
+        transform: none; // Usuń transformacje
+        box-shadow: none; // Usuń cień
+    }
+}
+
+
+// --- Reguły dla rozmieszczenia pól na siatce (automatycznie generowane przez pętlę @for) ---
+// NIE EDYTUJ TEGO BLOKU RĘCZNIE - JEST ON GENEROWANY PRZEZ SCSS
+@for $i from 1 through 44 { // Pętla dla każdego pola (zakładając maksymalnie 44 pola)
+  .tile:nth-child(#{$i}) { // Wybiera n-ty element z klasą .tile
+
+    @if $i >= 2 and $i <= 12 { // Pola na dolnej krawędzi (bez narożników, licząc od lewej)
+      $col: 12 - ($i - 2); // Oblicza kolumnę siatki (malejąco od 11 do 1)
+      grid-area: 12 / #{$col}; // Przypisuje obszar siatki (wiersz 12, obliczona kolumna)
+
+      // Obrót nazw i ID dla lepszej czytelności na krawędzi
+      .tile-name,
+      .tile-id {
+        transform: rotate(-45deg);
+        transform-origin: center;
+      }
+    } @else if $i >= 13 and $i <= 23 { // Pola na lewej krawędzi (bez narożników, licząc od dołu)
+      $row: 12 - ($i - 13); // Oblicza wiersz siatki (malejąco od 11 do 1)
+      grid-area: #{$row} / 1; // Przypisuje obszar siatki (obliczony wiersz, kolumna 1)
+        // Brak obrotu - tekst w pionie jest czytelny
+
+    } @else if $i >= 25 and $i <= 34 { // Pola na górnej krawędzi (bez narożników, licząc od prawej)
+      $col: 1 + ($i - 24); // Oblicza kolumnę siatki (rosnąco od 2 do 11)
+      grid-area: 1 / #{$col}; // Przypisuje obszar siatki (wiersz 1, obliczona kolumna)
+
+      // Obrót nazw i ID dla lepszej czytelności na krawędzi
+      .tile-name,
+      .tile-id {
+        transform: rotate(45deg);
+        transform-origin: center;
+      }
+    } @else if $i >= 35 and $i <= 44 { // Pola na prawej krawędzi (bez narożników, licząc od góry)
+      $row: 1 + ($i - 35); // Oblicza wiersz siatki (rosnąco od 2 do 11)
+      grid-area: #{$row} / 12; // Przypisuje obszar siatki (obliczony wiersz, kolumna 12)
+        // Brak obrotu - tekst w pionie jest czytelny
+    }
+    // Uwaga: Pola narożne (ID 0, 10, 20, 30 w układzie 0-39) mają swoje grid-area
+    // zdefiniowane w PHP lub przez domyślne zachowanie siatki, nie w tej pętli @for.
+    // Sprawdź, czy Twoje narożniki mają poprawne grid-area (np. grid-area: 12 / 12; dla pola 0)
+  }
+}
