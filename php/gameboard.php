@@ -223,10 +223,8 @@ if ($currentPlayerId === null && !empty($player)) {
                 // Generuj div dla każdego gracza z unikalną klasą i ID
                 $playerClassNumber = $index + 1; // Klasy CSS mogą używać numerów 1-4
                 echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
-                // Wyświetl podstawowe informacje o graczu
                 echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>"; // Używamy character_name
                 echo "Monety: " . htmlspecialchars($p['coins']). " $ <br>";
-                // Wyświetl statystyki postaci w tabeli
                 echo "<table>";
                 echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']). "</td></tr>";
                 echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']). "</td></tr>";
@@ -235,13 +233,19 @@ if ($currentPlayerId === null && !empty($player)) {
                 echo "<tr><td>Umiejętności gotowania:</td><td>" . htmlspecialchars($p['cook_skill']). "</td></tr>";
                 echo "<tr><td>Zmysł do przypraw:</td><td>" . htmlspecialchars($p['spice_sense']). "</td></tr>";
                 echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']). "</td></tr>";
-                echo "</table></div>"; // Zamknięcie tabeli i div.player-info
+                echo "</table>";
+                echo "<div class='handle-all handle" . htmlspecialchars($playerClassNumber) ."'><span> </span><span> </span><span> </span></div></div>";
             }
         } else {
-            // Komunikat, jeśli nie udało się pobrać danych graczy
             echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
         }
         ?>
+        <div class="player-more more1"></div>
+        <div class="player-more more2"></div>
+        <div class="player-more more3"></div>
+        <div class="player-more more4"></div>
+        <div class="card card-left"></div>
+        <div class="card card-right"></div>
     </div>
     <?php
     $tile_counter = 0; // Licznik pól (może być używany w CSS :nth-child, ale @for w SCSS jest lepsze)
@@ -323,5 +327,6 @@ if (!empty($player)) {
     <a href="./end_game.php"><button class="btn-end-game">Zakończ gre</button></a>
 </div>
 <script src="../js/gameboard.js"> </script>
+<script src="../js/gameboard_inner.js"></script>
 </body>
 </html>
