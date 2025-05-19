@@ -223,21 +223,62 @@ a {
 }
 
 // --- Stylizacja Pionków Graczy ---
+
+.pawn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 2px;
+    border: 2px solid black;
+    position: relative;
+}
+
+.pawn1 { background-color: red; }
+.pawn2 { background-color: blue; }
+.pawn3 { background-color: green; }
+.pawn4 { background-color: yellow; }
+
+
 .player-token {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     margin: 2px;
     display: inline-block;
-    border: 2px solid white; // Biała ramka wokół pionka
-    // Kolor tła pionka jest ustawiany przez klasy .player-1, .player-2, etc.
+    border: 2px solid black;
+    transition: transform 0.6s ease-in-out;
+    position: absolute;
 }
 
-// Kolory pionków (zgodne z kolorami z gameboard_inner.css/pawns.css)
-.player-1 { background-color: red; }
-.player-2 { background-color: blue; }
-.player-3 { background-color: green; }
-.player-4 { background-color: yellow; }
+    // Kolory pionków (zgodne z kolorami z gameboard_inner.css/pawns.css)
+    .player-1 {
+        background-color: red;
+    }
+
+    .player-2 {
+        background-color: blue;
+    }
+
+    .player-3 {
+        background-color: green;
+    }
+
+    .player-4 {
+        background-color: yellow;
+    }
+
+@keyframes move-token {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(var(--x), var(--y)); }
+}
+
+.player-token.moving {
+    animation: move-token 0.6s forwards;
+}
+
+.player-token.active {
+    box-shadow: 0 0 10px 3px gold;
+}
 
 .players-on-tile {
     position: absolute; // Absolutne pozycjonowanie wewnątrz pola (.tile jest relative)

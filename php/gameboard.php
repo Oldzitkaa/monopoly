@@ -37,7 +37,7 @@ if ($result) {
         // Obsłuż przypadek, gdy w tabeli 'tiles' nie ma żadnych rekordów
         error_log("Brak pól w bazie danych do wyświetlenia dla gry o ID: " . $gameId);
         // Możesz też wyświetlić komunikat na stronie
-         echo "<p style='color: red;'>Błąd: Brak danych pól planszy w bazie danych.</p>";
+        echo "<p style='color: red;'>Błąd: Brak danych pól planszy w bazie danych.</p>";
     }
     // Zwolnij pamięć zajmowaną przez wynik zapytania
     $result->free();
@@ -88,8 +88,8 @@ if ($stmt_player) {
             }
         } else {
             // Obsłuż przypadek, gdy dla danej gry nie ma graczy (nie powinno się zdarzyć przy poprawnym tworzeniu gry)
-             error_log("Brak graczy w bazie danych dla gry o ID: " . $gameId);
-             echo "<p style='color: red;'>Błąd: Brak danych graczy dla tej gry.</p>";
+            error_log("Brak graczy w bazie danych dla gry o ID: " . $gameId);
+            echo "<p style='color: red;'>Błąd: Brak danych graczy dla tej gry.</p>";
         }
         // Zwolnij pamięć zajmowaną przez wynik zapytania
         $result_player->free();
@@ -102,10 +102,10 @@ if ($stmt_player) {
     // Zamknij przygotowaną instrukcję
     $stmt_player->close();
 } else {
-     // Obsłuż błąd przygotowania zapytania
-     error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
-     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
-     // W przypadku błędu tablica $player pozostanie pusta
+    // Obsłuż błąd przygotowania zapytania
+    error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
+    echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
+    // W przypadku błędu tablica $player pozostanie pusta
 }
 // Zamknij połączenie z bazą danych po pobraniu wszystkich potrzebnych danych
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
@@ -130,37 +130,37 @@ function get_space_classes($tile) {
     $id = $tile['id'];
     // Narożniki
     if (in_array($id,[0,10,20,30])){ // Zakładając 40 pól (0-39) lub 41 (0-40), ID narożników to 0, 10, 20, 30
-         $classes[] ='corner';
-     }
-     // Krawędzie (bez narożników) - dostosuj zakresy ID do swojej planszy
-     elseif ($id >= 1 && $id <= 9) { // Dolna krawędź (pola 1-9)
-         $classes[] ='bottom-edge';
-     }
-     // Zakładając, że pola idą od 0 w prawo, w górę, w lewo, w dół:
-     elseif ($id >= 11 && $id <= 19) { // Lewa krawędź (pola 11-19)
-          $classes[] = 'left-edge';
-     }
-     elseif ($id >= 21 && $id <= 29) { // Górna krawędź (pola 21-29)
-          $classes[] ='top-edge';
-     }
-     elseif ($id >= 31 && $id <= 39) { // Prawa krawędź (pola 31-39)
-          $classes[] = 'right-edge';
-     }
-     // Jeśli masz 41 pól (0-40), narożniki to 0, 10, 20, 31, a zakresy krawędzi będą inne.
-     // Narożniki: 0, 10, 21, 31 (według poprzedniego snippeta) - dostosuj if/elseif poniżej
-     /*
-     if (in_array($id,[0,10,21,31])){
-         $classes[] ='corner';
-     } elseif ($id >= 1 && $id <= 9) { // Dolna krawędź
-         $classes[] ='bottom-edge';
-     } elseif ($id >= 11 && $id <= 20) { // Lewa krawędź
-         $classes[] = 'left-edge';
-     } elseif ($id >= 22 && $id <= 30) { // Górna krawędź
-         $classes[] ='top-edge';
-     } elseif ($id >= 32 && $id <= 40) { // Prawa krawędź
-         $classes[] = 'right-edge';
-     }
-     */
+        $classes[] ='corner';
+    }
+    // Krawędzie (bez narożników) - dostosuj zakresy ID do swojej planszy
+    elseif ($id >= 1 && $id <= 9) { // Dolna krawędź (pola 1-9)
+        $classes[] ='bottom-edge';
+    }
+    // Zakładając, że pola idą od 0 w prawo, w górę, w lewo, w dół:
+    elseif ($id >= 11 && $id <= 19) { // Lewa krawędź (pola 11-19)
+        $classes[] = 'left-edge';
+    }
+    elseif ($id >= 21 && $id <= 29) { // Górna krawędź (pola 21-29)
+        $classes[] ='top-edge';
+    }
+    elseif ($id >= 31 && $id <= 39) { // Prawa krawędź (pola 31-39)
+        $classes[] = 'right-edge';
+    }
+    // Jeśli masz 41 pól (0-40), narożniki to 0, 10, 20, 31, a zakresy krawędzi będą inne.
+    // Narożniki: 0, 10, 21, 31 (według poprzedniego snippeta) - dostosuj if/elseif poniżej
+    /*
+    if (in_array($id,[0,10,21,31])){
+        $classes[] ='corner';
+    } elseif ($id >= 1 && $id <= 9) { // Dolna krawędź
+        $classes[] ='bottom-edge';
+    } elseif ($id >= 11 && $id <= 20) { // Lewa krawędź
+        $classes[] = 'left-edge';
+    } elseif ($id >= 22 && $id <= 30) { // Górna krawędź
+        $classes[] ='top-edge';
+    } elseif ($id >= 32 && $id <= 40) { // Prawa krawędź
+        $classes[] = 'right-edge';
+    }
+    */
     // Dodaj klasę, jeśli pole ma przypisany plik graficzny tła
     if (!empty($tile['file'])) {
         $classes[] = 'has-tile-image';
@@ -235,6 +235,7 @@ if ($currentPlayerId === null && !empty($player)) {
                 echo "<div class='handle-all handle" . htmlspecialchars($playerClassNumber) ."'><span> </span><span> </span><span> </span></div></div>";
             }
         } else {
+            // Komunikat, jeśli nie udało się pobrać danych graczy
             echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
         }
         ?>
@@ -279,7 +280,7 @@ if ($currentPlayerId === null && !empty($player)) {
         <img id="diceImage" src="../zdj/kostki/1.png" alt="Kostka" class="dice-image">
         <button id="rollDiceButton" class="roll-dice-button">Rzuć kostką</button>
     </div>
-    </div> <?php
+</div> <?php
 // Jeśli dane graczy zostały pobrane, wygeneruj skrypt umieszczający pionki na polach startowych
 if (!empty($player)) {
     foreach ($player as $p) {
@@ -326,5 +327,22 @@ if (!empty($player)) {
 </div>
 <script src="../js/gameboard.js"> </script>
 <script src="../js/gameboard_inner.js"></script>
+
+<script>
+    const players = <?php echo json_encode($player); ?>;
+
+    players.forEach((player, index) => {
+        const pawn = document.createElement('div');
+        pawn.classList.add('pawn', `pawn${index + 1}`);
+        pawn.dataset.playerId = player.id_player;
+
+        const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
+        if (playerTile) {
+            playerTile.appendChild(pawn);
+        }
+    });
+</script>
+
+
 </body>
 </html>
