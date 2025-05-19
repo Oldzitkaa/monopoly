@@ -217,13 +217,11 @@ if ($currentPlayerId === null && !empty($player)) {
 <div class="monopoly-board" id="monopoly-board">
     <div class="board-center-placeholder">
         <?php
-        // Wyświetl informacje o graczach, jeśli dane zostały pobrane
         if (!empty($player)) {
             foreach ($player as $index => $p) {
-                // Generuj div dla każdego gracza z unikalną klasą i ID
-                $playerClassNumber = $index + 1; // Klasy CSS mogą używać numerów 1-4
+                $playerClassNumber = $index + 1;
                 echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
-                echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>"; // Używamy character_name
+                echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>";
                 echo "Monety: " . htmlspecialchars($p['coins']). " $ <br>";
                 echo "<table>";
                 echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']). "</td></tr>";
