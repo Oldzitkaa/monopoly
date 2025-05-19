@@ -14,35 +14,49 @@ include_once './database_connect.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potęga Smaku - Konfiguracja Gry</title>
+    <title>Potęga Smaku</title>
     <link rel="stylesheet" href="../css/styl.css"> 
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
     </head>
 <body>
     <div class="logo_div step1">
-        <p class="step-title">MONOPOLY</p> <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
-        <button class="start-button" onclick="goToStepTwo()">DALEJ &rarr;</button> 
+        <p class="step-title">MONOPOLY</p>
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
+        <div class="buttons-container">
+            <?php
+            if (isset($_SESSION['game_id']) && is_numeric($_SESSION['game_id']) && !is_null($_SESSION['game_id'])) {
+                echo "<button class='back-button' id='brake-session-button' onclick='goToStepTwoExtra()'>NOWA GRA</button>";
+                echo "<a href= './gameboard.php'><button class='start-button is'>WZNÓW</button></a>";
+            } else {
+                echo "<button class='back-button' onclick='goToStepTwo()'>NOWA GRA</button>";
+                echo "<button class='start-button notis' onclick=''>WZNÓW</button>";
+            }
+            ?>
+        </div>
     </div>
     <div class="logo_div step2" style="display: none; opacity: 0;">
         <p class="step-title">Podaj liczbę graczy</p> <div class="player-selection"> <div class="quantity-container"> <label for="quantity">Liczba graczy:</label>
                 <span id="playerCount">2</span>
                 <input type="range" class="rangeplayer" name="quantity" id="quantity" min="2" max="4" value="2">
             </div>
-            <div class="buttons-container"> <button class="back-button" onclick="goBackToStepOne()">&larr; WSTECZ</button>
-                <button class="next-button" onclick="goToNicknameStep()">DALEJ &rarr;</button> 
+            <div class="buttons-container"> 
+                <button class="back-button" onclick='(function(){ window.location.href="./index.php"; goBackToStepOne(); })()'>&larr; WSTECZ</button>
+                <button class="next-button" onclick="goToNicknameStep()">DALEJ &rarr;</button>
             </div>
         </div>
     </div>
     <div class="logo_div step3 nick" style="display: none; opacity: 0;">
         <p class="step-title">Utwórz graczy: Podaj nicki</p> <div id="nicknameInputsContainer">
             </div>
-        <div class="buttons-container"> <button class="back-button" onclick="goBackToStepTwo()">&larr; WSTECZ</button>
-             <button class="next-button" onclick="goToCharacterStep()">DALEJ &rarr;</button>
+        <div class="buttons-container"> 
+            <button class="back-button" onclick="goBackToStepTwo()">&larr; WSTECZ</button>
+            <button class="next-button" onclick="goToCharacterStep()">DALEJ &rarr;</button>
         </div>
     </div>
     <div class="logo_div step3 characters" style="display: none; opacity: 0; overflow: auto; max-height: 300px;">
-         <p class="step-title" id="characterSelectionHeader">Wybierz postacie</p> <div class="player-setup-container">
+         <p class="step-title" id="characterSelectionHeader">Wybierz postacie</p> 
+         <div class="player-setup-container">
              <div class="player-list" id="playerSetupList">
                  </div>
              <div class="character-details-panel">
