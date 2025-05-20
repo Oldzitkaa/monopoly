@@ -1308,4 +1308,59 @@ input[type=range]:active::-ms-thumb {
   color: #9f161d;
   min-width: 20px;
   text-align: center;
+}
+
+.character-stats-details table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.character-stats-details td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.character-stats-details th {
+  font-weight: bold;
+}
+
+.stat-bar-container {
+  background-color: #b46161;
+  height: 15px;
+  width: 70%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.stat-fill {
+  background-color: #a03a3a;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.stat-value {
+  font-size: 0.9em;
+  color: #f0f0f0;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.stat-value-ability {
+  display: block;
+  margin-top: 5px;
+  font-style: italic;
+  color: #ccc;
+}
+
+.name-tabel {
+  width: auto;
+}
+
+.value-table {
+  width: 100%;
 }/*# sourceMappingURL=styl.css.map */
