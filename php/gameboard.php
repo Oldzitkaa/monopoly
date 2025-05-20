@@ -194,6 +194,16 @@ if ($currentPlayerId === null && !empty($player)) {
     <link rel="stylesheet" href="../css/gameboard_inner.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
+    <?php
+    $colors = ['red', 'blue', 'green', 'yellow'];
+
+    echo '<style>';
+        for ($i = 1; $i <= 99999; $i++) {
+            $color = $colors[($i - 1) % count($colors)];
+            echo ".player-token.player-$i { background-color: $color; }";
+        }
+        echo '</style>';
+    ?>
 </head>
 <body>
 <div class="monopoly-board" id="monopoly-board">
@@ -246,6 +256,7 @@ if ($currentPlayerId === null && !empty($player)) {
             echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '"' . $style_attribute . '>';
             // Generuj wewnętrzną zawartość pola (nazwa, paski koloru itp.)
             echo get_space_content($tile);
+
             // Kontener na pionki graczy. JS umieści pionki w tych kontenerach.
             echo '<div class="players-on-tile"></div>';
             echo '</div>'; // Zamknięcie div.tile
@@ -263,32 +274,6 @@ if ($currentPlayerId === null && !empty($player)) {
     </div>
 </div> <?php
 if (!empty($player)) {
-    foreach ($player as $p) {
-        echo "<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Znajdź pole planszy odpowiadające aktualnej lokalizacji gracza
-        const tile = document.getElementById('space-" . intval($p['location_player']) . "');
-        if (tile) {
-            // Utwórz nowy element div reprezentujący pionek gracza
-            const playerDiv = document.createElement('div');
-            // Dodaj klasy CSS do pionka (player-token dla podstawy, player-X dla koloru)
-            playerDiv.classList.add('player-token');
-            playerDiv.classList.add('player-" . intval($p['id_player']) . "'); // Używamy ID gracza
-            // Ustaw atrybut title, aby po najechaniu myszą wyświetlał nick gracza
-            playerDiv.title = '" . htmlspecialchars($p['name_player']) . "';
-            // Znajdź kontener na pionki w bieżącym polu i dodaj do niego pionek
-            const playersContainer = tile.querySelector('.players-on-tile');
-            if(playersContainer) {
-                playersContainer.appendChild(playerDiv);
-            } else {
-                console.error('Nie znaleziono kontenera .players-on-tile w polu space-" . intval($p['location_player']) . "');
-            }
-        } else {
-            console.error('Nie znaleziono pola planszy o ID space-" . intval($p['location_player']) . " dla gracza " . htmlspecialchars($p['name_player']) . "');
-        }
-    });
-    </script>";
-    }
 }
 ?>
 <script>
@@ -304,6 +289,40 @@ if (!empty($player)) {
 <div class="end-game-div">
     <a href="./end_game.php"><button class="btn-end-game">Zakończ gre</button></a>
 </div>
+<script>
+    const players = <?= json_encode($player); ?>;
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        players.forEach(player => {
+            let playerTile = parseInt(player.location_player);
+            if (playerTile === 31) {
+                playerTile = 0;
+            }
+
+            const tileId = "space-" + playerTile;
+
+            const tile = document.getElementById(tileId);
+            if (tile) {
+                const playerDiv = document.createElement('div');
+                playerDiv.classList.add('player-token');
+                playerDiv.classList.add('player-' + player.id_player); // stylowanie po ID
+                playerDiv.title = player.name_player;
+
+                const playersContainer = tile.querySelector('.players-on-tile');
+                if (playersContainer) {
+                    playersContainer.appendChild(playerDiv);
+                } else {
+                    console.error(`Brak kontenera .players-on-tile w polu ${tileId}`);
+                }
+            } else {
+                console.error(`Nie znaleziono pola ${tileId} dla gracza ${player.name_player}`);
+            }
+        });
+    });
+</script>
+
 <script src="../js/gameboard.js"> </script>
 <script src="../js/gameboard_inner.js"></script>
 </body>
