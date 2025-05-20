@@ -1,5 +1,24 @@
 @use "./_color" as c;
 
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+$spacing-xl: 30px;
+$spacing-xxl: 50px;
+
+$border-radius-sm: 8px;
+$border-radius-md: 10px;
+$border-radius-lg: 15px;
+$border-radius-round: 50%;
+$border-radius-logo-div: 40%;
+
+$shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+$shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
+$shadow-logo-div: 0 0 50px c.$red1;
+$shadow-button: 0px 0px 10px c.$mint;
+
 body {
   display: flex;
   justify-content: center;
@@ -118,6 +137,7 @@ body {
     bottom: 0;
     left: 0;
     z-index: 3;
+    // Removed specific background-color rules here as they are now handled by .tile-color-bar
   }
 
   .title-id {
@@ -127,21 +147,27 @@ body {
   }
 
   .tile-color-bar{
-    position: relative;
+    position: absolute; /* Changed from relative to absolute */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.2rem; /* Adjusted height for visibility */
     z-index: 2;
+    // Background color will be set by inline style from PHP
   }
 
-  &.azja_restaurant .tile-tile     { background-color: c.$azja; }
-  &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
-  &.australia_restaurant .tile-tile { background-color: c.$aus; }
-  &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
-  &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
-  &.europa_restaurant .tile-tile   { background-color: c.$euro; }
-  &.duel .tile-tile      { background-color: c.$duel; }
-  &.event .tile-tile     { background-color: c.$action; }
-  &.start .tile-tile,
-  &.training .tile-tile,
-  &.vacation .tile-tile  { background-color: c.$start; }
+  // Removed these specific color rules as they are handled by inline style on .tile-color-bar
+  // &.azja_restaurant .tile-tile     { background-color: c.$azja; }
+  // &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
+  // &.australia_restaurant .tile-tile { background-color: c.$aus; }
+  // &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
+  // &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
+  // &.europa_restaurant .tile-tile   { background-color: c.$euro; }
+  // &.duel .tile-tile        { background-color: c.$duel; }
+  // &.event .tile-tile       { background-color: c.$action; }
+  // &.start .tile-tile,
+  // &.training .tile-tile,
+  // &.vacation .tile-tile    { background-color: c.$start; }
 
   .tile-price,
   .tile-rent,
@@ -237,34 +263,40 @@ body {
   background-color: #45a049;
 }
 
-@for $i from 1 through 44 {
-  .tile:nth-child(#{$i}) {
+// Corrected loop for 40 tiles (0-39) based on standard Monopoly board layout
+@for $i from 0 through 39 {
+  .tile:nth-child(#{$i + 1}) { // nth-child is 1-indexed
 
-    @if $i >= 2 and $i <= 12 {
-      $col: 12 - ($i - 2);
-      grid-area: 12 / #{$col};
-
-      .tile-name,
-      .tile-id {
-        transform: rotate(-45deg);
-        transform-origin: center;
-      }
-    } @else if $i >= 13 and $i <= 23 {
-      $row: 12 - ($i - 13);
-      grid-area: #{$row} / 1;
-
-    } @else if $i >= 25 and $i <= 34 {
-      $col: 1 + ($i - 24);
-      grid-area: 1 / #{$col};
-
-      .tile-name,
-      .tile-id {
-        transform: rotate(45deg);
-        transform-origin: center;
-      }
-    } @else if $i >= 35 and $i <= 44 {
-      $row: 1 + ($i - 35);
-      grid-area: #{$row} / 12;
+    @if $i == 0 { // Start (bottom-right corner)
+        grid-area: 12 / 12;
+    } @else if $i >= 1 and $i <= 9 { // Bottom edge (right to left)
+        $col: 12 - $i;
+        grid-area: 12 / #{$col};
+        .tile-name,
+        .tile-id {
+            transform: rotate(-45deg); // Adjust as needed
+            transform-origin: center;
+        }
+    } @else if $i == 10 { // Jail (bottom-left corner)
+        grid-area: 12 / 1;
+    } @else if $i >= 11 and $i <= 19 { // Left edge (bottom to top)
+        $row: 12 - ($i - 10);
+        grid-area: #{$row} / 1;
+    } @else if $i == 20 { // Free Parking (top-left corner)
+        grid-area: 1 / 1;
+    } @else if $i >= 21 and $i <= 29 { // Top edge (left to right)
+        $col: 1 + ($i - 20);
+        grid-area: 1 / #{$col};
+        .tile-name,
+        .tile-id {
+            transform: rotate(45deg); // Adjust as needed
+            transform-origin: center;
+        }
+    } @else if $i == 30 { // Go To Jail (top-right corner)
+        grid-area: 1 / 12;
+    } @else if $i >= 31 and $i <= 39 { // Right edge (top to bottom)
+        $row: 1 + ($i - 30);
+        grid-area: #{$row} / 12;
     }
   }
 }

@@ -1,29 +1,38 @@
 @use "./_color" as c;
-// Zmienne dla spójności z styl.scss
+
+// Spacing
 $spacing-xs: 5px;
 $spacing-sm: 10px;
 $spacing-md: 15px;
 $spacing-lg: 20px;
 $spacing-xl: 30px;
 $spacing-xxl: 50px;
+
+// Border Radius
 $border-radius-sm: 8px;
 $border-radius-md: 10px;
 $border-radius-lg: 15px;
 $border-radius-round: 50%;
-// $border-radius-logo-div: 40%; // Nie potrzebne w tym pliku
+
+// Shadows
 $shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
 $shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
 $shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
-// $shadow-logo-div: 0 0 50px c.$red1; // Nie potrzebne w tym pliku
-$shadow-button: 0px 0px 10px c.$mint; // Użyjemy tej zmiennej dla przycisku
+$shadow-button: 0px 0px 10px c.$mint;
+
+// Transitions
 $transition-duration: 0.5s;
 $transition-ease: ease-in-out;
 $transition-fast: 0.3s;
-// Nowa zmienna dla maksymalnej szerokości planszy
-$max-board-size: 800px;
 
-// --- Wspólne style strony (przywrócono poprzednie tło i kolor tekstu) ---
-// --- Wspólne style strony ---
+// Layout
+$max-board-size: 800px;
+$breakpoint-desktop: 768px;
+
+html {
+    height: 100%;
+}
+
 body {
     margin: 0;
     padding: $spacing-md;
@@ -39,44 +48,498 @@ body {
     box-sizing: border-box;
 }
 
-html {
-    height: 100%; // HTML również na 100% wysokości, aby body mogło użyć min-height: 100vh
-}
-
 a {
-    text-decoration: none; // Usuń podkreślenie linków
+    text-decoration: none;
 }
 
-// Główny kontener planszy i sterowania - dodany nowy
-.game-container {
+.game-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 1200px; // Maksymalna szerokość całego kontenera gry
-    margin: 0 auto; // Wyśrodkowanie
+    max-width: 1200px;
+    margin: 0 auto;
+
+    @media (min-width: $breakpoint-desktop) {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: calc(100vh - 2 * $spacing-md);
+        max-width: none;
+    }
 }
 
-// --- Stylizacja Planszy ---
+.game-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: $spacing-md;
+    box-sizing: border-box;
+    margin-bottom: $spacing-lg;
+    background-color: c.$white1;
+    border-radius: $border-radius-md;
+    box-shadow: $shadow-md;
+    min-width: 280px;
+    align-items: center;
+    max-height: 100vh; // Added
+    overflow-y: auto;  // Added
+
+    @media (min-width: $breakpoint-desktop) {
+        width: 50%;
+        max-width: 800px;
+        margin-left: $spacing-lg;
+        margin-bottom: 0;
+        height: 100%;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+}
+
+.player-info-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: $spacing-lg;
+    gap: $spacing-sm;
+    flex-grow: 1; // Changed from 0
+    flex-shrink: 0;
+    height: auto;
+    min-height: 100px;
+    position: relative;
+    overflow-x: hidden;
+    padding-bottom: $spacing-xs;
+
+    & > .player-info-box {
+        flex-basis: calc(50% - #{$spacing-sm / 2});
+        max-width: calc(50% - #{$spacing-sm / 2});
+        min-width: auto;
+        box-sizing: border-box;
+
+        @media (min-width: $breakpoint-desktop) {
+            flex-basis: calc(50% - #{$spacing-sm / 2});
+            max-width: calc(50% - #{$spacing-sm / 2});
+        }
+    }
+
+    @media (min-width: $breakpoint-desktop) {
+        justify-content: flex-start;
+        overflow-y: visible;
+        padding-bottom: 0;
+        min-height: auto;
+        overflow-x: hidden;
+    }
+
+    &.has-active-player {
+        overflow: visible;
+        height: auto;
+        min-height: 350px;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: flex-start;
+
+        .player-info-box:not(.active) {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            border: none;
+            transform: scale(0.1);
+            transition: opacity $transition-fast, transform $transition-fast, height $transition-fast, margin $transition-fast, padding $transition-fast;
+            flex-basis: 0;
+            max-width: 0;
+        }
+
+        .player-info-box.active {
+            flex-basis: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            min-height: 350px;
+        }
+    }
+}
+
+.player-info-box {
+    flex-shrink: 0;
+    flex-grow: 0;
+    transition: all $transition-fast $transition-ease;
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid #e0e0e0;
+    border-radius: $border-radius-md;
+    background-color: rgba(c.$white1, 0.95);
+    box-shadow: $shadow-sm;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: auto;
+    min-height: 70px;
+    max-height: 70px; // Minimal height for header
+    cursor: pointer;
+    z-index: 10;
+
+    &:hover {
+        box-shadow: $shadow-md;
+        border-color: #3498db;
+        transform: translateY(-2px);
+    }
+
+    &.active {
+        min-height: 350px;
+        max-height: 90vh; // Adjusted to reduce max height
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        z-index: 100;
+        background-color: c.$white1;
+        overflow-y: auto; // Added for player info box scrolling
+        opacity: 1;
+        transform: scale(1);
+        border: 2px solid #3498db;
+        width: 100%;
+        max-width: none;
+        margin: 0 auto;
+        align-self: flex-start;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: $spacing-lg;
+
+        .name {
+            font-size: 1.6em;
+            text-align: center;
+            width: 100%;
+            margin-bottom: $spacing-lg;
+            color: #2c3e50;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: $spacing-md;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: $border-radius-md;
+            border: 1px solid #dee2e6;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .properties-and-skills-wrapper {
+            padding-top: 0;
+            border-top: none;
+            width: 100%;
+            text-align: left;
+            flex-grow: 1;
+            overflow-y: visible;
+            max-height: none; // Adjusted
+            opacity: 1;
+            visibility: visible;
+            transition: none;
+        }
+
+        h3 {
+            margin: 0 0 $spacing-md 0;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-bottom: $spacing-sm;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #e0f2f7 0%, #d6eaf8 100%);
+            border-radius: $border-radius-sm;
+            padding: $spacing-sm $spacing-md;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+
+            &::before {
+                content: '';
+                width: 5px;
+                height: 20px;
+                background-color: #3498db;
+                margin-right: $spacing-sm;
+                border-radius: 2px;
+            }
+        }
+
+        .skills-content h3::before {
+            background-color: #2ecc71;
+        }
+    }
+}
+
+.player-info-box.current-turn-player {
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    background-color: #e8ffe8;
+}
+
+.player-info-box .name {
+    font-weight: 600;
+    font-size: 0.95em;
+    margin-bottom: 0;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-bottom: $spacing-xs;
+    flex-shrink: 0;
+    width: 100%;
+    color: #2c3e50;
+}
+
+.player-info-box p {
+    font-size: 0.85em;
+    color: #495057;
+    margin: 0;
+    padding: 2px 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    span {
+        font-weight: 500;
+        color: #212529;
+    }
+}
+
+.properties-and-skills-wrapper {
+    display: block;
+    padding-top: $spacing-xs;
+    border-top: 1px solid #dee2e6;
+    margin-top: $spacing-xs;
+    font-size: 0.9em;
+    color: #495057;
+    flex-grow: 1;
+    line-height: 1.4;
+    font-family: 'Poppins', Arial, sans-serif;
+    max-height: 0; // Adjusted
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height $transition-fast $transition-ease, opacity $transition-fast $transition-ease, visibility $transition-fast $transition-ease;
+
+    .player-info-box.active & {
+        max-height: 250px; // Adjusted for visible content height when active
+        opacity: 1;
+        visibility: visible;
+        overflow-y: auto;
+        flex-grow: 1;
+        padding: 0;
+        background-color: transparent;
+        border-radius: 0;
+        margin-top: 0;
+    }
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+
+        &:hover {
+            background: #a8a8a8;
+        }
+    }
+}
+
+.properties,
+.skills-content {
+    margin-bottom: $spacing-lg;
+    padding: $spacing-md;
+    background-color: #f8f9fa;
+    border-radius: $border-radius-md;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.skills-content h4::before {
+    background-color: #2ecc71;
+}
+
+.property-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid #e9ecef;
+    min-height: 32px;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 0 -$spacing-xs;
+    padding-left: $spacing-xs;
+    padding-right: $spacing-xs;
+
+    &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    &:hover {
+        background-color: rgba(52, 152, 219, 0.08);
+        transform: translateX(2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.property-name {
+    font-weight: 600;
+    color: #495057;
+    flex-shrink: 0;
+    font-size: 0.9em;
+    text-transform: capitalize;
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+
+    &::after {
+        content: ':';
+        margin-left: 2px;
+        color: #6c757d;
+    }
+}
+
+.property-value {
+    color: #212529;
+    text-align: right;
+    flex-grow: 1;
+    word-break: break-word;
+    padding-left: $spacing-sm;
+    font-weight: 500;
+    font-size: 0.9em;
+
+    &.numeric {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        color: #2ecc71;
+        font-weight: 600;
+
+        &::after {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+    }
+
+    &.text {
+        font-style: italic;
+        color: #6c757d;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &.boolean {
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 0.8em;
+        padding: 2px 6px;
+        border-radius: 12px;
+
+        &[data-value="true"] {
+            color: #ffffff;
+            background-color: #2ecc71;
+        }
+
+        &[data-value="false"] {
+            color: #ffffff;
+            background-color: #e74c3c;
+        }
+    }
+
+    &.cost-rent {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        color: #8e44ad;
+        font-weight: 600;
+
+        small {
+            font-size: 0.75em;
+            color: #95a5a6;
+            font-weight: normal;
+        }
+    }
+}
+
+.card-slots-container {
+    display: flex;
+    justify-content: space-around;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.card-slot {
+    flex: 1;
+    height: 100px;
+    border: 2px dashed #ccc;
+    border-radius: $border-radius-md;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9em;
+    color: #888;
+    background-color: c.$white1;
+    box-shadow: $shadow-sm;
+}
+
+.monopoly-board-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+
+    @media (min-width: $breakpoint-desktop) {
+        width: 65%;
+        height: 100%;
+        flex-grow: 1;
+    }
+}
+
 .monopoly-board {
     display: grid;
     padding: 0.3rem;
-    width: 98vw; // Szerokość oparta na viewport dla małych ekranów
-    max-width: $max-board-size; // Maksymalna szerokość planszy
-    aspect-ratio: 1 / 1; // Zachowanie proporcji kwadratu
-    // Dostosuj max-height, aby plansza mieściła się na ekranie, uwzględniając padding body i marginesy innych elementów
+    width: 98vw;
+    max-width: $max-board-size;
+    aspect-ratio: 1 / 1;
     max-height: calc(100vh - 2 * $spacing-md - $spacing-lg * 2);
     grid-template-columns: 1.5fr repeat(10, 1fr) 1.5fr;
     grid-template-rows: 1.5fr repeat(10, 1fr) 1.5fr;
     border: 0.4vw solid black;
-    background-color: c.$white1; // Tło planszy (pozostaje białe)
+    background-color: c.$white1;
     box-sizing: border-box;
     position: relative;
-    margin: 0 auto $spacing-lg auto; // Wyśrodkowanie i margines dolny
+    margin: 0 auto $spacing-lg auto;
     font-size: clamp(1rem, 5vw, 2rem);
-    // Zapewnij stałą grubość ramki na większych ekranach
-    @media (min-width: 1200px) {
-        border-width: 4px; // Stała grubość ramki zamiast 0.4vw
+
+    @media (min-width: $breakpoint-desktop) {
+        border-width: 4px;
+        width: 100%;
+        height: auto;
+        margin: auto;
+        max-height: calc(100vh - 2 * $spacing-md);
     }
 }
 
@@ -102,7 +565,7 @@ a {
     background-image: none;
     background-repeat: no-repeat;
     background-blend-mode: overlay;
-    // Na większych ekranach używaj stałego rozmiaru czcionki
+
     @media (min-width: 1200px) {
         font-size: 0.9rem;
     }
@@ -150,14 +613,13 @@ a {
         padding: 2px;
         word-break: break-word;
         hyphens: auto;
-        // Na większych ekranach używaj stałego rozmiaru czcionki
+
         @media (min-width: 1200px) {
             font-size: 0.7rem;
         }
     }
 
     .tile-name-text {
-        // Użyj półprzezroczystego tła z koloru białego z pliku kolorów (dla czytelności tekstu na tle/obrazku)
         background: rgba(c.$white1, 0.3);
         padding: 2px;
     }
@@ -171,6 +633,20 @@ a {
         bottom: 0;
         left: 0;
         z-index: 3;
+        // The following lines were removed to allow inline PHP styles to control background-color
+        // &.azja_restaurant .tile-tile { background-color: c.$azja; }
+        // &.afryka_restaurant .tile-tile { background-color: c.$afr; }
+        // &.australia_restaurant .tile-tile { background-color: c.$aus; }
+        // &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
+        // &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
+        // &.europa_restaurant .tile-tile { background-color: c.$euro; }
+        // &.region_entrance .tile-tile { background-color: c.$start; }
+        // &.special .tile-tile { background-color: c.$start; }
+        // &.duel .tile-tile { background-color: c.$duel; }
+        // &.event .tile-tile { background-color: c.$action; }
+        // &.start .tile-tile,
+        // &.training .tile-tile,
+        // &.vacation .tile-tile { background-color: c.$start; }
     }
 
     .title-id {
@@ -184,21 +660,6 @@ a {
         z-index: 2;
     }
 
-    // Przypisanie kolorów do pasków na podstawie typu/regionu pola
-    &.azja_restaurant .tile-tile     { background-color: c.$azja; }
-    &.afryka_restaurant .tile-tile   { background-color: c.$afr; }
-    &.australia_restaurant .tile-tile { background-color: c.$aus; }
-    &.amerykan_restaurant .tile-tile { background-color: c.$amen; } // Sprawdź nazwę klasy dla regionu Ameryki Północnej
-    &.amerykas_restaurant .tile-tile { background-color: c.$ames; } // Sprawdź nazwę klasy dla regionu Ameryki Południowej
-    &.europa_restaurant .tile-tile   { background-color: c.$euro; }
-    &.region_entrance .tile-tile    { background-color: c.$start; } // Kolor dla wejścia do regionu
-    &.special .tile-tile    { background-color: c.$start; } // Kolor dla pól specjalnych (np. Szansa, Kasa Społeczna, Podatek)
-    &.duel .tile-tile      { background-color: c.$duel; }
-    &.event .tile-tile     { background-color: c.$action; }
-    &.start .tile-tile,
-    &.training .tile-tile,
-    &.vacation .tile-tile  { background-color: c.$start; } // Kolor dla pól startowych/specjalnych
-
     .tile-price,
     .tile-rent,
     .tile-cost,
@@ -209,90 +670,126 @@ a {
         margin-top: 0.2em;
         text-align: center;
         width: 100%;
-        color: black; // Upewnij się, że tekst na polach jest czarny
+        color: black;
     }
 }
 
-// --- Stylizacja Centralnego Obszaru Planszy ---
 .board-center-placeholder {
-    grid-area: 2 / 2 / 12 / 12; // Umieszcza w środku siatki 12x12
+    grid-area: 2 / 2 / 12 / 12;
     z-index: 1;
-    // Skomentowane lub usunięte wewnętrzne style display/flex/color -
-    // Ostateczny wygląd tego obszaru jest definiowany przez elementy wewnątrz
-    // (np. .player-info ze stylów w gameboard_inner.css)
+}
+
+.pawn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 2px;
+    border: 2px solid black;
+    position: relative;
+}
+
+.pawn1 { background-color: red; }
+.pawn2 { background-color: blue; }
+.pawn3 { background-color: green; }
+.pawn4 { background-color: yellow; }
+
+.player-token {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 2px;
+    display: inline-block;
+    border: 2px solid black;
+    transition: transform 0.6s ease-in-out;
+    position: absolute;
+}
+
+.player-1 { background-color: red; }
+.player-2 { background-color: blue; }
+.player-3 { background-color: green; }
+.player-4 { background-color: yellow; }
+
+@keyframes move-token {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(var(--x), var(--y)); }
+}
+
+.player-token.moving {
+    animation: move-token 0.6s forwards;
+}
+
+.player-token.active {
+    box-shadow: 0 0 10px 3px gold;
 }
 
 .players-on-tile {
-    position: relative;
+    position: absolute;
+    bottom: 5px;
+    width: 100%;
     display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
     justify-content: center;
-    align-items: center;
-    padding: 2px;
-    z-index: 10;
+    flex-wrap: wrap;
 }
 
-.player-token {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    border: 3px solid #000;
-    z-index: 10;
-}
-
-.player-token.player-1 {
-    background-color: red; }
-.player-token.player-2 {
-    background-color: blue; }
-.player-token.player-3 {
-    background-color: green; }
-.player-token.player-4 {
-    background-color: yellow; }
-
-
-
-// --- Stylizacja Kontenera Sterowania Grą (Kostka, Wynik, Przycisk) ---
-// Kontener dla kostki i przycisków (panel pod planszą)
 .game-controls-container {
     display: flex;
-    flex-direction: column; // Elementy (sekcja kostki) ułożone w kolumnie
-    align-items: center; // Elementy wyśrodkowane poziomo
-    background-color: c.$white1; // Tło kontenera (biały z palety kolorów)
-    padding: $spacing-md; // Wewnętrzne odstępy
-    border-radius: $border-radius-md; // Zaokrąglone rogi
-    margin-left: 0; // Brak marginesu z lewej strony w układzie kolumnowym body
-    margin-top: $spacing-lg; // Margines z góry, oddzielający od planszy lub poprzedniego elementu
-    box-shadow: $shadow-md; // Średni cień
-    width: 100%; // Domyślnie pełna szerokość w kontenerze flexbox (body)
-    max-width: 300px; // Ograniczenie maksymalnej szerokości na większych ekranach
-    box-sizing: border-box; // Padding wewnątrz elementu
-    position: relative; // Dodanie pozycji relative
+    flex-direction: column;
+    align-items: center;
+    background-color: c.$white1;
+    padding: $spacing-md;
+    border-radius: $border-radius-md;
+    margin-top: $spacing-lg;
+    box-shadow: $shadow-md;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0; // Added
+
+    @media (min-width: $breakpoint-desktop) {
+        display: block;
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        margin-top: auto;
+        box-shadow: none;
+        width: 100%;
+        max-width: none;
+    }
 }
 
-// Styl dla sekcji zawierającej kostkę i przycisk wewnątrz game-controls-container
 .dice-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
+    margin-bottom: $spacing-lg;
+    flex-shrink: 0;
+
+    @media (min-width: $breakpoint-desktop) {
+        margin-top: auto;
+    }
 }
 
-// Style dla obrazka kostki
 .dice-image {
     display: block;
     width: clamp(60px, 15vw, 100px);
     height: clamp(60px, 15vw, 100px);
-    margin: 10px auto; // Centrowanie poziome
-    transition: transform .5s ease-out; // Płynne przejścia transformacji
-    cursor: pointer; // Kursor wskazujący na klikalność
-    &.animacja { // Gdy element ma dodatkowo klasę .animacja
-        animation: roll-animation 1s ease-out forwards; // Uruchom animację rzutu
+    margin: 10px auto;
+    transition: transform .5s ease-out;
+    cursor: pointer;
+
+    @media (min-width: $breakpoint-desktop) {
+        width: 80px;
+        height: 80px;
+    }
+
+    &.animacja {
+        animation: roll-animation 1s ease-out forwards;
     }
 }
 
-// Definicja animacji rzutu kostką
 @keyframes roll-animation {
     0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
     25% { transform: rotateX(180deg) rotateY(90deg) scale(1.1); }
@@ -301,94 +798,101 @@ a {
     100% { transform: rotateX(720deg) rotateY(360deg) scale(1); }
 }
 
-// Style dla tekstu wyświetlającego wynik rzutu
 .roll-result-text {
     text-align: center;
     font-size: clamp(1em, 4vw, 1.5em);
     font-weight: bold;
-    color: c.$red1; // Kolor tekstu (czerwony z palety)
+    color: c.$red1;
     margin-top: 5px;
     margin-bottom: 10px;
-    min-height: 1.8em; // Zapewnia stałą wysokość, zapobiegając przesunięciom layoutu
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3); // Cień tekstu
+    min-height: 1.8em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
-// Style dla przycisku rzutu kostką (pasujące do reszty przycisków, ale z innymi kolorami)
 .roll-dice-button {
     padding: 8px 16px;
     font-size: clamp(0.8em, 3vw, 1em);
-    cursor: pointer; // Kursor wskazujący na klikalność
-    background-color: c.$mint; // Tło przycisku (miętowy)
-    color: c.$red1; // Kolor tekstu (czerwony)
-    border: 2px solid c.$red1; // Ramka (czerwona)
-    border-radius: 8px; // Zaokrąglone rogi
-    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease; // Płynne przejścia
-    text-transform: uppercase; // Tekst dużymi literami
-    font-weight: bold; // Gruba czcionka
-    margin-top: 15px; // Margines z góry, oddzielający od wyniku rzutu
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); // Lekki cień
-    &:hover { // Styl po najechaniu myszą
-        background-color: darken(c.$mint, 10%); // Lekko przyciemnij tło
-        border-color: darken(c.$red1, 10%); // Lekko przyciemnij ramkę
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3); // Zwiększ cień
+    cursor: pointer;
+    background-color: c.$mint;
+    color: c.$red1;
+    border: 2px solid c.$red1;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-top: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    &:hover {
+        background-color: darken(c.$mint, 10%);
+        border-color: darken(c.$red1, 10%);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-    &:active { // Styl po kliknięciu (stan aktywny)
-        transform: translateY(1px); // Lekkie przesunięcie w dół
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2); // Zmniejsz cień
+
+    &:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    &:disabled { // Styl dla wyłączonego przycisku
-        opacity: 0.6; // Zmniejsz przezroczystość
-        cursor: not-allowed; // Kursor wskazujący na brak możliwości kliknięcia
-        transform: none; // Usuń transformacje
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
         box-shadow: none;
     }
 }
 
-// --- Stylizacja Przycisku Zakończ Gre ---
 .end-game-div {
-    display: flex; // Użyj flexbox, aby wyśrodkować przycisk
-    justify-content: center; // Centruj zawartość (przycisk) poziomo
-    margin-top: $spacing-lg; // Margines z góry, oddzielający od panelu sterowania
-    width: 100%; // Div zajmuje pełną szerokość, co pomaga w centrowaniu
-    margin-bottom: $spacing-lg; // Dodaj margines na dole strony
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-lg;
+    width: 100%;
+    margin-bottom: $spacing-lg;
+    flex-shrink: 0;
+
+    @media (min-width: $breakpoint-desktop) {
+        margin-top: auto;
+    }
 }
 
 .btn-end-game {
-    // Style skopiowane i zaadoptowane z przycisków w styl.scss (start-button, back-button, next-button)
-    position: relative; // Jeśli potrzebne do wewnętrznych elementów pozycjonowanych
-    background-color: c.$red1; // Tło przycisku (czerwony)
-    border: 2px solid c.$mint; // Ramka (miętowa)
-    border-radius: 40%; // Mocno zaokrąglone rogi (jak w styl.scss)
-    color: c.$white1; // Kolor tekstu (biały)
-    font-size: 1rem; // Stały rozmiar czcionki
-    display: inline-flex; // Wyświetlanie inline-flex
-    justify-content: center; // Centrowanie zawartości w pionie i poziomie
+    position: relative;
+    background-color: c.$red1;
+    border: 2px solid c.$mint;
+    border-radius: 40%;
+    color: c.$white1;
+    font-size: 1rem;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-    box-shadow: $shadow-button; // Cień (miętowy)
-    box-sizing: border-box; // Padding wewnątrz elementu
-    padding: $spacing-sm $spacing-md; // Wewnętrzne odstępy
-    text-align: center; // Wyrównanie tekstu do środka
-    white-space: normal; // Normalne zawijanie tekstu
-    line-height: 1.2; // Wysokość linii
-    cursor: pointer; // Kursor wskazujący na klikalność
-    transition: all $transition-fast $transition-ease; // Płynne przejścia przy najechaniu/kliknięciu
-    font-weight: 600; // Gruba czcionka
-    text-transform: uppercase; // Tekst dużymi literami
-    letter-spacing: 1px; // Odstępy między literami
-    text-decoration: none; // Brak podkreślenia (dla <a> elementu)
-    &:hover { // Styl po najechaniu myszą
-        background-color: c.$red2; // Lekko przyciemnij tło
-        box-shadow: 0px 0px 15px c.$mint; // Zwiększ cień
-        transform: translateY(-2px); // Lekkie przesunięcie w górę
+    box-shadow: $shadow-button;
+    box-sizing: border-box;
+    padding: $spacing-sm $spacing-md;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: all $transition-fast $transition-ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+
+    &:hover {
+        background-color: c.$red2;
+        box-shadow: 0px 0px 15px c.$mint;
+        transform: translateY(-2px);
     }
-    &:active { // Styl po kliknięciu (stan aktywny)
-        transform: translateY(0); // Powrót do pozycji
-        box-shadow: $shadow-button; // Przywróć cień
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: $shadow-button;
     }
-    &:disabled { // Styl dla wyłączonego przycisku (mniej prawdopodobne dla tego przycisku, ale dobra praktyka)
-        opacity: 0.5; // Zmniejsz przezroczystość
-        cursor: not-allowed; // Kursor wskazujący na brak możliwości kliknięcia
-        transform: none; // Usuń transformacje
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
         box-shadow: none;
     }
 }
@@ -398,6 +902,7 @@ a {
         @if $i >= 2 and $i <= 12 {
             $col: 12 - ($i - 2);
             grid-area: 12 / #{$col};
+
             .tile-name,
             .tile-id {
                 transform: rotate(-45deg);
@@ -409,6 +914,7 @@ a {
         } @else if $i >= 25 and $i <= 34 {
             $col: 1 + ($i - 24);
             grid-area: 1 / #{$col};
+
             .tile-name,
             .tile-id {
                 transform: rotate(45deg);
@@ -417,6 +923,103 @@ a {
         } @else if $i >= 35 and $i <= 44 {
             $row: 1 + ($i - 35);
             grid-area: #{$row} / 12;
+        }
+    }
+}
+
+@media (max-width: $breakpoint-desktop) {
+    .player-info-box.active {
+        .properties,
+        .skills-content {
+            margin-bottom: $spacing-md;
+            padding: $spacing-sm;
+        }
+
+        .property-item {
+            padding: $spacing-xs 0;
+            min-height: 28px;
+        }
+
+        .property-name,
+        .property-value {
+            font-size: 0.85em;
+        }
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.player-info-box.active {
+    .properties,
+    .skills-content {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .property-item {
+        animation: slideIn 0.3s ease-out;
+        @for $i from 1 through 10 {
+            &:nth-child(#{$i}) {
+                animation-delay: #{$i * 0.05}s;
+            }
+        }
+    }
+
+    .player-stats-table,
+    .player-properties-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: $spacing-lg;
+        background-color: #f8f9fa;
+        border-radius: $border-radius-md;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: $spacing-md;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        th, td {
+            padding: $spacing-sm $spacing-md;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95em;
+            color: #34495e;
+        }
+
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .numeric {
+            font-weight: 600;
+            color: #27ae60;
+        }
+
+        .property-cost-rent {
+            color: #8e44ad;
+        }
+
+        .property-type-region {
+            font-style: italic;
+            color: #6c757d;
         }
     }
 }

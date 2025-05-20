@@ -5,7 +5,22 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 
 $mysqli->set_charset("utf8");
-$sql = "SELECT id, name, type, region, cost, base_rent, description, file FROM tiles ORDER BY id"; // Używamy backticków dla nazwy `file`
+
+// Zmodyfikowane zapytanie SQL do pobrania danych o polach planszy
+$sql = "SELECT
+            t.id,
+            t.name,
+            t.type,
+            t.region,
+            t.cost,
+            t.base_rent,
+            t.description,
+            t.`file`,
+            tg.name AS group_name,
+            tg.color AS group_color
+        FROM `tiles` t
+        LEFT JOIN `tile_groups` tg ON t.group_id = tg.id
+        ORDER BY t.id";
 $result = $mysqli->query($sql);
 
 $tiles = [];
@@ -15,17 +30,22 @@ if ($result) {
             $tiles[] = $row;
         }
     } else {
+        // Opcjonalnie: logowanie lub obsługa przypadku braku pól
     }
 } else {
     echo "Błąd zapytania SQL: " . $mysqli->error;
 }
 
 $mysqli->close();
+
+// Zmodyfikowana funkcja get_space_classes
 function get_space_classes($tile) {
     $classes = ['tile'];
     $type_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
 
-    if ($tile['type'] === 'restaurant' && !empty($tile['region'])) {
+    if (!empty($tile['group_name'])) {
+        $classes[] = strtolower(str_replace([' ', '_', '/'], '_', $tile['group_name']));
+    } elseif ($tile['type'] === 'restaurant' && !empty($tile['region'])) {
         $region_part = strtolower(str_replace([' ', '/'], '_', $tile['region']));
         $classes[] = $region_part . '_restaurant';
     } else {
@@ -33,12 +53,16 @@ function get_space_classes($tile) {
     }
 
     $id = $tile['id'];
-    if (in_array($id,[0,10,21,31])){
+    if (in_array($id,[0,10,20,30])){ // Poprawione indeksy narożników
         $classes[] ='corner';
-    }elseif ($id >= 1 && $id <= 9) {
+    } elseif ($id >= 1 && $id <= 9) {
         $classes[] ='bottom-edge';
-    }elseif ($id >= 22 && $id <= 30) {
+    } elseif ($id >= 11 && $id <= 19) { // Lewa krawędź
+        $classes[] = 'left-edge';
+    } elseif ($id >= 21 && $id <= 29) { // Górna krawędź
         $classes[] ='top-edge';
+    } elseif ($id >= 31 && $id <= 39) { // Prawa krawędź
+        $classes[] = 'right-edge';
     }
 
     if (!empty($tile['file'])) {
@@ -47,12 +71,25 @@ function get_space_classes($tile) {
 
     return implode(' ', $classes);
 }
+
+// Zmodyfikowana funkcja get_space_content
 function get_space_content($tile) {
     $content = '<div class="tile-name">';
-    $content .= '<div class="tile-name-text tile-' . htmlspecialchars($tile['type']) . ' '. htmlspecialchars($tile['region']).'">' . htmlspecialchars($tile['name']) . '</div>';
+    $name_class = 'tile-' . htmlspecialchars($tile['type']);
+    if (!empty($tile['group_name'])) {
+        $name_class .= ' ' . strtolower(str_replace([' ', '/'], '_', $tile['group_name']));
+    } elseif (!empty($tile['region'])) {
+        $name_class .= ' ' . htmlspecialchars($tile['region']);
+    }
+    $content .= '<div class="tile-name-text ' . $name_class . '">' . htmlspecialchars($tile['name']) . '</div>';
     $content .= '</div>';
     $content .= '<div class="tile-tile"></div>';
-    $content .= '<div class="tile-color-bar"></div>';
+
+    $color_bar_style = '';
+    if (!empty($tile['group_color'])) {
+        $color_bar_style = ' style="background-color: ' . htmlspecialchars($tile['group_color']) . ';"';
+    }
+    $content .= '<div class="tile-color-bar"' . $color_bar_style . '></div>';
     return $content;
 }
 ?>
@@ -63,6 +100,8 @@ function get_space_content($tile) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MONOPOLY</title>
     <link rel="stylesheet" href="../css/pawns.css">
+    <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 </head>
 <body>
 <div class="monopoly-board" id="monopoly-board">
@@ -79,10 +118,10 @@ function get_space_content($tile) {
             if (!empty($tile['file'])) {
                 $backgroundPath = '../zdj/pola/' . $tile['file'];
             }
-// Pionki
-            echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" style="--tile-bg: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\');">';
+            echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '" style="--tile-bg: url(\'' . htmlspecialchars($backgroundPath) . '\');">';
             echo get_space_content($tile);
             echo '<div class="players-on-tile">';
+            // Pionki są tworzone tylko na polu startowym (ID 0)
             if ($tile['id'] == 0) {
                 echo '<div class="player-marker pawn1" id="player1"></div>';
                 echo '<div class="player-marker pawn2" id="player2"></div>';
@@ -91,14 +130,11 @@ function get_space_content($tile) {
             }
             echo '</div>';
             echo '</div>';
-
         }
     } else {
         echo "<p>Nie udało się pobrać danych pól z bazy danych lub brak pól do wyświetlenia.</p>";
     }
     ?>
-
-<!--kostka-->
 </div>
 
 <div class="dice-roll-container">
@@ -109,7 +145,6 @@ function get_space_content($tile) {
 </body>
 </html>
 
-<!--skrypt do pionków-->
 <script>
     const totalSpaces = <?= count($tiles) ?>;
     const playerPositions = [0, 0, 0, 0];
@@ -144,213 +179,3 @@ function get_space_content($tile) {
         }
     }
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
