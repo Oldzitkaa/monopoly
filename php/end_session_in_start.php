@@ -4,7 +4,7 @@ include_once './database_connect.php';
 
 $response = ['success' => false, 'message' => 'Nie udało się zakończyć sesji.'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'end_game') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_SESSION['game_id'])) {
         $gameId = $_SESSION['game_id'];
         $sql = "UPDATE `games` SET `status` = 'ended' WHERE `games`.`id` = ?";
@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $response['message'] = 'Błąd przygotowania zapytania SQL: ' . $mysqli->error;
         }
     } else {
+        $response['success'] = true;
         $response['message'] = 'Brak ID gry w sesji.';
     }
 

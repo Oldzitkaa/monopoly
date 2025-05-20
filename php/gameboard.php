@@ -1,55 +1,37 @@
 <?php
 session_start();
-// Sprawdź, czy identyfikator gry istnieje w sesji
+
 if (!isset($_SESSION['game_id'])) {
-    // Jeśli nie, przekieruj użytkownika na stronę główną lub stronę rozpoczęcia gry
     header("Location: index.php");
-    // Możesz opcjonalnie dodać echo i exit(), aby upewnić się, że skrypt się zatrzyma
-    // echo "Brak aktywnej gry w sesji. Przekierowanie...";
     exit();
 }
-// Pobierz game_id z sesji
 $gameId = $_SESSION['game_id'];
-// Dołącz plik połączenia z bazą danych
 include_once './database_connect.php';
-// Sprawdź, czy połączenie z bazą danych zostało pomyślnie nawiązane po dołączeniu pliku
+
 if (!isset($mysqli) || $mysqli->connect_errno) {
-    // W przypadku błędu połączenia, zakończ działanie skryptu i wyświetl komunikat
-    // Można też przekierować na stronę błędu lub wyświetlić bardziej przyjazny komunikat
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
 }
-// Ustaw kodowanie znaków dla połączenia z bazą danych (zalecane dla polskich znaków)
+
 $mysqli->set_charset("utf8");
-// --- Pobierz dane pól planszy ---
-// Zapytanie SQL pobierające wszystkie pola planszy, uporządkowane według ID
-// Używamy backticków (``) dla nazw kolumn, aby uniknąć problemów ze słowami kluczowymi SQL, np. `file`
 $sql = "SELECT id, name, type, region, cost, base_rent, description, `file` FROM tiles ORDER BY id";
 $result = $mysqli->query($sql);
-$tiles = []; // Tablica do przechowywania danych pól
+$tiles = [];
+
 if ($result) {
-    // Sprawdź, czy zapytanie zwróciło wyniki
     if ($result->num_rows > 0) {
-        // Pobierz każdy wiersz wyniku jako tablicę asocjacyjną i dodaj do tablicy $tiles
         while($row = $result->fetch_assoc()) {
             $tiles[] = $row;
         }
     } else {
-        // Obsłuż przypadek, gdy w tabeli 'tiles' nie ma żadnych rekordów
         error_log("Brak pól w bazie danych do wyświetlenia dla gry o ID: " . $gameId);
-        // Możesz też wyświetlić komunikat na stronie
         echo "<p style='color: red;'>Błąd: Brak danych pól planszy w bazie danych.</p>";
     }
-    // Zwolnij pamięć zajmowaną przez wynik zapytania
     $result->free();
 } else {
-    // Obsłuż błąd wykonania zapytania SQL
     error_log("Błąd zapytania SQL dla pól (gry ID: " . $gameId . "): " . $mysqli->error);
     echo "<p style='color: red;'>Błąd zapytania SQL dla pól: " . $mysqli->error . "</p>";
-    // W przypadku błędu zapytania, tablica $tiles pozostanie pusta
 }
-// --- Pobierz dane graczy dla bieżącej gry ---
-// Zapytanie SQL pobierające dane graczy z tabeli 'players' oraz nazwy postaci z tabeli 'characters'
-// dla graczy należących do bieżącej gry ($gameId). Używamy aliasów, aby uniknąć konfliktów nazw kolumn.
+
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -64,13 +46,13 @@ $sql_player = "SELECT
                 p.prep_time as prep_time,
                 p.tradition_affinity as tradition_affinity,
                 p.turn_order as turn_order,
-                p.is_turn as is_turn, -- Pole wskazujące, czy to tura tego gracza (1 = tak, 0 = nie)
+                p.is_turn as is_turn,
                 p.turns_to_miss as turns_to_miss,
                 c.name as character_name
             FROM `players` p
             JOIN `characters` c ON p.character_id = c.id
             WHERE p.game_id = ?
-            ORDER BY p.turn_order ASC"; // Dodano sortowanie po kolejności tury
+            ORDER BY p.turn_order ASC";
 // Użyj przygotowanej instrukcji, aby bezpiecznie przekazać $gameId
 $stmt_player = $mysqli->prepare($sql_player);
 if ($stmt_player) {
@@ -235,7 +217,6 @@ if ($currentPlayerId === null && !empty($player)) {
                 echo "<div class='handle-all handle" . htmlspecialchars($playerClassNumber) ."'><span> </span><span> </span><span> </span></div></div>";
             }
         } else {
-            // Komunikat, jeśli nie udało się pobrać danych graczy
             echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
         }
         ?>
@@ -243,11 +224,11 @@ if ($currentPlayerId === null && !empty($player)) {
         <div class="player-more more2"></div>
         <div class="player-more more3"></div>
         <div class="player-more more4"></div>
-        <div class="card card-left"></div>
-        <div class="card card-right"></div>
+        <!-- <div class="card card-left"></div>
+        <div class="card card-right"></div> -->
     </div>
     <?php
-    $tile_counter = 0; // Licznik pól (może być używany w CSS :nth-child, ale @for w SCSS jest lepsze)
+    $tile_counter = 0;
     if (!empty($tiles)) {
         foreach ($tiles as $tile) {
             $tile_counter++; // Inkrementacja licznika
@@ -281,10 +262,8 @@ if ($currentPlayerId === null && !empty($player)) {
         <button id="rollDiceButton" class="roll-dice-button">Rzuć kostką</button>
     </div>
 </div> <?php
-// Jeśli dane graczy zostały pobrane, wygeneruj skrypt umieszczający pionki na polach startowych
 if (!empty($player)) {
     foreach ($player as $p) {
-        // Użyj htmlspecialchars, aby zabezpieczyć nick gracza w tytule pionka
         echo "<script>
     document.addEventListener('DOMContentLoaded', () => {
         // Znajdź pole planszy odpowiadające aktualnej lokalizacji gracza
@@ -327,22 +306,5 @@ if (!empty($player)) {
 </div>
 <script src="../js/gameboard.js"> </script>
 <script src="../js/gameboard_inner.js"></script>
-
-<script>
-    const players = <?php echo json_encode($player); ?>;
-
-    players.forEach((player, index) => {
-        const pawn = document.createElement('div');
-        pawn.classList.add('pawn', `pawn${index + 1}`);
-        pawn.dataset.playerId = player.id_player;
-
-        const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
-        if (playerTile) {
-            playerTile.appendChild(pawn);
-        }
-    });
-</script>
-
-
 </body>
 </html>

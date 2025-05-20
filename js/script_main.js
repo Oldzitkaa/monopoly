@@ -330,6 +330,31 @@ function goToStepTwo() {
     animateTransition(step1Div, step2Div, '10%'); 
     currentStep = 2;
 }
+function goToStepTwoExtra() {
+    fetch('end_session_in_start.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.success) {
+            console.log("Sesja zakończona pomyślnie.");
+            animateTransition(step1Div, step2Div, '10%');
+            currentStep = 2;
+        } else {
+            console.error("Błąd podczas kończenia sesji:", data.message);
+            showErrorMessage("Błąd podczas kończenia sesji: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Wystąpił błąd sieciowy podczas kończenia sesji:", error);
+        showErrorMessage("Wystąpił błąd sieciowy podczas kończenia sesji.");
+    });
+}
+
 function goBackToStepOne() {
     if (!step2Div || !step1Div) { console.error("Elementy kroków 1 lub 2 nie znaleziono!"); return; }
     animateTransition(step2Div, step1Div, '-40%'); 

@@ -239,6 +239,32 @@ p {
         box-shadow: none;
     }
 }
+.start-button{
+    &.notis{
+        background-color: #ad4846;
+        border: 2px solid #539b79;
+        box-shadow: none;
+        cursor: default;
+        color: #c4c2b3;
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+            cursor: default;
+        }
+        &:active {
+            transform: none;
+            box-shadow: none;
+            cursor: default;
+        }
+        &:disabled {
+            opacity: 1;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}
 
 .nextright{
     margin-top: 30px;
