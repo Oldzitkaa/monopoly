@@ -170,9 +170,9 @@ function populateCharacterCards() {
                 <h3>${character.name || 'Nieznana postać'}</h3>
                 <p class="character-description">${character.description || 'Brak opisu.'}</p>
                 <div class="character-stats">
-                    <div class="character-stat"><span>Gotowanie:</span> <span class="stat-value">${character.base_cook_skill || 0}</span></div>
-                    <div class="character-stat"><span>Tolerancja:</span> <span class="stat-value">${character.base_tolerance || 0}</span></div>
-                    <div class="character-stat"><span>Biznes:</span> <span class="stat-value">${character.base_business_acumen || 0}</span></div>
+                    <div class="character-stat"><span>Umiejętność gotowania:</span> <span class="stat-value">${character.base_cook_skill || 0}</span></div>
+                    <div class="character-stat"><span>Tolerancja ostrości:</span> <span class="stat-value">${character.base_tolerance || 0}</span></div>
+                    <div class="character-stat"><span>Łeb do biznesu:</span> <span class="stat-value">${character.base_business_acumen || 0}</span></div>
                     <div class="character-stat"><span>Pojemność żołądka:</span> <span class="stat-value">${character.base_belly_capacity || 0}</span></div>
                     <div class="character-stat"><span>Zmysł przypraw:</span> <span class="stat-value">${character.base_spice_sense || 0}</span></div>
                     <div class="character-stat"><span>Czas przygotowania:</span> <span class="stat-value">${character.base_prep_time || 0}</span></div>
@@ -186,7 +186,7 @@ function populateCharacterCards() {
 }
 function updateCharacterDetailsPanel(character) {
     if (!characterDetailsPanel || !selectedCharacterImage || !selectedCharacterName || !selectedCharacterDescription || !characterStatsDetailsContainer) {
-         return; 
+        return;
     }
     if (character) {
         const imageUrl = character.image_path || PLACEHOLDER_IMAGE_PATH;
@@ -195,45 +195,64 @@ function updateCharacterDetailsPanel(character) {
         selectedCharacterName.textContent = character.name || 'Nieznana postać';
         selectedCharacterDescription.textContent = character.description || 'Brak opisu dla tej postaci.';
         characterStatsDetailsContainer.innerHTML = '';
-        const maxStatValue = 10;
+
         const stats = [
-            { label: 'Gotowanie', value: character.base_cook_skill },
-            { label: 'Tolerancja', value: character.base_tolerance },
-            { label: 'Biznes', value: character.base_business_acumen },
+            { label: 'Umiejętność gotowania', value: character.base_cook_skill },
+            { label: 'Tolerancja ostrości', value: character.base_tolerance },
+            { label: 'łeb do biznesu', value: character.base_business_acumen },
             { label: 'Pojemność żołądka', value: character.base_belly_capacity },
             { label: 'Zmysł przypraw', value: character.base_spice_sense },
             { label: 'Czas przygotowania', value: character.base_prep_time },
             { label: 'Oddanie tradycji', value: character.base_tradition_affinity }
         ];
+        const maxStatValue = 10;
+
+        const table = document.createElement('table');
         stats.forEach(stat => {
+            const row = table.insertRow();
+            const labelCell = row.insertCell();
+            const valueCell = row.insertCell();
+            labelCell.textContent = stat.label + ':';
+            labelCell.classList.add('name-tabel'); // Dodano klasę 'name-tabel' do pierwszej komórki
+
             const statValue = typeof stat.value === 'number' ? stat.value : 0;
             const percentage = (statValue / maxStatValue) * 100;
-            const statItem = document.createElement('div');
-            statItem.className = 'stat-item'; 
-            statItem.innerHTML = `
-                <span class="stat-label">${stat.label}:</span>
-                <div class="stat-bar">
-                    <div class="stat-fill" style="width: ${percentage > 100 ? 100 : (percentage < 0 ? 0 : percentage)}%"></div>
-                </div>
-                <span class="stat-value">${statValue}</span>
-            `;
-            characterStatsDetailsContainer.appendChild(statItem);
+
+            const statBarContainer = document.createElement('div');
+            statBarContainer.className = 'stat-bar-container';
+            const statFill = document.createElement('div');
+            statFill.className = 'stat-fill';
+            statFill.style.width = `${percentage > 100 ? 100 : (percentage < 0 ? 0 : percentage)}%`;
+            const statValueSpan = document.createElement('span');
+            statValueSpan.className = 'stat-value';
+            statValueSpan.textContent = statValue;
+
+            statBarContainer.appendChild(statFill);
+            valueCell.appendChild(statBarContainer);
+            valueCell.appendChild(statValueSpan);
+            valueCell.classList.add('value-table'); // Dodano klasę 'value-table' do drugiej komórki
         });
-         if (character.special_ability_description) {
-             const abilityItem = document.createElement('div');
-             abilityItem.className = 'stat-item stat-item--ability'; 
-             abilityItem.innerHTML = `
-                 <span class="stat-label">Zdolność spec.:</span>
-                 <span class="stat-value">${character.special_ability_description}</span>
-             `;
-              characterStatsDetailsContainer.appendChild(abilityItem);
-         }
+
+        if (character.special_ability_description) {
+            const row = table.insertRow();
+            const labelCell = row.insertCell();
+            const valueCell = row.insertCell();
+            labelCell.textContent = 'Zdolność spec.:';
+            labelCell.classList.add('name-tabel');
+            valueCell.textContent = character.special_ability_description;
+            labelCell.classList.add('stat-label');
+            valueCell.classList.add('stat-value-ability');
+            valueCell.classList.add('value-table');
+        }
+
+        characterStatsDetailsContainer.appendChild(table);
+
     } else {
-        selectedCharacterImage.src = PLACEHOLDER_IMAGE_PATH; 
+        selectedCharacterImage.src = PLACEHOLDER_IMAGE_PATH;
         selectedCharacterImage.alt = 'Wybierz postać';
         selectedCharacterName.textContent = 'Wybierz postać';
         selectedCharacterDescription.textContent = 'Kliknij na postać, aby zobaczyć jej opis i statystyki.';
-        characterStatsDetailsContainer.innerHTML = ''; 
+        characterStatsDetailsContainer.innerHTML = '';
     }
 }
 function resetCharacterDetailsPanel() {

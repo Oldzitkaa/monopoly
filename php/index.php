@@ -55,25 +55,29 @@ include_once './database_connect.php';
         </div>
     </div>
     <div class="logo_div step3 characters" style="display: none; opacity: 0; overflow: auto; max-height: 300px;">
-         <p class="step-title" id="characterSelectionHeader">Wybierz postacie</p> 
-         <div class="player-setup-container">
-             <div class="player-list" id="playerSetupList">
-                 </div>
-             <div class="character-details-panel">
-                 <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
-                 <h3 id="selectedCharacterName">Wybierz postać</h3>
-                 <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
-                 <div class="character-stats-details"> </div>
+        <p class="step-title" id="characterSelectionHeader">Wybierz postacie</p> 
+        <div class="player-setup-container">
+            <div class="player-list" id="playerSetupList">
+                </div>
+            <div class="character-details-panel">
+                <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
+                <h3 id="selectedCharacterName">Wybierz postać</h3>
+                <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
+                <div class="character-stats-details"> 
+                    <table>
+        
+                    </table>
+                </div>
              </div>
-         </div>
-         <div class="character-carousel">
-             <div id="characterCardsContainer" class="character-cards-container">
-                 </div>
-         </div>
-         <div class="buttons-container"> <button class="back-button" onclick="goBackToNicknameStep()">&larr; WSTECZ</button>
+        </div>
+        <div class="character-carousel">
+            <div id="characterCardsContainer" class="character-cards-container">
+            </div>
+        </div>
+        <div class="buttons-container"> <button class="back-button" onclick="goBackToNicknameStep()">&larr; WSTECZ</button>
             <button class="start-button" id="startGameButton" onclick="submitGameSetup()" style="width: 300px;">ROZPOCZNIJ GRĘ!</button>
-         </div>
-         </div>
+        </div>
+        </div>
     <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
     <script src="../js/script_main.js"></script>
 </body>

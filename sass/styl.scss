@@ -680,7 +680,8 @@ p {
         padding: $spacing-md;
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: $border-radius-lg;
-        max-height: 40vh;
+        // max-height: 40vh;
+        height: auto;
         overflow-y: auto;
         border: 1px solid rgba(c.$white1, 0.2);
 
@@ -981,7 +982,8 @@ p {
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: $spacing-sm;
             padding: $spacing-sm;
-            max-height: 50vh;
+            // max-height: 50vh;
+            height: auto;
         }
 
         .character-card {
@@ -1065,7 +1067,8 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: $spacing-md;
-            max-height: 45vh;
+            // max-height: 45vh;
+            height: auto;
         }
         .character-image-container { height: 120px; }
         .character-info h3 { font-size: 15px; }
@@ -1139,7 +1142,8 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: $spacing-lg;
-            max-height: 40vh;
+            // max-height: 40vh;
+            height: auto;
             padding: $spacing-lg;
         }
         .character-image-container { height: 150px; }
@@ -1279,11 +1283,60 @@ input[type="range"]:active::-ms-thumb {
     max-width: 400px;
     margin: 20px auto;
 }
-
 #playerCount {
     font-size: 1.2em;
     font-weight: bold;
     color: c.$red2;
     min-width: 20px;
     text-align: center;
+}
+// dane przy postaciach
+.character-stats-details table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+.character-stats-details td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.character-stats-details th {
+    font-weight: bold;
+}
+
+.stat-bar-container {
+    background-color: #b46161; 
+    // background-color: #c38181; 
+    height: 15px;
+    width: 70%;
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+    overflow: hidden;
+    border-radius: 5px; 
+}
+.stat-fill {
+    background-color: #a03a3a; 
+    height: 100%;
+    border-radius: 5px; 
+}
+.stat-value {
+    font-size: 0.9em;
+    color: #f0f0f0;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+.stat-value-ability {
+    display: block;
+    margin-top: 5px;
+    font-style: italic;
+    color: #ccc;
+}
+.name-tabel{
+    width: auto;
+}
+.value-table{
+    width: 100%;
 }

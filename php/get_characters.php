@@ -80,8 +80,6 @@ try {
 if (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
     unset($response['debug_message']);
 }
-
-
 echo json_encode($response);
 ?>
 

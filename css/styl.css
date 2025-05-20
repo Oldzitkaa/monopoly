@@ -333,6 +333,7 @@ p {
   background: #9f161d;
   cursor: pointer;
   margin-top: -10px;
+  -webkit-transition: background-color 0.3s ease, transform 0.3s ease;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 .logo_div.step2 #quantity::-webkit-slider-thumb:hover {
@@ -346,6 +347,7 @@ p {
   background: #9f161d;
   cursor: pointer;
   border: none;
+  -moz-transition: background-color 0.3s ease;
   transition: background-color 0.3s ease;
 }
 .logo_div.step2 #quantity::-moz-range-thumb:hover {
@@ -1170,7 +1172,8 @@ p {
 }
 input[type=range] {
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   width: 100%;
   height: 8px;
   background: transparent;
@@ -1199,6 +1202,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -webkit-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
@@ -1219,6 +1223,7 @@ input[type=range]::-moz-range-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -moz-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
@@ -1250,6 +1255,7 @@ input[type=range]::-ms-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -ms-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   margin-top: 0;
 }
@@ -1259,20 +1265,20 @@ input[type=range]::-ms-tooltip {
 }
 
 input[type=range]:hover::-webkit-slider-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:hover::-moz-range-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:hover::-ms-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:active::-webkit-slider-thumb {
   cursor: grabbing;
-  border-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  border-color: #721015;
 }
 
 input[type=range]:active::-moz-range-thumb {
@@ -1301,5 +1307,58 @@ input[type=range]:active::-ms-thumb {
   min-width: 20px;
   text-align: center;
 }
+/*zmiany Olgi <3 */
+.character-stats-details table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
 
-/*# sourceMappingURL=styl.css.map */
+.character-stats-details td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.character-stats-details th {
+  font-weight: bold;
+}
+
+.stat-bar-container {
+  background-color: #b46161;
+  height: 15px;
+  width: 70%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.stat-fill {
+  background-color: #a03a3a;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.stat-value {
+  font-size: 0.9em;
+  color: #f0f0f0;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.stat-value-ability {
+  display: block;
+  margin-top: 5px;
+  font-style: italic;
+  color: #ccc;
+}
+
+.name-tabel {
+  width: auto;
+}
+
+.value-table {
+  width: 100%;
+}/*# sourceMappingURL=styl.css.map */
