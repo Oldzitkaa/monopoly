@@ -65,7 +65,7 @@ include_once './database_connect.php';
                 <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
                 <div class="character-stats-details"> 
                     <table>
-                        
+        
                     </table>
                 </div>
              </div>

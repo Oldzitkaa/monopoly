@@ -170,9 +170,9 @@ function populateCharacterCards() {
                 <h3>${character.name || 'Nieznana postać'}</h3>
                 <p class="character-description">${character.description || 'Brak opisu.'}</p>
                 <div class="character-stats">
-                    <div class="character-stat"><span>Gotowanie:</span> <span class="stat-value">${character.base_cook_skill || 0}</span></div>
+                    <div class="character-stat"><span>Umiejętność gotowania:</span> <span class="stat-value">${character.base_cook_skill || 0}</span></div>
                     <div class="character-stat"><span>Tolerancja ostrości:</span> <span class="stat-value">${character.base_tolerance || 0}</span></div>
-                    <div class="character-stat"><span>Biznes:</span> <span class="stat-value">${character.base_business_acumen || 0}</span></div>
+                    <div class="character-stat"><span>Łeb do biznesu:</span> <span class="stat-value">${character.base_business_acumen || 0}</span></div>
                     <div class="character-stat"><span>Pojemność żołądka:</span> <span class="stat-value">${character.base_belly_capacity || 0}</span></div>
                     <div class="character-stat"><span>Zmysł przypraw:</span> <span class="stat-value">${character.base_spice_sense || 0}</span></div>
                     <div class="character-stat"><span>Czas przygotowania:</span> <span class="stat-value">${character.base_prep_time || 0}</span></div>
@@ -197,9 +197,9 @@ function updateCharacterDetailsPanel(character) {
         characterStatsDetailsContainer.innerHTML = '';
 
         const stats = [
-            { label: 'Gotowanie', value: character.base_cook_skill },
+            { label: 'Umiejętność gotowania', value: character.base_cook_skill },
             { label: 'Tolerancja ostrości', value: character.base_tolerance },
-            { label: 'Biznes', value: character.base_business_acumen },
+            { label: 'łeb do biznesu', value: character.base_business_acumen },
             { label: 'Pojemność żołądka', value: character.base_belly_capacity },
             { label: 'Zmysł przypraw', value: character.base_spice_sense },
             { label: 'Czas przygotowania', value: character.base_prep_time },

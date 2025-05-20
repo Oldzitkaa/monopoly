@@ -680,7 +680,8 @@ p {
         padding: $spacing-md;
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: $border-radius-lg;
-        max-height: 40vh;
+        // max-height: 40vh;
+        height: auto;
         overflow-y: auto;
         border: 1px solid rgba(c.$white1, 0.2);
 
@@ -981,7 +982,8 @@ p {
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: $spacing-sm;
             padding: $spacing-sm;
-            max-height: 50vh;
+            // max-height: 50vh;
+            height: auto;
         }
 
         .character-card {
@@ -1065,7 +1067,8 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: $spacing-md;
-            max-height: 45vh;
+            // max-height: 45vh;
+            height: auto;
         }
         .character-image-container { height: 120px; }
         .character-info h3 { font-size: 15px; }
@@ -1139,7 +1142,8 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: $spacing-lg;
-            max-height: 40vh;
+            // max-height: 40vh;
+            height: auto;
             padding: $spacing-lg;
         }
         .character-image-container { height: 150px; }
