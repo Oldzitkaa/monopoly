@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
     const cardSlotText = document.querySelector('.card-slot.card-text');
+    const cardSlotChoose = document.querySelector('.card-slot.card-choose');
 
     if (!diceImage || !wynikTekst || !rollDiceButton || typeof gameId === 'undefined' || typeof currentPlayerId === 'undefined') {
         if (rollDiceButton) {
@@ -30,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
         rollDiceButton.disabled = true;
         wynikTekst.textContent = 'Rzut...';
         startDiceAnimation();
+
+        if (cardSlotText) cardSlotText.textContent = '';
+        if (cardSlotChoose) {
+            cardSlotChoose.innerHTML = '';
+            cardSlotChoose.style.display = 'none';
+        }
 
         try {
             const response = await fetch('roll_dice_api.php', {
@@ -68,29 +75,84 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         const messageResponse = await fetch(`get_tile_message.php?location=${newLocation}`);
                         if (!messageResponse.ok) {
-                            throw new Error(`Błąd pobierania wiadomości: HTTP ${messageResponse.status}`);
+                            throw new Error(`Błąd pobierania wiadomości o polu: HTTP ${messageResponse.status}`);
                         }
+                        
                         const messageText = await messageResponse.text();
                         if (cardSlotText) {
                             cardSlotText.textContent = messageText;
                         }
+
+                        if (cardSlotChoose) {
+                            cardSlotChoose.style.display = 'block';
+                            cardSlotChoose.innerHTML = '<p>Ładowanie opcji akcji...</p>';
+
+                            try {
+                                const chooseResponse = await fetch(`get_tile_choose.php?location=${newLocation}`); 
+                                if (!chooseResponse.ok) {
+                                    throw new Error(`Błąd pobierania opcji akcji: HTTP ${chooseResponse.status}`);
+                                }
+                                const chooseHtml = await chooseResponse.text();
+                                
+                                cardSlotChoose.innerHTML = chooseHtml; 
+
+                                cardSlotChoose.querySelectorAll('.action-button').forEach(button => {
+                                    button.addEventListener('click', (event) => {
+                                        const actionType = event.target.dataset.actionType;
+                                        const targetPlayerId = event.target.dataset.targetPlayerId;
+
+                                        // Po wykonaniu akcji (lub wysłaniu AJAX), możesz schować/wyczyścić slot akcji
+                                        // Zależnie od logiki gry, możesz też ponownie włączyć przycisk "Rzuć kostką"
+                                        if (cardSlotChoose) {
+                                            cardSlotChoose.innerHTML = '';
+                                            cardSlotChoose.style.display = 'none';
+                                        }
+                                        rollDiceButton.disabled = false;
+                                    });
+                                });
+
+                            } catch (chooseError) {
+                                console.error("Błąd podczas pobierania lub przetwarzania opcji akcji:", chooseError);
+                                if (cardSlotChoose) {
+                                    cardSlotChoose.innerHTML = '<p style="color: red;">Błąd ładowania opcji akcji.</p>';
+                                    cardSlotChoose.style.display = 'block';
+                                }
+                            }
+                        } else {
+                            // Jeśli cardSlotChoose nie istnieje (co nie powinno się zdarzyć, ale dla bezpieczeństwa)
+                            console.warn("Element cardSlotChoose nie został znaleziony.");
+                        }
+
                     } catch (msgError) {
                         console.error("Błąd podczas pobierania wiadomości o polu:", msgError);
                         if (cardSlotText) {
                             cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
                         }
+                        if (cardSlotChoose) {
+                            cardSlotChoose.innerHTML = '';
+                            cardSlotChoose.style.display = 'none';
+                        }
                     }
-                }, 2000);
-                // --- KONIEC NOWEGO KODU ---
+                }, 2000); // Opóźnienie przed wyświetleniem wiadomości o polu
 
             } else {
                 wynikTekst.textContent = `Błąd: ${result.message}`;
+                if (cardSlotText) cardSlotText.textContent = result.message;
+                if (cardSlotChoose) {
+                    cardSlotChoose.innerHTML = '';
+                    cardSlotChoose.style.display = 'none';
+                }
             }
 
         } catch (error) {
             wynikTekst.textContent = `Błąd: ${error.message}`;
+            if (cardSlotText) cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            if (cardSlotChoose) {
+                cardSlotChoose.innerHTML = '';
+                cardSlotChoose.style.display = 'none';
+            }
         } finally {
-            rollDiceButton.disabled = false;
+            // rollDiceButton.disabled = false; // To jest przeniesione do obsługi akcji, aby gracz najpierw podjął decyzję
             setTimeout(() => {
                 rollDiceButton.textContent = 'Rzuć kostką';
             }, 500);
