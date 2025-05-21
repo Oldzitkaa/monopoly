@@ -220,7 +220,6 @@ p {
     letter-spacing: 1px;
     text-decoration: none;
 
-
     &:hover {
         background-color: c.$red2;
         box-shadow: 0px 0px 15px c.$mint;
@@ -680,7 +679,6 @@ p {
         padding: $spacing-md;
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: $border-radius-lg;
-        // max-height: 40vh;
         height: auto;
         overflow-y: auto;
         border: 1px solid rgba(c.$white1, 0.2);
@@ -936,7 +934,7 @@ p {
         flex-direction: column;
         gap: $spacing-sm;
         width: 100%;
-        align-items: center; /* <--- DODANA LINIA DLA WYŚRODKOWANIA PRZYCISKÓW */
+        align-items: center;
     }
     .start-button, .back-button, .next-button {
         width: 80%;
@@ -982,7 +980,6 @@ p {
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: $spacing-sm;
             padding: $spacing-sm;
-            // max-height: 50vh;
             height: auto;
         }
 
@@ -1000,8 +997,7 @@ p {
         .character-stats .character-stat {
              margin-bottom: $spacing-xs / 4;
              &:last-child { margin-bottom: 0; }
-         }
-
+           }
 
         .character-details-panel .character-preview { max-width: 100px; }
         #selectedCharacterName { font-size: 18px; }
@@ -1067,7 +1063,6 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: $spacing-md;
-            // max-height: 45vh;
             height: auto;
         }
         .character-image-container { height: 120px; }
@@ -1079,7 +1074,7 @@ p {
         .character-stats .character-stat {
              margin-bottom: $spacing-xs / 2;
              &:last-child { margin-bottom: 0; }
-         }
+           }
     }
 }
 
@@ -1142,7 +1137,6 @@ p {
         #characterCardsContainer {
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: $spacing-lg;
-            // max-height: 40vh;
             height: auto;
             padding: $spacing-lg;
         }
@@ -1155,7 +1149,7 @@ p {
         .character-stats .character-stat {
              margin-bottom: $spacing-xs;
              &:last-child { margin-bottom: 0; }
-         }
+           }
     }
 }
 input[type="range"] {
@@ -1307,20 +1301,38 @@ input[type="range"]:active::-ms-thumb {
 }
 
 .stat-bar-container {
-    background-color: #b46161; 
-    // background-color: #c38181; 
+    background-color: #b46161;
     height: 15px;
     width: 70%;
     display: inline-block;
     margin-right: 5px;
     vertical-align: middle;
     overflow: hidden;
-    border-radius: 5px; 
+    border-radius: 5px;
 }
+
+// === Zmodyfikowany styl dla przycisku Zatwierdź Wybór ===
+// To jest kluczowe, aby umieścić ten selektor ID PO selektorach klasowych,
+// aby zapewnić wyższą specyfikę.
+#confirmCharacterButton {
+    width: 300px; /* Zwiększona szerokość do 300px */
+    max-width: 90%; /* Zapewnia, że przycisk nie będzie szerszy niż 90% rodzica */
+    display: block !important; /* Wymusza wyświetlanie jako blok, co jest kluczowe dla width i margin:auto */
+    margin-left: auto; /* Wyśrodkowanie przycisku */
+    margin-right: auto; /* Wyśrodkowanie przycisku */
+    margin-top: 30px; /* Odstęp od góry */
+    padding: $spacing-md $spacing-xl; /* Zachowanie paddingu */
+    height: auto; /* Pozostawiamy wysokość dynamiczną */
+    border-radius: $border-radius-lg; /* Dopasuj border-radius, jeśli chcesz, np. do 15px */
+    font-size: 22px; /* Zwiększona czcionka */
+    box-sizing: border-box; /* Ważne, aby padding i border nie powiększały elementu poza zadaną szerokość */
+}
+
+// Dodatkowe style, które przesłałeś, dodaję na końcu.
 .stat-fill {
-    background-color: #a03a3a; 
+    background-color: #a03a3a;
     height: 100%;
-    border-radius: 5px; 
+    border-radius: 5px;
 }
 .stat-value {
     font-size: 0.9em;

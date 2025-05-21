@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku.");
@@ -178,4 +178,4 @@ function get_space_content($tile) {
             }, i * 500);
         }
     }
-</script>
+</script> -->

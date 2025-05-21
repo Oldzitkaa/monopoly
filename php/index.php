@@ -59,16 +59,16 @@ include_once './database_connect.php';
         <div class="player-setup-container">
             <div class="player-list" id="playerSetupList">
                 </div>
-            <div class="character-details-panel">
-                <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
-                <h3 id="selectedCharacterName">Wybierz postać</h3>
-                <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
-                <div class="character-stats-details"> 
-                    <table>
-        
-                    </table>
-                </div>
-             </div>
+           <div class="character-details-panel">
+    <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
+    <h3 id="selectedCharacterName">Wybierz postać</h3>
+    <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
+    <div class="character-stats-details">
+        <table>
+            </table>
+    </div>
+   <button id="confirmCharacterButton" class="next-button" style="width: 300px; margin-top: 10px;">Zatwierdź</button>
+</div>
         </div>
         <div class="character-carousel">
             <div id="characterCardsContainer" class="character-cards-container">
