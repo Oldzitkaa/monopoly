@@ -22,7 +22,7 @@ $sql_player = "SELECT
                 p.prep_time as prep_time,
                 p.tradition_affinity as tradition_affinity,
                 p.turn_order as turn_order,
-                p.is_turn as is_turn,
+                p.is_current_turn as is_turn,
                 p.turns_to_miss as turns_to_miss,
                 c.name as character_name
             FROM `players` p

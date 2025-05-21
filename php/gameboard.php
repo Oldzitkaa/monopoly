@@ -306,6 +306,17 @@ if ($currentPlayerId === null && !empty($player)) {
     <link rel="stylesheet" href="../css/gameboard_inner.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
+<?php
+    $colors = ['red', 'blue', 'green', 'yellow'];
+
+    echo '<style>';
+        for ($i = 1; $i <= 20; $i++) {
+            $color = $colors[($i - 1) % count($colors)];
+            echo ".player-token.player-$i { background-color: $color; }";
+        }
+        echo '</style>';
+
+?>
 </head>
 <body>
 <div class="game-wrapper">
@@ -410,12 +421,15 @@ if ($currentPlayerId === null && !empty($player)) {
     console.log('currentPlayerId ustawione dla JS:', currentPlayerId);
 
     const players = <?php echo json_encode($player); ?>;
+    console.log(players);
 
     // Funkcja do aktualizacji pozycji pionków
     function updatePlayerPawns() {
         // Usuń wszystkie istniejące pionki
         document.querySelectorAll('.player-token').forEach(pawn => pawn.remove());
 
+        colors = ['red', 'green', 'yellow', 'blue']
+        let playerIndex = 0
         // Przenieś pionki na ich aktualne pozycje
         players.forEach(player => {
             const pawn = document.createElement('div');
@@ -423,20 +437,7 @@ if ($currentPlayerId === null && !empty($player)) {
             pawn.classList.add(`player-${player.id_player}`);
             pawn.dataset.playerId = player.id_player;
             pawn.title = player.name_player;
-
-            // Dodaj kolor pionka na podstawie player_color
-            if (player.player_color) {
-                pawn.style.backgroundColor = player.player_color;
-                // Dodaj ramkę, jeśli tło jest jasne, aby pionek był widoczny
-                const hex = player.player_color.replace('#', '');
-                const r = parseInt(hex.substring(0, 2), 16);
-                const g = parseInt(hex.substring(2, 4), 16);
-                const b = parseInt(hex.substring(4, 6), 16);
-                const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-                if (brightness > 200) { // Próg jasności, możesz go dostosować
-                    pawn.style.border = '1px solid #333';
-                }
-            }
+            pawn.style.backgroundColor = colors[playerIndex];
 
             const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
             if (playerTile) {
@@ -444,6 +445,7 @@ if ($currentPlayerId === null && !empty($player)) {
             } else {
                 console.error(`Nie znaleziono kontenera .players-on-tile w polu space-${player.location_player} dla gracza ${player.name_player}`);
             }
+            playerIndex += 1
         });
     }
 
