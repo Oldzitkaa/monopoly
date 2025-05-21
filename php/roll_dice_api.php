@@ -6,8 +6,8 @@ $response = [
     'success' => false,
     'message' => 'Wystąpił nieznany błąd.',
     'roll_result' => null,
-    'new_location' => null, // Initialize new_location
-    'new_coins' => null // Initialize new_coins
+    'new_location' => null,
+    'new_coins' => null 
 ];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

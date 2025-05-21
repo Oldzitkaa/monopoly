@@ -396,8 +396,12 @@ if ($currentPlayerId === null && !empty($player)) {
         </div>
 
         <div class="card-slots-container">
-            <div class="card-slot">Karty Niespodzianki</div>
-            <div class="card-slot">Karty Wyzwania</div>
+            <div class="card-slot card-text">
+            <?php
+                // include_once './get_tile_message.php';
+            ?>
+            </div>
+            <div class="card-slot card-choose"></div>
         </div>
 
         <div class="game-controls-container">

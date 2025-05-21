@@ -75,7 +75,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
         <!-- Tabela wynikow -->
          <p class="win-player">Zwycięzcą zostaje &rarr; 
             <?php
-
+                
             ?>
          </p>
         <table class="player-result">

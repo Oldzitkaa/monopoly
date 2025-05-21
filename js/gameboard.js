@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('monopoly-board');
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
+    const cardSlotText = document.querySelector('.card-slot.card-text');
 
     if (!diceImage || !wynikTekst || !rollDiceButton || typeof gameId === 'undefined' || typeof currentPlayerId === 'undefined') {
         if (rollDiceButton) {
@@ -62,9 +63,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 movePlayerToken(playerId, newLocation);
                 updatePlayerDisplay(playerId, result.new_coins, newLocation);
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     wynikTekst.textContent = rollResult;
+                    try {
+                        const messageResponse = await fetch(`get_tile_message.php?location=${newLocation}`);
+                        if (!messageResponse.ok) {
+                            throw new Error(`Błąd pobierania wiadomości: HTTP ${messageResponse.status}`);
+                        }
+                        const messageText = await messageResponse.text();
+                        if (cardSlotText) {
+                            cardSlotText.textContent = messageText;
+                        }
+                    } catch (msgError) {
+                        console.error("Błąd podczas pobierania wiadomości o polu:", msgError);
+                        if (cardSlotText) {
+                            cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
+                        }
+                    }
                 }, 2000);
+                // --- KONIEC NOWEGO KODU ---
+
             } else {
                 wynikTekst.textContent = `Błąd: ${result.message}`;
             }
