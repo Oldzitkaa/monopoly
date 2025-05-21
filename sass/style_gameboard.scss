@@ -679,35 +679,33 @@ a {
     z-index: 1;
 }
 
-.pawn {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin: 2px;
-    border: 2px solid black;
+.players-on-tile {
     position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    z-index: 10;
 }
-
-.pawn1 { background-color: red; }
-.pawn2 { background-color: blue; }
-.pawn3 { background-color: green; }
-.pawn4 { background-color: yellow; }
 
 .player-token {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
-    margin: 2px;
-    display: inline-block;
-    border: 2px solid black;
-    transition: transform 0.6s ease-in-out;
-    position: absolute;
+    border: 3px solid #000;
+    z-index: 10;
 }
 
-.player-1 { background-color: red; }
-.player-2 { background-color: blue; }
-.player-3 { background-color: green; }
-.player-4 { background-color: yellow; }
+.player-token.player-1 {
+    background-color: red; }
+.player-token.player-2 {
+    background-color: blue; }
+.player-token.player-3 {
+    background-color: green; }
+.player-token.player-4 {
+    background-color: yellow; }
 
 @keyframes move-token {
     0% { transform: translate(0, 0); }
