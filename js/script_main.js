@@ -27,9 +27,9 @@ const TRANSITION_DURATION_SEC = 0.5;
 const TRANSITION_EASE = 'ease-in-out';
 const PLACEHOLDER_IMAGE_PATH = '../zdj/placeholder.png';
 
-// New global variable to store the currently previewed character
+
 let currentlyPreviewedCharacter = null;
-let confirmCharacterButton; // Declare the new button
+let confirmCharacterButton; 
 
 document.addEventListener('DOMContentLoaded', () => {
     step1Div = document.querySelector('.logo_div.step1');
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingIndicator = document.getElementById('loadingIndicator') || createLoadingIndicator();
     notificationArea = document.getElementById('notificationArea') || createNotificationArea();
 
-    // Initialize the new confirm button
+    
     confirmCharacterButton = document.getElementById('confirmCharacterButton');
     if (confirmCharacterButton) {
         confirmCharacterButton.addEventListener('click', confirmCharacterSelection);
@@ -227,7 +227,7 @@ function updateCharacterDetailsPanel(character) {
             const labelCell = row.insertCell();
             const valueCell = row.insertCell();
             labelCell.textContent = stat.label + ':';
-            labelCell.classList.add('name-tabel'); // Dodano klasę 'name-tabel' do pierwszej komórki
+            labelCell.classList.add('name-tabel'); 
 
             const statValue = typeof stat.value === 'number' ? stat.value : 0;
             const percentage = (statValue / maxStatValue) * 100;
@@ -244,7 +244,7 @@ function updateCharacterDetailsPanel(character) {
             statBarContainer.appendChild(statFill);
             valueCell.appendChild(statBarContainer);
             valueCell.appendChild(statValueSpan);
-            valueCell.classList.add('value-table'); // Dodano klasę 'value-table' do drugiej komórki
+            valueCell.classList.add('value-table'); 
         });
 
         if (character.special_ability_description) {
@@ -268,15 +268,15 @@ function updateCharacterDetailsPanel(character) {
         selectedCharacterDescription.textContent = 'Kliknij na postać, aby zobaczyć jej opis i statystyki.';
         characterStatsDetailsContainer.innerHTML = '';
     }
-    // Show/hide the confirm button based on whether a character is being previewed
+    
     if (confirmCharacterButton) {
         confirmCharacterButton.style.display = character ? 'block' : 'none';
-        confirmCharacterButton.disabled = !character; // Disable if no character is selected
+        confirmCharacterButton.disabled = !character; 
     }
 }
 function resetCharacterDetailsPanel() {
     updateCharacterDetailsPanel(null);
-    currentlyPreviewedCharacter = null; // Clear the previewed character
+    currentlyPreviewedCharacter = null; 
 }
 function updatePlayerListSummary() {
     if (!playerSetupList) {
@@ -402,7 +402,7 @@ function goBackToStepOne() {
 function goToNicknameStep() {
     if (!step2Div || !step3NickDiv) { console.error("Elementy kroków 2 lub 3a nie znaleziono!"); return; }
     numPlayers = parseInt(quantityInput.value);
-    // Enforce a maximum of 4 players for nickname input generation
+    
     numPlayers = Math.min(numPlayers, 4); 
 
     playerNicknames = new Array(numPlayers).fill('');
@@ -488,7 +488,7 @@ function goBackToNicknameStep() {
     playerCharacterSelections = new Array(numPlayers).fill(null);
     currentPlayerChoosingCharacter = 0;
     resetCharacterCardStates();
-    resetCharacterDetailsPanel(); // Resets the preview panel
+    resetCharacterDetailsPanel(); 
     animateTransition(step3CharactersDiv, step3NickDiv, '20%');
     currentStep = 3;
     if (characterCardsContainer) characterCardsContainer.scrollTop = 0;
@@ -499,41 +499,41 @@ function updateCharacterSelectionScreen() {
         console.error('Element nagłówka wyboru postaci (#characterSelectionHeader) nie znaleziono!');
         return;
     }
-    resetCharacterCardStates(); // Clears all selected/disabled states
-    currentlyPreviewedCharacter = null; // Clear any previously previewed character
-    resetCharacterDetailsPanel(); // Clear the details panel and hide the confirm button
+    resetCharacterCardStates(); 
+    currentlyPreviewedCharacter = null; 
+    resetCharacterDetailsPanel(); 
 
     if (currentPlayerChoosingCharacter < numPlayers) {
         const currentPlayerNick = playerNicknames[currentPlayerChoosingCharacter] || `Gracz ${currentPlayerChoosingCharacter + 1}`;
         characterSelectionHeader.textContent = `${currentPlayerNick}, wybierz postać:`;
 
         const selectedCharIdsByOthers = playerCharacterSelections
-            .filter((selection, index) => selection !== null && selection.characterId !== null) // Get all selected characters
+            .filter((selection, index) => selection !== null && selection.characterId !== null) 
             .map(selection => parseInt(selection.characterId));
 
         document.querySelectorAll('.character-card').forEach(card => {
             const cardId = parseInt(card.dataset.characterId);
             if (selectedCharIdsByOthers.includes(cardId)) {
-                card.classList.add('disabled'); // Disable if already chosen by anyone
+                card.classList.add('disabled'); 
             }
         });
 
-        // Highlight if the current player had previously selected a character (e.g., after going back)
+        
         const currentPlayersSelection = playerCharacterSelections[currentPlayerChoosingCharacter];
         if (currentPlayersSelection && currentPlayersSelection.characterId !== null) {
              const previouslySelectedCard = characterCardsContainer.querySelector(`.character-card[data-character-id="${currentPlayersSelection.characterId}"]`);
              if (previouslySelectedCard) {
-                 previouslySelectedCard.classList.add('selected'); // Keep it highlighted for the current player
+                 previouslySelectedCard.classList.add('selected'); 
              }
         }
 
     } else {
         characterSelectionHeader.textContent = 'Wszyscy gracze wybrali postacie!';
-        // Disable all character cards once all players have chosen
+        
         document.querySelectorAll('.character-card').forEach(card => {
             card.classList.add('disabled');
         });
-        // Hide the confirm button if all characters are chosen
+        
         if (confirmCharacterButton) {
             confirmCharacterButton.style.display = 'none';
         }
@@ -557,19 +557,19 @@ function handleCharacterCardClick(event) {
     const clickedCharacter = charactersData.find(char => char.id == characterId);
 
     if (clickedCharacter) {
-        // Remove 'selected' class from previously previewed card for the current player
+        
         if (currentlyPreviewedCharacter && currentlyPreviewedCharacter.id != characterId) {
             const previousCard = characterCardsContainer.querySelector(`.character-card[data-character-id="${currentlyPreviewedCharacter.id}"]`);
             if (previousCard) {
                 previousCard.classList.remove('selected');
             }
         }
-        // Add 'selected' class to the currently clicked card (for visual feedback)
+        
         card.classList.add('selected');
 
-        // Update the details panel with the clicked character's info
+        
         updateCharacterDetailsPanel(clickedCharacter);
-        currentlyPreviewedCharacter = clickedCharacter; // Store the character for later confirmation
+        currentlyPreviewedCharacter = clickedCharacter; 
 
     } else {
         console.error(`Dane postaci o ID ${characterId} nie znaleziono w charactersData po kliknięciu karty!`);
@@ -585,47 +585,47 @@ function confirmCharacterSelection() {
     const characterId = currentlyPreviewedCharacter.id;
     const characterName = currentlyPreviewedCharacter.name;
 
-    // Check if the character has already been selected by another player
+    
     const isAlreadySelected = playerCharacterSelections.some((selection, index) =>
         index !== currentPlayerChoosingCharacter && selection && selection.characterId == characterId
     );
 
     if (isAlreadySelected) {
         showInfoMessage('Ta postać została już wybrana przez innego gracza. Wybierz inną.');
-        // Remove 'selected' from the currently previewed card if it was just confirmed
+        
         const confirmedCard = characterCardsContainer.querySelector(`.character-card[data-character-id="${characterId}"]`);
         if (confirmedCard) {
              confirmedCard.classList.remove('selected');
         }
-        resetCharacterDetailsPanel(); // Clear the panel and hide the button
-        currentlyPreviewedCharacter = null; // Clear preview
-        updateCharacterSelectionScreen(); // Re-render to ensure disabled state is correct
+        resetCharacterDetailsPanel(); 
+        currentlyPreviewedCharacter = null; 
+        updateCharacterSelectionScreen(); 
         return;
     }
 
-    // Finalize the selection for the current player
+    
     playerCharacterSelections[currentPlayerChoosingCharacter] = {
         characterId: characterId,
         name: playerNicknames[currentPlayerChoosingCharacter],
         characterName: characterName
     };
 
-    // Mark the selected card as disabled for subsequent players
+    
     const selectedCardElement = characterCardsContainer.querySelector(`.character-card[data-character-id="${characterId}"]`);
     if (selectedCardElement) {
         selectedCardElement.classList.add('disabled');
-        selectedCardElement.classList.remove('selected'); // Remove selected class after confirmation
+        selectedCardElement.classList.remove('selected'); 
     }
 
-    currentlyPreviewedCharacter = null; // Clear the preview
-    resetCharacterDetailsPanel(); // Clear the details panel and hide the confirm button
+    currentlyPreviewedCharacter = null; 
+    resetCharacterDetailsPanel(); 
 
     currentPlayerChoosingCharacter++;
 
-    // Advance to the next player's selection
+    
     setTimeout(() => {
         updateCharacterSelectionScreen();
-    }, 100); // A small delay for visual feedback before updating for the next player
+    }, 100); 
 }
 
 

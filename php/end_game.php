@@ -69,10 +69,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
 </head>
 <body>
     <div class="logo-div">
-        <!-- <p class="step-title">MONOPOLY</p>  -->
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
-
-        <!-- Tabela wynikow -->
          <p class="win-player">Zwycięzcą zostaje &rarr; 
             <?php
 

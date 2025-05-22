@@ -263,7 +263,7 @@ p {
   color: #ba2f2d;
 }
 #startGameButton:hover {
-  background-color: rgb(146.3072625698, 235.6927374302, 194.217877095);
+  background-color: #92ecc2;
   box-shadow: 0 0 20px #67e4aa;
   transform: translateY(-2px);
 }
@@ -314,7 +314,8 @@ p {
 }
 .logo_div.step2 #quantity {
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   width: 100%;
   height: 10px;
   background: #fcf9de;
@@ -333,10 +334,11 @@ p {
   background: #9f161d;
   cursor: pointer;
   margin-top: -10px;
+  -webkit-transition: background-color 0.3s ease, transform 0.3s ease;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 .logo_div.step2 #quantity::-webkit-slider-thumb:hover {
-  background-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  background-color: #721015;
   transform: scale(1.1);
 }
 .logo_div.step2 #quantity::-moz-range-thumb {
@@ -346,10 +348,11 @@ p {
   background: #9f161d;
   cursor: pointer;
   border: none;
+  -moz-transition: background-color 0.3s ease;
   transition: background-color 0.3s ease;
 }
 .logo_div.step2 #quantity::-moz-range-thumb:hover {
-  background-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  background-color: #721015;
 }
 .logo_div.step2 #playerCount {
   font-size: 30px;
@@ -715,7 +718,8 @@ p {
 .logo_div.step3.characters .character-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .logo_div.step3.characters .character-info {
   padding: 10px;
@@ -903,7 +907,7 @@ p {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    align-items: center; /* <--- DODANA LINIA DLA WYŚRODKOWANIA PRZYCISKÓW */
+    align-items: center;
   }
   .start-button, .back-button, .next-button {
     width: 80%;
@@ -1170,7 +1174,8 @@ p {
 }
 input[type=range] {
   -webkit-appearance: none;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   width: 100%;
   height: 8px;
   background: transparent;
@@ -1199,6 +1204,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -webkit-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
@@ -1219,6 +1225,7 @@ input[type=range]::-moz-range-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -moz-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
@@ -1250,6 +1257,7 @@ input[type=range]::-ms-thumb {
   border: 2px solid #9f161d;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   cursor: grab;
+  -ms-transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   margin-top: 0;
 }
@@ -1259,30 +1267,30 @@ input[type=range]::-ms-tooltip {
 }
 
 input[type=range]:hover::-webkit-slider-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:hover::-moz-range-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:hover::-ms-thumb {
-  background: rgb(249.875, 244.75, 198.625);
+  background: #faf5c7;
 }
 
 input[type=range]:active::-webkit-slider-thumb {
   cursor: grabbing;
-  border-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  border-color: #721015;
 }
 
 input[type=range]:active::-moz-range-thumb {
   cursor: grabbing;
-  border-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  border-color: #721015;
 }
 
 input[type=range]:active::-ms-thumb {
   cursor: grabbing;
-  border-color: rgb(114.1988950276, 15.8011049724, 20.8287292818);
+  border-color: #721015;
 }
 
 .slider-container {
@@ -1329,6 +1337,20 @@ input[type=range]:active::-ms-thumb {
   border-radius: 5px;
 }
 
+#confirmCharacterButton {
+  width: 300px; /* Zwiększona szerokość do 300px */
+  max-width: 90%; /* Zapewnia, że przycisk nie będzie szerszy niż 90% rodzica */
+  display: block !important; /* Wymusza wyświetlanie jako blok, co jest kluczowe dla width i margin:auto */
+  margin-left: auto; /* Wyśrodkowanie przycisku */
+  margin-right: auto; /* Wyśrodkowanie przycisku */
+  margin-top: 30px; /* Odstęp od góry */
+  padding: 15px 30px; /* Zachowanie paddingu */
+  height: auto; /* Pozostawiamy wysokość dynamiczną */
+  border-radius: 15px; /* Dopasuj border-radius, jeśli chcesz, np. do 15px */
+  font-size: 22px; /* Zwiększona czcionka */
+  box-sizing: border-box; /* Ważne, aby padding i border nie powiększały elementu poza zadaną szerokość */
+}
+
 .stat-fill {
   background-color: #a03a3a;
   height: 100%;
@@ -1355,6 +1377,4 @@ input[type=range]:active::-ms-thumb {
 
 .value-table {
   width: 100%;
-}
-
-/*# sourceMappingURL=styl.css.map */
+}/*# sourceMappingURL=styl.css.map */

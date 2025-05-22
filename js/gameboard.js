@@ -2,9 +2,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const diceImage = document.getElementById('diceImage');
     const wynikTekst = document.getElementById('wynikTekst');
     const rollDiceButton = document.getElementById('rollDiceButton');
-    const gameBoard = document.getElementById('monopoly-board');
+    const gameBoard = document.getElementById('monopoly-board'); // Możesz usunąć, jeśli nie używasz
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
+
+    function translatePropertyType(type) {
+        switch (type) {
+            case 'restaurant':
+                return 'Restauracja';
+            case 'hotel':
+                return 'Hotel';
+            default:
+                return type;
+        }
+    }
+
+    function translateRegion(region) {
+        switch (region) {
+            case 'Azja':
+                return 'Azja';
+            case 'Afryka':
+                return 'Afryka';
+            case 'Australia':
+                return 'Australia';
+            case 'Amerykapln':
+                return 'Ameryka Północna';
+            case 'Amerykapld':
+                return 'Ameryka Południowa';
+            case 'Europa':
+                return 'Europa';
+            case 'Pojedynek':
+                return 'Pojedynek';
+            case 'Niespodzianka':
+                return 'Niespodzianka';
+            case 'Szkolenie':
+                return 'Szkolenie';
+            case 'Urlop':
+                return 'Urlop';
+            case 'regionenter': // Upewnij się, że to nazwa z bazy dla tego typu pola
+                return 'Wjazd do regionu';
+            case 'Specjalne': // Jeśli Twoje PHP zwraca już 'Specjalne'
+                return 'Specjalne';
+            default:
+                return region;
+        }
+    }
 
     if (!diceImage || !wynikTekst || !rollDiceButton || typeof gameId === 'undefined' || typeof currentPlayerId === 'undefined') {
         if (rollDiceButton) {
@@ -127,12 +169,41 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (propertiesTableContainer) {
                                 propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3>';
                                 if (Array.isArray(data.properties) && data.properties.length > 0) {
-                                    let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th></tr></thead><tbody>';
+                                    let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th><th>Upgrade</th></tr></thead><tbody>';
                                     data.properties.forEach(prop => {
+                                        let costRentDisplay = '';
+                                        if (prop.cost) {
+                                            costRentDisplay += `${prop.cost} zł`;
+                                        }
+                                        if (prop.calculated_rent) {
+                                            if (costRentDisplay) costRentDisplay += ' | ';
+                                            costRentDisplay += `${prop.calculated_rent} zł`;
+                                        }
+                                        if (prop.level !== undefined) {
+                                            costRentDisplay += ` (Poziom: ${prop.level})`;
+                                        }
+                                        if (prop.is_mortgaged) {
+                                            costRentDisplay += ` (Zastawiono)`;
+                                        }
+                                        if (!costRentDisplay) {
+                                            costRentDisplay = 'N/A';
+                                        }
+
+                                        let upgradeCostDisplay = 'B/D';
+                                        if (prop.level >= 5) {
+                                            upgradeCostDisplay = 'MAX. POZIOM';
+                                        } else if (prop.upgrade_cost !== null && prop.upgrade_cost !== undefined) {
+                                            upgradeCostDisplay = `${prop.upgrade_cost} zł`;
+                                        }
+
+                                        const translatedType = translatePropertyType(prop.type || '');
+                                        const translatedRegion = translateRegion(prop.region || '');
+
                                         tableHtml += `<tr>
                                             <td>${prop.name}</td>
-                                            <td>${prop.type || ''}${prop.group_name ? ` (${prop.group_name})` : ''}</td>
-                                            <td class="property-cost-rent">${prop.cost || prop.rent || 'N/A'}</td>
+                                            <td style="${prop.color ? 'border-left: 5px solid ' + prop.color + '; padding-left: 5px;' : ''}">${translatedType}<br>${translatedRegion}</td>
+                                            <td class="property-cost-rent">${costRentDisplay}</td>
+                                            <td class="property-upgrade-cost">${upgradeCostDisplay}</td>
                                         </tr>`;
                                     });
                                     tableHtml += '</tbody></table>';
@@ -157,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     } catch (error) {
+                        console.error('Error loading player details:', error);
                         if (propertiesTableContainer) propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3><p>Błąd ładowania nieruchomości.</p>';
                         if (skillsTableContainer) skillsTableContainer.innerHTML = '<h3>Umiejętności</h3><p>Błąd ładowania umiejętności.</p>';
                     }
@@ -192,12 +264,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     return data;
                 } else {
+                    console.error('API Error (loadPlayerDetails):', data.message);
                     return null;
                 }
             } else {
+                console.error('HTTP Error (loadPlayerDetails):', response.status, response.statusText);
                 return null;
             }
         } catch (error) {
+            console.error('Fetch Error (loadPlayerDetails):', error);
             return null;
         }
     }
@@ -216,20 +291,52 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (playerBox.classList.contains('active')) {
+                const propertiesTableContainer = playerBox.querySelector('.player-properties-table-container');
+                const skillsTableContainer = playerBox.querySelector('.player-skills-table-container');
+
+                if (propertiesTableContainer) propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3><p>Ładowanie...</p>';
+                if (skillsTableContainer) skillsTableContainer.innerHTML = '<h3>Umiejętności</h3><p>Ładowanie...</p>';
+
                 loadPlayerDetails(playerId).then(data => {
                     if (data) {
-                        const propertiesTableContainer = playerBox.querySelector('.player-properties-table-container');
-                        const skillsTableContainer = playerBox.querySelector('.player-skills-table-container');
-
                         if (propertiesTableContainer) {
                             propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3>';
                             if (Array.isArray(data.properties) && data.properties.length > 0) {
-                                let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th></tr></thead><tbody>';
+                                let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th><th>Upgrade</th></tr></thead><tbody>';
                                 data.properties.forEach(prop => {
+                                    let costRentDisplay = '';
+                                    if (prop.cost) {
+                                        costRentDisplay += `${prop.cost} zł`;
+                                    }
+                                    if (prop.calculated_rent) {
+                                        if (costRentDisplay) costRentDisplay += ' | ';
+                                        costRentDisplay += `${prop.calculated_rent} zł`;
+                                    }
+                                    if (prop.level !== undefined) {
+                                        costRentDisplay += ` (Poziom: ${prop.level})`;
+                                    }
+                                    if (prop.is_mortgaged) {
+                                        costRentDisplay += ` (Zastawiono)`;
+                                    }
+                                    if (!costRentDisplay) {
+                                        costRentDisplay = 'N/A';
+                                    }
+
+                                    let upgradeCostDisplay = 'B/D';
+                                    if (prop.level >= 5) {
+                                        upgradeCostDisplay = 'MAX. POZIOM';
+                                    } else if (prop.upgrade_cost !== null && prop.upgrade_cost !== undefined) {
+                                        upgradeCostDisplay = `${prop.upgrade_cost} zł`;
+                                    }
+
+                                    const translatedType = translatePropertyType(prop.type || '');
+                                    const translatedRegion = translateRegion(prop.region || '');
+
                                     tableHtml += `<tr>
                                         <td>${prop.name}</td>
-                                        <td>${prop.type || ''}${prop.group_name ? ` (${prop.group_name})` : ''}</td>
-                                        <td class="property-cost-rent">${prop.cost || prop.rent || 'N/A'}</td>
+                                        <td style="${prop.color ? 'border-left: 5px solid ' + prop.color + '; padding-left: 5px;' : ''}">${translatedType}<br>${translatedRegion}</td>
+                                        <td class="property-cost-rent">${costRentDisplay}</td>
+                                        <td class="property-upgrade-cost">${upgradeCostDisplay}</td>
                                     </tr>`;
                                 });
                                 tableHtml += '</tbody></table>';
@@ -252,7 +359,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             tableHtml += '</tbody></table>';
                             skillsTableContainer.innerHTML += tableHtml;
                         }
+                    } else {
+                         console.error('Failed to load player details during updatePlayerDisplay.');
                     }
+                }).catch(error => {
+                    console.error('Error during player details refresh in updatePlayerDisplay:', error);
                 });
             }
         }

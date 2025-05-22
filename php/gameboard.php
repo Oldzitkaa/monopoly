@@ -6,7 +6,7 @@ if (!isset($_SESSION['game_id'])) {
     exit();
 }
 $gameId = $_SESSION['game_id'];
-include_once './database_connect.php'; // Upewnij się, że ten plik prawidłowo łączy się z bazą danych i zwraca obiekt $mysqli
+include_once './database_connect.php'; 
 
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku database_connect.php: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.'));
@@ -14,7 +14,7 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 
 $mysqli->set_charset("utf8");
 
-// Zapytanie SQL do pobrania danych o polach planszy (zmodyfikowane dla nowego schematu, ale z myślą o starym wyglądzie)
+
 $sql = "SELECT
             t.id,
             t.name,
@@ -43,7 +43,7 @@ if ($stmt_tiles) {
         $result = $stmt_tiles->get_result();
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                // Map 'group_name' to 'region' for compatibility with get_space_classes and get_space_content
+                
                 $row['region'] = $row['group_name'];
                 $tiles[] = $row;
             }
@@ -62,7 +62,7 @@ if ($stmt_tiles) {
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla pól: " . $mysqli->error . "</p>";
 }
 
-// Zapytanie SQL do pobrania danych o graczach
+
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -111,7 +111,7 @@ if ($stmt_player) {
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
 }
 
-// Pobranie nieruchomości graczy
+
 $playerProperties = [];
 if (!empty($player)) {
     foreach ($player as $p) {
@@ -153,24 +153,24 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
 }
 
-// Zmodyfikowana funkcja get_space_classes aby odzwierciedlać stary wygląd
+
 function get_space_classes($tile) {
     $classes = ['tile'];
 
-    // Użyj 'group_name' z zapytania SQL (który jest aliasem dla 'region' w tej funkcji)
-    // Jeśli 'group_name' istnieje, użyj go do klas CSS
+    
+    
     if (!empty($tile['group_name'])) {
         $group_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['group_name']));
 
-        // Specjalne klasy dla restauracji z regionem
+        
         if ($tile['type'] === 'restaurant') {
             $classes[] = $group_class . '_restaurant';
         } else {
-            // Dla innych typów pól, które mają grupę
+            
             $classes[] = $group_class;
         }
     } else {
-        // Domyślna klasa na podstawie 'type' jeśli 'group_name' jest puste
+        
         $classes[] = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
     }
 
@@ -197,23 +197,23 @@ function get_space_classes($tile) {
     return implode(' ', $classes);
 }
 
-// Zmodyfikowana funkcja get_space_content aby odzwierciedlać stary wygląd
+
 function get_space_content($tile) {
     $content = '<div class="tile-name">';
-    // Użyj 'group_name' jako 'region' dla klasy 'tile-name-text'
+    
     $regionClass = !empty($tile['group_name']) ? strtolower(str_replace([' ', '/'], '_', $tile['group_name'])) : '';
     $content .= '<div class="tile-name-text tile-' . htmlspecialchars($tile['type']) . ' ' . $regionClass . '">' . htmlspecialchars($tile['name']) . '</div>';
     $content .= '</div>';
 
-    // Stara struktura board_inner.css ma div 'tile-tile' i 'tile-color-bar'
-    // Dodajemy styl inline z kolorem z bazy danych dla tile-tile
+    
+    
     $tile_tile_style = '';
     if (!empty($tile['group_color'])) {
         $tile_tile_style = ' style="background-color: ' . htmlspecialchars($tile['group_color']) . ';"';
     }
-    $content .= '<div class="tile-tile"' . $tile_tile_style . '></div>'; // ZMODYFIKOWANA LINIA
+    $content .= '<div class="tile-tile"' . $tile_tile_style . '></div>'; 
 
-    // Dodajemy styl inline z kolorem z bazy danych dla paska koloru
+    
     $color_bar_style = '';
     if (!empty($tile['group_color'])) {
         $color_bar_style = ' style="background-color: ' . htmlspecialchars($tile['group_color']) . ';"';
@@ -223,8 +223,8 @@ function get_space_content($tile) {
     return $content;
 }
 
-// Funkcja do generowania tabeli statystyk gracza (dla sidebara)
-// Ta funkcja będzie teraz nieużywana w sidebarze, ale zostawiam ją, jeśli jest używana gdzie indziej
+
+
 function generatePlayerStatsTable($playerData) {
     $html = '<div class="player-stats-table-container">';
     $html .= '<h3>Statystyki Gracza</h3>';
@@ -251,10 +251,10 @@ function generatePlayerStatsTable($playerData) {
     return $html;
 }
 
-// Funkcja do generowania tabeli nieruchomości (dla sidebara)
+
 function generatePlayerPropertiesTable($properties) {
     $html = '<div class="player-properties-table-container">';
-    $html .= '<h3>Nieruchomości</h3>'; // Added H3 for clarity
+    $html .= '<h3>Nieruchomości</h3>'; 
     if (!empty($properties)) {
         $html .= '<table class="player-properties-table">';
         $html .= '<thead>';
@@ -324,30 +324,30 @@ if ($currentPlayerId === null && !empty($player)) {
         <div class="monopoly-board" id="monopoly-board">
             <div class="board-center-placeholder">
                 <?php
-                // START: Zmodyfikowany blok dla wyświetlania statystyk graczy w centrum planszy
+                
                 if (!empty($player)) {
                     foreach ($player as $index => $p) {
-                        $playerClassNumber = $index + 1; // Generuje klasy player1, player2 itd.
+                        $playerClassNumber = $index + 1; 
                         echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
                         echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>";
-                        echo "Monety: " . htmlspecialchars($p['coins']). " zł <br>"; // Zmieniono "$" na "zł"
+                        echo "Monety: " . htmlspecialchars($p['coins']). " zł <br>"; 
                         echo "<table>";
                         echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']). "</td></tr>";
                         echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']). "</td></tr>";
                         echo "<tr><td>Czas przygotowania:</td><td>" . htmlspecialchars($p['prep_time']). "</td></tr>";
-                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']). "</td></tr>"; // Poprawiona nazwa
+                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']). "</td></tr>"; 
                         echo "<tr><td>Umiejętności gotowania:</td><td>" . htmlspecialchars($p['cook_skill']). "</td></tr>";
                         echo "<tr><td>Zmysł do przypraw:</td><td>" . htmlspecialchars($p['spice_sense']). "</td></tr>";
                         echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']). "</td></tr>";
                         echo "</table>";
-                        // USUNIĘTO: Element z menu hamburgerowym:
-                        // echo "<div class='handle-all handle" . htmlspecialchars($playerClassNumber) ."'><span> </span><span> </span><span> </span></div></div>";
-                        echo "</div>"; // Zamknięcie div.player-info
+                        
+                        
+                        echo "</div>"; 
                     }
                 } else {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
-                // END: Zmodyfikowany blok
+                
                 ?>
             </div>
             <?php
@@ -356,13 +356,13 @@ if ($currentPlayerId === null && !empty($player)) {
                 foreach ($tiles as $tile) {
                     $tile_counter++;
                     $style_attribute = '';
-                    // Obrazki dla pól specjalnych (nie restauracji) są ustawiane jako tło z 'file'
+                    
                     if (!empty($tile['file']) && $tile['type'] !== 'restaurant') {
                         $style_attribute = ' style="background-image: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\'); background-size: cover; background-position: center;"';
                     }
                     echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '"' . $style_attribute . '>';
                     echo get_space_content($tile);
-                    echo '<div class="players-on-tile"></div>'; // Kontener na pionki graczy
+                    echo '<div class="players-on-tile"></div>'; 
                     echo '</div>';
                 }
             } else {
@@ -377,17 +377,17 @@ if ($currentPlayerId === null && !empty($player)) {
             <?php
             if (!empty($player)) {
                 foreach ($player as $index => $p) {
-                    // Stara struktura sidebar player info box
+                    
                     echo "<div class='player-info-box' data-player-id='" . htmlspecialchars($p['id_player']) . "'>";
-                    // Kolor ramki nagłówka z koloru gracza
+                    
                     echo "<div class='player-header' style='border-color: " . htmlspecialchars($p['player_color']) . ";'>";
                     echo "<div class='name'>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</div>";
-                    echo "</div>"; // Close player-header
+                    echo "</div>"; 
                     echo "<div class='properties-and-skills-wrapper'>";
-                    // USUNIĘTO: generatePlayerStatsTable($p); // Usunięto wyświetlanie statystyk gracza tutaj
+                    
                     echo generatePlayerPropertiesTable(isset($playerProperties[$p['id_player']]) ? $playerProperties[$p['id_player']] : []);
-                    echo "</div>"; // close .properties-and-skills-wrapper
-                    echo "</div>"; // close .player-info-box
+                    echo "</div>"; 
+                    echo "</div>"; 
                 }
             } else {
                 echo "<div class='player-info-box'><div class='name'>Brak graczy</div></div>";
@@ -423,17 +423,17 @@ if ($currentPlayerId === null && !empty($player)) {
     const players = <?php echo json_encode($player); ?>;
     console.log(players);
 
-    // Funkcja do aktualizacji pozycji pionków
+    
     function updatePlayerPawns() {
-        // Usuń wszystkie istniejące pionki
+        
         document.querySelectorAll('.player-token').forEach(pawn => pawn.remove());
 
         colors = ['red', 'green', 'yellow', 'blue']
         let playerIndex = 0
-        // Przenieś pionki na ich aktualne pozycje
+        
         players.forEach(player => {
             const pawn = document.createElement('div');
-            pawn.classList.add('player-token'); // Zmieniono na 'player-token'
+            pawn.classList.add('player-token'); 
             pawn.classList.add(`player-${player.id_player}`);
             pawn.dataset.playerId = player.id_player;
             pawn.title = player.name_player;
@@ -449,7 +449,7 @@ if ($currentPlayerId === null && !empty($player)) {
         });
     }
 
-    // Wywołaj funkcję przy ładowaniu strony, aby umieścić pionki
+    
     document.addEventListener('DOMContentLoaded', updatePlayerPawns);
 </script>
 
