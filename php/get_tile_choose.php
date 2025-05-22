@@ -139,7 +139,7 @@ if (
     if (!empty($players_in_game)) {
         $output_html .= '<p>Wybierz rywala do pojedynku:</p>';
         foreach ($players_in_game as $player_data) {
-            $output_html .= '<button class="action-button duel-player-button" data-action-type="duel" data-target-player-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
+            $output_html .= '<button class="action-button duel-player-button" data-action-type="duel"' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
     } else {
         $output_html .= '<p>Brak innych graczy do pojedynku.</p>';
