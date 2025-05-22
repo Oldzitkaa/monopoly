@@ -78,14 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             throw new Error(`Błąd pobierania wiadomości o polu: HTTP ${messageResponse.status}`);
                         }
                         
-                        const messageText = await messageResponse.text();
+                        const messageHtml = await messageResponse.text();
+                        
                         if (cardSlotText) {
-                            cardSlotText.textContent = messageText;
+                            cardSlotText.innerHTML = messageHtml;
+                            cardSlotText.style.display = 'block';
                         }
 
-                        if (cardSlotChoose) {
+                        if (cardSlotChoose) { 
+                            cardSlotChoose.innerHTML = '<p>Ładowanie opcji akcji...</p>'; 
                             cardSlotChoose.style.display = 'block';
-                            cardSlotChoose.innerHTML = '<p>Ładowanie opcji akcji...</p>';
 
                             try {
                                 const chooseResponse = await fetch(`get_tile_choose.php?location=${newLocation}`); 
@@ -94,12 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                                 const chooseHtml = await chooseResponse.text();
                                 
-                                cardSlotChoose.innerHTML = chooseHtml; 
-
+                                cardSlotChoose.innerHTML = chooseHtml;
+                                
                                 cardSlotChoose.querySelectorAll('.action-button').forEach(button => {
                                     button.addEventListener('click', (event) => {
                                         const actionType = event.target.dataset.actionType;
                                         const targetPlayerId = event.target.dataset.targetPlayerId;
+
 
                                         if (cardSlotChoose) {
                                             cardSlotChoose.innerHTML = '';
@@ -115,10 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     cardSlotChoose.innerHTML = '<p style="color: red;">Błąd ładowania opcji akcji.</p>';
                                     cardSlotChoose.style.display = 'block';
                                 }
+                                rollDiceButton.disabled = false;
                             }
                         } else {
-                            // Jeśli cardSlotChoose nie istnieje (co nie powinno się zdarzyć, ale dla bezpieczeństwa)
                             console.warn("Element cardSlotChoose nie został znaleziony.");
+                            rollDiceButton.disabled = false;
                         }
 
                     } catch (msgError) {
@@ -130,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             cardSlotChoose.innerHTML = '';
                             cardSlotChoose.style.display = 'none';
                         }
+                        rollDiceButton.disabled = false;
                     }
                 }, 2000);
 

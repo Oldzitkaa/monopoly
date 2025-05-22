@@ -9,7 +9,7 @@ if (!isset($_SESSION['game_id'])) {
 }
 $gameId = $_SESSION['game_id'];
 // $current_player_id = $_SESSION['player_id'];
-$current_player_id = 1;
+$current_player_id = 33;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 
 include_once './database_connect.php';
@@ -17,10 +17,9 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
     echo "<p style='color: red;'>Błąd połączenia z bazą danych: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.') . "</p>";
     exit();
 }
-
 $mysqli->set_charset("utf8");
 
-
+// gracze
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -63,6 +62,7 @@ if ($stmt_player) {
     $stmt_player->close();
 }
 
+// pola
 $sql_tiles_all = "SELECT
             t.id,
             t.name,
@@ -176,12 +176,16 @@ if (
     // urlop
     $output_html .= '<button class="action-button accept">Super</button>';
 
-} elseif (
-    $location === 0 || $location === 7 || $location === 15 || 
-    $location === 22 || $location === 29 || $location === 37 
+} elseif ($location === 0 ){
+    $output_html .= '<button class="action-button accept">Super</button>';
+} elseif ($location === 22 ){
+    $output_html .= '<button class="action-button accept">Ooo super</button>';
+}elseif (
+    $location === 7 || $location === 15 || 
+    $location === 29 || $location === 37 
 ) {
     // WEJŚĆ DO KONTYNENTÓW
-    $output_html .= '<button class="action-button accept">Super</button>';
+    $output_html .= '<button class="action-button accept">Płacę</button>';
 }
 
 echo $output_html;
