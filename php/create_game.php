@@ -279,10 +279,15 @@ try {
         $response['gameId'] = $gameId;
         $response['players'] = $playerIds;
 
+        // --- WAŻNA ZMIANA TUTAJ ---
+        // Upewnij się, że sesja jest uruchomiona ZANIM ustawisz zmienne sesji
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         $_SESSION['game_id'] = $gameId;
+        // DODANA LINIA: Ustawiamy ID gracza w sesji, aby gameboard.php wiedział, który gracz ogląda
+        $_SESSION['player_id'] = $firstPlayerId; 
+        // --- KONIEC ZMIANY ---
 
     } catch (Exception $e) {
         $mysqli->rollback();

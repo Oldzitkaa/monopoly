@@ -1,25 +1,22 @@
 <?php
 session_start();
-
+header('Content-Type: text/html; charset=utf-8');
 if (!isset($_SESSION['game_id'])) {
     header("Location: index.php");
     exit();
 }
 $gameId = $_SESSION['game_id'];
 include_once './database_connect.php'; // Upewnij się, że ten plik prawidłowo łączy się z bazą danych i zwraca obiekt $mysqli
-
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku database_connect.php: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.'));
 }
-
 $mysqli->set_charset("utf8");
-
 // Zapytanie SQL do pobrania danych o polach planszy (zmodyfikowane dla nowego schematu, ale z myślą o starym wyglądzie)
 $sql = "SELECT
             t.id,
             t.name,
             t.type,
-            tg.name AS group_name, 
+            tg.name AS group_name,
             tg.color_code AS group_color,
             t.cost,
             t.base_rent,
@@ -33,17 +30,14 @@ $sql = "SELECT
         LEFT JOIN `tile_groups` tg ON t.group_id = tg.id
         LEFT JOIN `game_tiles` gt ON t.id = gt.tile_id AND gt.game_id = ?
         ORDER BY t.id";
-
 $stmt_tiles = $mysqli->prepare($sql);
 $tiles = [];
-
 if ($stmt_tiles) {
     $stmt_tiles->bind_param('i', $gameId);
     if ($stmt_tiles->execute()) {
         $result = $stmt_tiles->get_result();
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
-                
                 $row['region'] = $row['group_name'];
                 $tiles[] = $row;
             }
@@ -61,7 +55,6 @@ if ($stmt_tiles) {
     error_log("Błąd przygotowania zapytania SQL dla pól (gry ID: " . $gameId . "): " . $mysqli->error);
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla pól: " . $mysqli->error . "</p>";
 }
-
 // Zapytanie SQL do pobrania danych o graczach
 $sql_player = "SELECT
                 p.id as id_player,
@@ -87,7 +80,6 @@ $sql_player = "SELECT
             ORDER BY p.turn_order ASC";
 $stmt_player = $mysqli->prepare($sql_player);
 $player = [];
-
 if ($stmt_player) {
     $stmt_player->bind_param('i', $gameId);
     if ($stmt_player->execute()) {
@@ -110,8 +102,6 @@ if ($stmt_player) {
     error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
 }
-
-
 $playerProperties = [];
 if (!empty($player)) {
     foreach ($player as $p) {
@@ -148,32 +138,49 @@ if (!empty($player)) {
         }
     }
 }
-
+// --- NEW CODE STARTS HERE ---
+$initialCurrentTurnPlayerId = null;
+if (isset($_SESSION['player_id'])) { // Assuming the *viewer's* player ID is in session
+    $viewerPlayerId = (int)$_SESSION['player_id'];
+} else {
+    $viewerPlayerId = 0; // Fallback or handle appropriately if no player is logged in
+    error_log("Błąd: ID gracza przeglądającego stronę nie znaleziono w sesji.");
+}
+// Fetch the current_player_id from the 'games' table
+// This represents whose turn it *is* in the game, not necessarily the viewer
+$sql_current_turn = "SELECT current_player_id FROM games WHERE id = ? LIMIT 1";
+$stmt_current_turn = $mysqli->prepare($sql_current_turn);
+if ($stmt_current_turn) {
+    $stmt_current_turn->bind_param('i', $gameId);
+    $stmt_current_turn->execute();
+    $result_current_turn = $stmt_current_turn->get_result();
+    if ($row_current_turn = $result_current_turn->fetch_assoc()) {
+        $initialCurrentTurnPlayerId = (int)$row_current_turn['current_player_id'];
+    }
+    $stmt_current_turn->close();
+} else {
+    error_log("Błąd przygotowania zapytania SQL dla current_player_id: " . $mysqli->error);
+}
+// If for some reason initialCurrentTurnPlayerId is not found (e.g., game not properly initialized),
+// you might want a fallback. For now, we'll keep it null if not found from DB.
+// You might also want to set it to $viewerPlayerId if it's a new game and that's the first player.
+// For now, it's correct to reflect the DB state.
+// --- NEW CODE ENDS HERE ---
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
 }
-
-
 function get_space_classes($tile) {
     $classes = ['tile'];
-
-    
-    
     if (!empty($tile['group_name'])) {
         $group_class = strtolower(str_replace([' ', '_', '/'], '_', $tile['group_name']));
-
-        
         if ($tile['type'] === 'restaurant') {
             $classes[] = $group_class . '_restaurant';
         } else {
-            
             $classes[] = $group_class;
         }
     } else {
-        
         $classes[] = strtolower(str_replace([' ', '_', '/'], '_', $tile['type']));
     }
-
     $id = $tile['id'];
     if (in_array($id,[0,10,20,30])){
         $classes[] ='corner';
@@ -190,41 +197,28 @@ function get_space_classes($tile) {
     elseif ($id >= 31 && $id <= 39) {
         $classes[] = 'right-edge';
     }
-
     if (!empty($tile['file'])) {
         $classes[] = 'has-tile-image';
     }
     return implode(' ', $classes);
 }
-
-
 function get_space_content($tile) {
     $content = '<div class="tile-name">';
-    
     $regionClass = !empty($tile['group_name']) ? strtolower(str_replace([' ', '/'], '_', $tile['group_name'])) : '';
     $content .= '<div class="tile-name-text tile-' . htmlspecialchars($tile['type']) . ' ' . $regionClass . '">' . htmlspecialchars($tile['name']) . '</div>';
     $content .= '</div>';
-
-    
-    
     $tile_tile_style = '';
     if (!empty($tile['group_color'])) {
         $tile_tile_style = ' style="background-color: ' . htmlspecialchars($tile['group_color']) . ';"';
     }
-    $content .= '<div class="tile-tile"' . $tile_tile_style . '></div>'; 
-
-    
+    $content .= '<div class="tile-tile"' . $tile_tile_style . '></div>';
     $color_bar_style = '';
     if (!empty($tile['group_color'])) {
         $color_bar_style = ' style="background-color: ' . htmlspecialchars($tile['group_color']) . ';"';
     }
     $content .= '<div class="tile-color-bar"' . $color_bar_style . '></div>';
-
     return $content;
 }
-
-
-
 function generatePlayerStatsTable($playerData) {
     $html = '<div class="player-stats-table-container">';
     $html .= '<h3>Statystyki Gracza</h3>';
@@ -243,18 +237,16 @@ function generatePlayerStatsTable($playerData) {
     $html .= '<tr><td>Czas Przygotowania</td><td class="numeric">' . htmlspecialchars($playerData['prep_time']) . '</td></tr>';
     $html .= '<tr><td>Tradycyjne Powiązania</td><td class="numeric">' . htmlspecialchars($playerData['tradition_affinity']) . '</td></tr>';
     $html .= '<tr><td>Kolejka (Tura)</td><td>' . htmlspecialchars($playerData['turn_order']) . '</td></tr>';
-    $html .= '<tr><td>Tura Aktywna</td><td class="boolean" data-value="' . (isset($playerData['is_current_turn']) && $playerData['is_current_turn'] ? 'true' : 'false') . '">' . (isset($playerData['is_current_turn']) && $player['is_current_turn'] ? 'TAK' : 'NIE') . '</td></tr>';
+    $html .= '<tr><td>Tura Aktywna</td><td class="boolean" data-value="' . (isset($playerData['is_current_turn']) && $playerData['is_current_turn'] ? 'true' : 'false') . '">' . (isset($playerData['is_current_turn']) && $playerData['is_current_turn'] ? 'TAK' : 'NIE') . '</td></tr>'; // Corrected variable name here
     $html .= '<tr><td>Tury do pominięcia</td><td class="numeric">' . htmlspecialchars($playerData['turns_to_miss']) . '</td></tr>';
     $html .= '</tbody>';
     $html .= '</table>';
     $html .= '</div>';
     return $html;
 }
-
-
 function generatePlayerPropertiesTable($properties) {
     $html = '<div class="player-properties-table-container">';
-    $html .= '<h3>Nieruchomości</h3>'; 
+    $html .= '<h3>Nieruchomości</h3>';
     if (!empty($properties)) {
         $html .= '<table class="player-properties-table">';
         $html .= '<thead>';
@@ -280,20 +272,9 @@ function generatePlayerPropertiesTable($properties) {
     $html .= '</div>';
     return $html;
 }
-
-
-$currentPlayerId = null;
-if (!empty($player)) {
-    foreach ($player as $p) {
-        if (isset($p['is_current_turn']) && $p['is_current_turn'] == 1) {
-            $currentPlayerId = $p['id_player'];
-            break;
-        }
-    }
-}
-if ($currentPlayerId === null && !empty($player)) {
-    error_log("Błąd: Nie znaleziono gracza, którego jest tura dla gry ID: " . $gameId);
-}
+// Removed the old $currentPlayerId loop as it's now fetched directly from the 'games' table
+// The $currentPlayerId in JS will be the *viewer's* ID (from session), not necessarily the current turn player.
+// The new $initialCurrentTurnPlayerId will be the one from the 'games' table.
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -308,14 +289,12 @@ if ($currentPlayerId === null && !empty($player)) {
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 <?php
     $colors = ['red', 'blue', 'green', 'yellow'];
-
     echo '<style>';
         for ($i = 1; $i <= 20; $i++) {
             $color = $colors[($i - 1) % count($colors)];
             echo ".player-token.player-$i { background-color: $color; }";
         }
         echo '</style>';
-
 ?>
 </head>
 <body>
@@ -324,30 +303,26 @@ if ($currentPlayerId === null && !empty($player)) {
         <div class="monopoly-board" id="monopoly-board">
             <div class="board-center-placeholder">
                 <?php
-                
                 if (!empty($player)) {
                     foreach ($player as $index => $p) {
-                        $playerClassNumber = $index + 1; 
+                        $playerClassNumber = $index + 1;
                         echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
                         echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>";
-                        echo "Monety: " . htmlspecialchars($p['coins']). " zł <br>"; 
+                        echo "Monety: " . htmlspecialchars($p['coins']). " zł <br>";
                         echo "<table>";
                         echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']). "</td></tr>";
                         echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']). "</td></tr>";
                         echo "<tr><td>Czas przygotowania:</td><td>" . htmlspecialchars($p['prep_time']). "</td></tr>";
-                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']). "</td></tr>"; 
+                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']). "</td></tr>";
                         echo "<tr><td>Umiejętności gotowania:</td><td>" . htmlspecialchars($p['cook_skill']). "</td></tr>";
                         echo "<tr><td>Zmysł do przypraw:</td><td>" . htmlspecialchars($p['spice_sense']). "</td></tr>";
                         echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']). "</td></tr>";
                         echo "</table>";
-                        
-                        
-                        echo "</div>"; 
+                        echo "</div>";
                     }
                 } else {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
-                
                 ?>
             </div>
             <?php
@@ -356,13 +331,12 @@ if ($currentPlayerId === null && !empty($player)) {
                 foreach ($tiles as $tile) {
                     $tile_counter++;
                     $style_attribute = '';
-                    
                     if (!empty($tile['file']) && $tile['type'] !== 'restaurant') {
                         $style_attribute = ' style="background-image: url(\'../zdj/pola/' . htmlspecialchars($tile['file']) . '\'); background-size: cover; background-position: center;"';
                     }
                     echo '<div class="' . get_space_classes($tile) . '" id="space-' . $tile['id'] . '"' . $style_attribute . '>';
                     echo get_space_content($tile);
-                    echo '<div class="players-on-tile"></div>'; 
+                    echo '<div class="players-on-tile"></div>';
                     echo '</div>';
                 }
             } else {
@@ -371,39 +345,32 @@ if ($currentPlayerId === null && !empty($player)) {
             ?>
         </div>
     </div>
-
     <div class="game-sidebar">
         <div class="player-info-container" id="playerInfoContainer">
             <?php
             if (!empty($player)) {
                 foreach ($player as $index => $p) {
-                    
                     echo "<div class='player-info-box' data-player-id='" . htmlspecialchars($p['id_player']) . "'>";
-                    
                     echo "<div class='player-header' style='border-color: " . htmlspecialchars($p['player_color']) . ";'>";
                     echo "<div class='name'>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</div>";
-                    echo "</div>"; 
+                    echo "</div>";
                     echo "<div class='properties-and-skills-wrapper'>";
-                    
                     echo generatePlayerPropertiesTable(isset($playerProperties[$p['id_player']]) ? $playerProperties[$p['id_player']] : []);
-                    echo "</div>"; 
-                    echo "</div>"; 
+                    echo "</div>";
+                    echo "</div>";
                 }
             } else {
                 echo "<div class='player-info-box'><div class='name'>Brak graczy</div></div>";
             }
             ?>
         </div>
-
         <div class="card-slots-container">
             <div class="card-slot card-text">
             <?php
-               
             ?>
             </div>
             <div class="card-slot card-choose"></div>
         </div>
-
         <div class="game-controls-container">
             <div class="dice-section">
                 <p class="roll-result-text">Wyrzucono: <strong id="wynikTekst">-</strong></p>
@@ -411,38 +378,32 @@ if ($currentPlayerId === null && !empty($player)) {
                 <button id="rollDiceButton" class="roll-dice-button">Rzuć kostką</button>
             </div>
         </div>
-
         <div class="end-game-div">
             <a href="./end_game.php"><button class="btn-end-game">Zakończ gre</button></a>
         </div>
     </div>
 </div>
-
 <script>
+    // Assuming $_SESSION['player_id'] holds the ID of the player viewing this page
+    let currentPlayerId = <?= json_encode($viewerPlayerId); ?>; // ZMIENIONO Z 'const' NA 'let'
     const gameId = <?= json_encode($gameId); ?>;
-    const currentPlayerId = <?= json_encode($currentPlayerId); ?>;
+    const initialCurrentTurnPlayerId = <?= json_encode($initialCurrentTurnPlayerId); ?>; // THIS IS THE NEW LINE
     console.log('gameId ustawione dla JS:', gameId);
-    console.log('currentPlayerId ustawione dla JS:', currentPlayerId);
-
+    console.log('currentPlayerId (viewer) ustawione dla JS:', currentPlayerId);
+    console.log('initialCurrentTurnPlayerId (current turn) ustawione dla JS:', initialCurrentTurnPlayerId);
     const players = <?php echo json_encode($player); ?>;
     console.log(players);
-
-    
     function updatePlayerPawns() {
-        
         document.querySelectorAll('.player-token').forEach(pawn => pawn.remove());
-
         colors = ['red', 'green', 'yellow', 'blue']
         let playerIndex = 0
-        
         players.forEach(player => {
             const pawn = document.createElement('div');
-            pawn.classList.add('player-token'); 
+            pawn.classList.add('player-token');
             pawn.classList.add(`player-${player.id_player}`);
             pawn.dataset.playerId = player.id_player;
             pawn.title = player.name_player;
             pawn.style.backgroundColor = colors[playerIndex];
-
             const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
             if (playerTile) {
                 playerTile.appendChild(pawn);
@@ -452,13 +413,9 @@ if ($currentPlayerId === null && !empty($player)) {
             playerIndex += 1
         });
     }
-
-    
     document.addEventListener('DOMContentLoaded', updatePlayerPawns);
 </script>
-
 <script src="../js/gameboard.js"> </script>
 <script src="../js/gameboard_inner.js"></script>
-
 </body>
 </html>

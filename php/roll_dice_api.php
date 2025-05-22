@@ -7,7 +7,9 @@ $response = [
     'message' => 'Wystąpił nieznany błąd.',
     'roll_result' => null,
     'new_location' => null,
-    'new_coins' => null 
+    'new_coins' => null,
+    'current_player_id' => null,
+    'turn_info' => null
 ];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -30,23 +32,115 @@ if (empty($data) || !isset($data['game_id']) || !isset($data['player_id'])) {
 $gameId = (int) $data['game_id'];
 $playerId = (int) $data['player_id'];
 
-// Generate the dice roll result
-$rollResult = rand(1, 6);
-// You might roll two dice in Monopoly, so you'd do:
-// $rollResult = rand(1, 6) + rand(1, 6);
-// The current code rolls one die, assigns it, then rolls another and assigns it again.
-// Let's assume you want a single roll for now, or adjust if you need two dice.
-// For a single die:
-$rollResult = rand(1, 6); // Keep only one of these lines if it's a single die game
+// Start transaction
+$mysqli->begin_transaction();
 
-$response['roll_result'] = $rollResult;
+try {
+    // Get current turn number from games table
+    $sql_get_turn = "SELECT current_turn FROM games WHERE id = ? LIMIT 1";
+    $stmt_get_turn = $mysqli->prepare($sql_get_turn);
+    if (!$stmt_get_turn) {
+        throw new Exception("Błąd przygotowania zapytania pobierania numeru tury: " . $mysqli->error);
+    }
+    $stmt_get_turn->bind_param('i', $gameId);
+    $stmt_get_turn->execute();
+    $result_turn = $stmt_get_turn->get_result();
+    $turn_row = $result_turn->fetch_assoc();
+    $stmt_get_turn->close();
 
-// --- Fetch current player location and coins ---
-// Prepare statement for security
-$sql_get_pos_coins = "SELECT location, coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
-$stmt_get_pos_coins = $mysqli->prepare($sql_get_pos_coins);
+    if (!$turn_row) {
+        throw new Exception("Nie znaleziono gry o podanym ID.");
+    }
+    $currentTurnNumber = (int)$turn_row['current_turn'];
 
-if ($stmt_get_pos_coins) {
+    // POPRAWKA 1: Sprawdź czy istnieje kolejka dla bieżącej tury, jeśli nie - utwórz ją
+    $sql_check_queue_exists = "SELECT COUNT(*) as queue_count FROM turn_queue WHERE game_id = ? AND turn_number = ?";
+    $stmt_check_queue = $mysqli->prepare($sql_check_queue_exists);
+    if (!$stmt_check_queue) {
+        throw new Exception("Błąd przygotowania zapytania sprawdzania kolejki: " . $mysqli->error);
+    }
+    $stmt_check_queue->bind_param('ii', $gameId, $currentTurnNumber);
+    $stmt_check_queue->execute();
+    $result_check_queue = $stmt_check_queue->get_result();
+    $queue_row = $result_check_queue->fetch_assoc();
+    $stmt_check_queue->close();
+
+    if ($queue_row['queue_count'] == 0) {
+        // Brak kolejki dla bieżącej tury - utwórz ją
+        $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
+        $stmt_get_players = $mysqli->prepare($sql_get_players);
+        if (!$stmt_get_players) {
+            throw new Exception("Błąd przygotowania zapytania o graczy: " . $mysqli->error);
+        }
+        $stmt_get_players->bind_param('i', $gameId);
+        $stmt_get_players->execute();
+        $result_get_players = $stmt_get_players->get_result();
+        
+        $players = [];
+        while ($player_row = $result_get_players->fetch_assoc()) {
+            $players[] = $player_row;
+        }
+        $stmt_get_players->close();
+        
+        if (!empty($players)) {
+            $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
+            $stmt_create_queue = $mysqli->prepare($sql_create_queue);
+            if (!$stmt_create_queue) {
+                throw new Exception("Błąd przygotowania zapytania tworzenia kolejki: " . $mysqli->error);
+            }
+            
+            $queuePosition = 1;
+            foreach ($players as $player) {
+                $stmt_create_queue->bind_param('iiii', $gameId, $player['id'], $currentTurnNumber, $queuePosition);
+                $stmt_create_queue->execute();
+                $queuePosition++;
+            }
+            $stmt_create_queue->close();
+        }
+    }
+
+    // POPRAWKA 2: Dodaj sprawdzenie czy wpis gracza istnieje w turn_queue
+    $sql_ensure_player_in_queue = "INSERT IGNORE INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) 
+                                   SELECT ?, ?, ?, 
+                                          COALESCE((SELECT MAX(queue_position) FROM turn_queue tq WHERE tq.game_id = ? AND tq.turn_number = ?), 0) + 1,
+                                          0, 0 
+                                   WHERE NOT EXISTS (SELECT 1 FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ?)";
+    $stmt_ensure_player = $mysqli->prepare($sql_ensure_player_in_queue);
+    if (!$stmt_ensure_player) {
+        throw new Exception("Błąd przygotowania zapytania dodawania gracza do kolejki: " . $mysqli->error);
+    }
+    $stmt_ensure_player->bind_param('iiiiiiii', $gameId, $playerId, $currentTurnNumber, $gameId, $currentTurnNumber, $gameId, $playerId, $currentTurnNumber);
+    $stmt_ensure_player->execute();
+    $stmt_ensure_player->close();
+
+    // Check if the player has already played in this turn
+    $sql_check_played = "SELECT has_played FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ? LIMIT 1";
+    $stmt_check_played = $mysqli->prepare($sql_check_played);
+    if (!$stmt_check_played) {
+        throw new Exception("Błąd przygotowania zapytania sprawdzania czy gracz już grał: " . $mysqli->error);
+    }
+    $stmt_check_played->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
+    $stmt_check_played->execute();
+    $result_check_played = $stmt_check_played->get_result();
+    $check_row = $result_check_played->fetch_assoc();
+    $stmt_check_played->close();
+
+    if ($check_row && $check_row['has_played'] == 1) {
+        throw new Exception("Ten gracz już wykonał swój ruch w tej turze.");
+    }
+
+    // Generate the dice roll result
+    $rollResult = rand(1, 6);
+    $response['roll_result'] = $rollResult;
+
+    // --- Fetch current player location and coins ---
+    $sql_get_pos_coins = "SELECT location, coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
+    $stmt_get_pos_coins = $mysqli->prepare($sql_get_pos_coins);
+
+    if (!$stmt_get_pos_coins) {
+        throw new Exception("Błąd przygotowania zapytania o pobranie pozycji: " . $mysqli->error);
+    }
+
     $stmt_get_pos_coins->bind_param('ii', $playerId, $gameId);
     $stmt_get_pos_coins->execute();
     $result_get_pos_coins = $stmt_get_pos_coins->get_result();
@@ -54,82 +148,186 @@ if ($stmt_get_pos_coins) {
     if ($result_get_pos_coins && $result_get_pos_coins->num_rows === 1) {
         $row = $result_get_pos_coins->fetch_assoc();
         $currentLocation = (int)$row['location'];
-        // $currentCoins = (int)$row['coins']; // You have current coins here if needed for transactions
+        $currentCoins = (int)$row['coins'];
 
-        // Calculate new location (using % 40 for a standard 40-space board)
-        $newLocation = ($currentLocation + $rollResult) % 40; // Corrected modulo
+        // Calculate new location
+        $newLocation = ($currentLocation + $rollResult);
+        $boardSize = 40;
+        if ($newLocation >= $boardSize) {
+            $newLocation = $newLocation % $boardSize;
+            // Optional: Pass Go bonus
+            // $currentCoins += 200;
+        }
 
         // --- Update player's location in the database ---
-        // Prepare statement for security
-        $sql_update_location = "UPDATE players SET location = ? WHERE id = ? AND game_id = ?";
+        $sql_update_location = "UPDATE players SET location = ?, coins = ? WHERE id = ? AND game_id = ?";
         $stmt_update_location = $mysqli->prepare($sql_update_location);
 
-        if ($stmt_update_location) {
-            $stmt_update_location->bind_param('iii', $newLocation, $playerId, $gameId);
-            $stmt_update_location->execute();
-            // Check if update was successful (optional but good practice)
-            // if ($stmt_update_location->affected_rows > 0) { ... }
+        if (!$stmt_update_location) {
+            throw new Exception("Błąd przygotowania zapytania o aktualizację pozycji: " . $mysqli->error);
+        }
 
-            $stmt_update_location->close();
+        $stmt_update_location->bind_param('iiii', $newLocation, $currentCoins, $playerId, $gameId);
+        $stmt_update_location->execute();
+        $stmt_update_location->close();
 
-            // --- **FETCH UPDATED COINS AFTER LOCATION CHANGE AND ANY TRANSACTIONS** ---
-            // IMPORTANT: If moving to the new location triggers events that change coins
-            // (like collecting salary for passing GO, paying rent, drawing cards),
-            // that logic should happen *here* before refetching coins.
-            // For now, we'll just refetch the coins assuming no immediate transaction logic here.
-            $sql_get_updated_coins = "SELECT coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
-            $stmt_get_updated_coins = $mysqli->prepare($sql_get_updated_coins);
+        // POPRAWKA 3: Użyj bardziej precyzyjnego UPDATE z dodatkowymi warunkami
+        $sql_mark_played = "UPDATE turn_queue SET has_played = 1 WHERE game_id = ? AND player_id = ? AND turn_number = ? AND has_played = 0";
+        $stmt_mark_played = $mysqli->prepare($sql_mark_played);
 
-            if ($stmt_get_updated_coins) {
-                $stmt_get_updated_coins->bind_param('ii', $playerId, $gameId);
-                $stmt_get_updated_coins->execute();
-                $result_get_updated_coins = $stmt_get_updated_coins->get_result();
+        if (!$stmt_mark_played) {
+            throw new Exception("Błąd przygotowania zapytania oznaczania gracza jako zagranego: " . $mysqli->error);
+        }
 
-                if ($result_get_updated_coins && $result_get_updated_coins->num_rows === 1) {
-                    $updatedRow = $result_get_updated_coins->fetch_assoc();
-                    $newCoins = (int)$updatedRow['coins'];
+        $stmt_mark_played->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
+        $stmt_mark_played->execute();
+        
+        // POPRAWKA 4: Sprawdź czy UPDATE rzeczywiście zmienił rekord
+        $affected_rows = $stmt_mark_played->affected_rows;
+        $stmt_mark_played->close();
+        
+        if ($affected_rows === 0) {
+            // Dodatkowe logowanie dla debugowania
+            error_log("WARNING: No rows affected when marking player $playerId as played in game $gameId, turn $currentTurnNumber");
+            
+            // Sprawdź aktualny stan kolejki
+            $sql_debug = "SELECT * FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ?";
+            $stmt_debug = $mysqli->prepare($sql_debug);
+            $stmt_debug->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
+            $stmt_debug->execute();
+            $debug_result = $stmt_debug->get_result();
+            $debug_row = $debug_result->fetch_assoc();
+            $stmt_debug->close();
+            
+            error_log("Current queue state for player $playerId: " . json_encode($debug_row));
+        }
 
-                    // --- Add new_location and new_coins to the response ---
-                    $response['success'] = true; // Set success to true here after all operations
-                    $response['message'] = 'Rzut kostką wykonany i pozycja zaktualizowana.';
-                    $response['new_location'] = $newLocation;
-                    $response['new_coins'] = $newCoins; // <-- ADDED THIS LINE
-                } else {
-                     // Error fetching updated coins - this is less critical than location, but good to log
-                    error_log("Failed to refetch coins for player ID: " . $playerId . " after move in game ID: " . $gameId);
-                    // Continue with success=true but new_coins might be null or old value depending on logic
-                    $response['success'] = true; // Still a successful roll and move
-                    $response['message'] = 'Rzut kostką wykonany, pozycja zaktualizowana, ale nie udało się pobrać aktualnych monet.';
-                    $response['new_location'] = $newLocation;
-                    // $response['new_coins'] remains null or previous value
-                }
-                $stmt_get_updated_coins->close();
+        // --- Check for next player in current turn ---
+        $sql_next_player = "SELECT player_id FROM turn_queue 
+                           WHERE game_id = ? AND turn_number = ? AND has_played = 0 AND is_skipped = 0 
+                           ORDER BY queue_position ASC LIMIT 1";
+        $stmt_next_player = $mysqli->prepare($sql_next_player);
+        if (!$stmt_next_player) {
+            throw new Exception("Błąd przygotowania zapytania o następnego gracza: " . $mysqli->error);
+        }
+        $stmt_next_player->bind_param('ii', $gameId, $currentTurnNumber);
+        $stmt_next_player->execute();
+        $result_next_player = $stmt_next_player->get_result();
+        $next_player_row = $result_next_player->fetch_assoc();
+        $stmt_next_player->close();
 
-            } else {
-                error_log("Error preparing updated coins query: " . $mysqli->error);
-                 // Continue with success=true but new_coins might be null
-                $response['success'] = true; // Still a successful roll and move
-                $response['message'] = 'Rzut kostką wykonany, pozycja zaktualizowana, ale błąd przygotowania zapytania o monety.';
-                $response['new_location'] = $newLocation;
-                 // $response['new_coins'] remains null
+        if ($next_player_row) {
+            // There's still a player who hasn't played in this turn
+            $nextPlayerId = (int)$next_player_row['player_id'];
+            
+            // Update current_player_id in games table
+            $sql_update_current_player = "UPDATE games SET current_player_id = ? WHERE id = ?";
+            $stmt_update_current_player = $mysqli->prepare($sql_update_current_player);
+            if ($stmt_update_current_player) {
+                $stmt_update_current_player->bind_param('ii', $nextPlayerId, $gameId);
+                $stmt_update_current_player->execute();
+                $stmt_update_current_player->close();
             }
-
+            
+            $response['current_player_id'] = $nextPlayerId;
+            $response['turn_info'] = "Następny gracz w kolejce: " . $nextPlayerId;
         } else {
-            $response['message'] = "Błąd przygotowania zapytania o aktualizację pozycji: " . $mysqli->error;
-            http_response_code(500); // Internal Server Error
+            // All players have played in this turn, create next turn queue
+            $nextTurnNumber = $currentTurnNumber + 1;
+            
+            // Get all active players in the game
+            $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
+            $stmt_get_players = $mysqli->prepare($sql_get_players);
+            if (!$stmt_get_players) {
+                throw new Exception("Błąd przygotowania zapytania o graczy: " . $mysqli->error);
+            }
+            $stmt_get_players->bind_param('i', $gameId);
+            $stmt_get_players->execute();
+            $result_get_players = $stmt_get_players->get_result();
+            
+            $players = [];
+            while ($player_row = $result_get_players->fetch_assoc()) {
+                $players[] = $player_row;
+            }
+            $stmt_get_players->close();
+            
+            if (!empty($players)) {
+                // Create new turn queue
+                $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
+                $stmt_create_queue = $mysqli->prepare($sql_create_queue);
+                if (!$stmt_create_queue) {
+                    throw new Exception("Błąd przygotowania zapytania tworzenia kolejki: " . $mysqli->error);
+                }
+                
+                $queuePosition = 1;
+                foreach ($players as $player) {
+                    $stmt_create_queue->bind_param('iiii', $gameId, $player['id'], $nextTurnNumber, $queuePosition);
+                    $stmt_create_queue->execute();
+                    $queuePosition++;
+                }
+                $stmt_create_queue->close();
+                
+                // Update game's current turn and current player
+                $firstPlayerId = $players[0]['id'];
+                $sql_update_game = "UPDATE games SET current_turn = ?, current_player_id = ? WHERE id = ?";
+                $stmt_update_game = $mysqli->prepare($sql_update_game);
+                if ($stmt_update_game) {
+                    $stmt_update_game->bind_param('iii', $nextTurnNumber, $firstPlayerId, $gameId);
+                    $stmt_update_game->execute();
+                    $stmt_update_game->close();
+                }
+                
+                $response['current_player_id'] = $firstPlayerId;
+                $response['turn_info'] = "Nowa tura " . $nextTurnNumber . " rozpoczęta. Pierwszy gracz: " . $firstPlayerId;
+            } else {
+                throw new Exception("Brak aktywnych graczy do utworzenia nowej tury.");
+            }
+        }
+
+        // --- Fetch updated coins ---
+        $sql_get_updated_coins = "SELECT coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
+        $stmt_get_updated_coins = $mysqli->prepare($sql_get_updated_coins);
+
+        if ($stmt_get_updated_coins) {
+            $stmt_get_updated_coins->bind_param('ii', $playerId, $gameId);
+            $stmt_get_updated_coins->execute();
+            $result_get_updated_coins = $stmt_get_updated_coins->get_result();
+
+            if ($result_get_updated_coins && $result_get_updated_coins->num_rows === 1) {
+                $updatedRow = $result_get_updated_coins->fetch_assoc();
+                $newCoins = (int)$updatedRow['coins'];
+
+                $response['success'] = true;
+                $response['message'] = 'Rzut kostką wykonany, pozycja zaktualizowana i kolejka zarządzana.';
+                $response['new_location'] = $newLocation;
+                $response['new_coins'] = $newCoins;
+            } else {
+                error_log("Failed to refetch coins for player ID: " . $playerId . " after move in game ID: " . $gameId);
+                $response['success'] = true;
+                $response['message'] = 'Rzut kostką wykonany, pozycja zaktualizowana, ale nie udało się pobrać aktualnych monet.';
+                $response['new_location'] = $newLocation;
+            }
+            $stmt_get_updated_coins->close();
+        } else {
+            error_log("Error preparing updated coins query: " . $mysqli->error);
+            $response['success'] = true;
+            $response['message'] = 'Rzut kostką wykonany, pozycja zaktualizowana, ale błąd przygotowania zapytania o monety.';
+            $response['new_location'] = $newLocation;
         }
 
     } else {
-        $response['message'] = "Nie znaleziono pozycji gracza w bazie.";
-        http_response_code(404); // Not Found
+        throw new Exception("Nie znaleziono pozycji gracza w bazie.");
     }
     $stmt_get_pos_coins->close();
 
-} else {
-    $response['message'] = "Błąd przygotowania zapytania o pobranie pozycji: " . $mysqli->error;
-    http_response_code(500); // Internal Server Error
-}
+    $mysqli->commit();
 
+} catch (Exception $e) {
+    $mysqli->rollback();
+    error_log("Błąd w roll_dice.php: " . $e->getMessage());
+    $response['message'] = 'Wystąpił błąd podczas rzutu kostką: ' . $e->getMessage();
+    http_response_code(500);
+}
 
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();

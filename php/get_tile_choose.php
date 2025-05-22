@@ -1,16 +1,24 @@
 <?php
 session_start();
 
-header('Content-Type: text/html; charset=utf-8'); 
+header('Content-Type: text/html; charset=utf-8');
 
 if (!isset($_SESSION['game_id'])) {
     echo "<p style='color: red;'>Błąd: Brak aktywnej gry.</p>";
     exit();
 }
 $gameId = $_SESSION['game_id'];
-// $current_player_id = $_SESSION['player_id'];
-$current_player_id = 33;
+// ZMIANA: Pobierz ID gracza z parametru GET, a nie hardkoduj
+$player_id_for_duel_context = isset($_GET['player_id']) ? (int)$_GET['player_id'] : null;
+
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
+
+// Walidacja player_id_for_duel_context
+if ($player_id_for_duel_context === null) {
+    echo "<p style='color: red;'>Błąd: Brak ID gracza dla kontekstu akcji.</p>";
+    exit();
+}
+
 
 include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
@@ -67,7 +75,7 @@ $sql_tiles_all = "SELECT
             t.id,
             t.name,
             t.type,
-            tg.name AS group_name, 
+            tg.name AS group_name,
             tg.color_code AS group_color,
             t.cost,
             t.base_rent,
@@ -83,7 +91,7 @@ $sql_tiles_all = "SELECT
         ORDER BY t.id";
 
 $stmt_tiles_all = $mysqli->prepare($sql_tiles_all);
-$tiles_all = []; 
+$tiles_all = [];
 
 if ($stmt_tiles_all) {
     $stmt_tiles_all->bind_param('i', $gameId);
@@ -105,7 +113,7 @@ if ($stmt_tiles_all) {
 } else {
     error_log("Błąd przygotowania zapytania SQL dla pól (gry ID: " . $gameId . "): " . $mysqli->error);
 }
-$tile = $tiles_all[$location] ?? null; 
+$tile = $tiles_all[$location] ?? null;
 
 $output_html = '';
 
@@ -115,11 +123,12 @@ if (
 ) {
     // pojedynek
     $players_in_game = [];
-    $sql_player_duel = "SELECT id as id_player, name as name_player FROM `players` WHERE game_id = ? AND NOT id= ?;"; 
+    // ZMIANA: Użyj $player_id_for_duel_context zamiast hardkodowanego $current_player_id
+    $sql_player_duel = "SELECT id as id_player, name as name_player FROM `players` WHERE game_id = ? AND NOT id= ?;";
     $stmt_player_duel = $mysqli->prepare($sql_player_duel);
 
     if ($stmt_player_duel) {
-        $stmt_player_duel->bind_param('ii', $gameId, $current_player_id); 
+        $stmt_player_duel->bind_param('ii', $gameId, $player_id_for_duel_context);
         if ($stmt_player_duel->execute()) {
             $result_player_duel = $stmt_player_duel->get_result();
             while($row = $result_player_duel->fetch_assoc()) {
@@ -139,7 +148,8 @@ if (
     if (!empty($players_in_game)) {
         $output_html .= '<p>Wybierz rywala do pojedynku:</p>';
         foreach ($players_in_game as $player_data) {
-            $output_html .= '<button class="action-button duel-player-button" data-action-type="duel"' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
+            // Corrected: Added data-player-id attribute for duel action
+            $output_html .= '<button class="action-button duel-player-button" data-action-type="duel" data-player-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
     } else {
         $output_html .= '<p>Brak innych graczy do pojedynku.</p>';
@@ -167,25 +177,31 @@ if (
     $location === 4 || $location === 10 || $location === 19 ||
     $location === 23 || $location === 35 || $location === 38
 ) {
-    $output_html .= '<button class="action-button accept">Super</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_surprise">Super</button>';
 } elseif ($location === 11) {
     // szkolenie
-    $output_html .= '<button class="action-button accept">Lece się szkolić</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_training">Lece się szkolić</button>';
 
 } elseif ($location === 33) {
     // urlop
-    $output_html .= '<button class="action-button accept">Super</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_vacation">Super</button>';
 
 } elseif ($location === 0 ){
-    $output_html .= '<button class="action-button accept">Super</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_start_tile">Super</button>';
 } elseif ($location === 22 ){
-    $output_html .= '<button class="action-button accept">Ooo super</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_special_tile">Ooo super</button>';
 }elseif (
-    $location === 7 || $location === 15 || 
-    $location === 29 || $location === 37 
+    $location === 7 || $location === 15 ||
+    $location === 29 || $location === 37
 ) {
     // WEJŚĆ DO KONTYNENTÓW
-    $output_html .= '<button class="action-button accept">Płacę</button>';
+    // Added data-action-type for "accept" buttons
+    $output_html .= '<button class="action-button accept" data-action-type="accept_continent_entry">Płacę</button>';
 }
 
 echo $output_html;
