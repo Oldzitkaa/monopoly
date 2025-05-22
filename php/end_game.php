@@ -72,7 +72,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
          <p class="win-player">Zwycięzcą zostaje &rarr; 
             <?php
-
+                
             ?>
          </p>
         <table class="player-result">

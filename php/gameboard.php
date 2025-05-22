@@ -6,7 +6,7 @@ if (!isset($_SESSION['game_id'])) {
     exit();
 }
 $gameId = $_SESSION['game_id'];
-include_once './database_connect.php'; 
+include_once './database_connect.php'; // Upewnij się, że ten plik prawidłowo łączy się z bazą danych i zwraca obiekt $mysqli
 
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku database_connect.php: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.'));
@@ -14,13 +14,13 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 
 $mysqli->set_charset("utf8");
 
-
+// Zapytanie SQL do pobrania danych o polach planszy (zmodyfikowane dla nowego schematu, ale z myślą o starym wyglądzie)
 $sql = "SELECT
             t.id,
             t.name,
             t.type,
-            tg.name AS group_name,      -- Używamy group_name jako 'region' dla celów wyświetlania
-            tg.color_code AS group_color, -- Kolor grupy dla paska
+            tg.name AS group_name, 
+            tg.color_code AS group_color,
             t.cost,
             t.base_rent,
             t.description,
@@ -62,7 +62,7 @@ if ($stmt_tiles) {
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla pól: " . $mysqli->error . "</p>";
 }
 
-
+// Zapytanie SQL do pobrania danych o graczach
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -396,8 +396,12 @@ if ($currentPlayerId === null && !empty($player)) {
         </div>
 
         <div class="card-slots-container">
-            <div class="card-slot">Karty Niespodzianki</div>
-            <div class="card-slot">Karty Wyzwania</div>
+            <div class="card-slot card-text">
+            <?php
+               
+            ?>
+            </div>
+            <div class="card-slot card-choose"></div>
         </div>
 
         <div class="game-controls-container">

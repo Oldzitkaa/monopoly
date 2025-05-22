@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('monopoly-board'); // Możesz usunąć, jeśli nie używasz
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
+    const cardSlotText = document.querySelector('.card-slot.card-text');
+    const cardSlotChoose = document.querySelector('.card-slot.card-choose');
 
     function translatePropertyType(type) {
         switch (type) {
@@ -72,6 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
         wynikTekst.textContent = 'Rzut...';
         startDiceAnimation();
 
+        if (cardSlotText) cardSlotText.textContent = '';
+        if (cardSlotChoose) {
+            cardSlotChoose.innerHTML = '';
+            cardSlotChoose.style.display = 'none';
+        }
+
         try {
             const response = await fetch('roll_dice_api.php', {
                 method: 'POST',
@@ -104,17 +112,92 @@ document.addEventListener('DOMContentLoaded', () => {
                 movePlayerToken(playerId, newLocation);
                 updatePlayerDisplay(playerId, result.new_coins, newLocation);
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     wynikTekst.textContent = rollResult;
+                    try {
+                        const messageResponse = await fetch(`get_tile_message.php?location=${newLocation}`);
+                        if (!messageResponse.ok) {
+                            throw new Error(`Błąd pobierania wiadomości o polu: HTTP ${messageResponse.status}`);
+                        }
+                        
+                        const messageHtml = await messageResponse.text();
+                        
+                        if (cardSlotText) {
+                            cardSlotText.innerHTML = messageHtml;
+                            cardSlotText.style.display = 'block';
+                        }
+
+                        if (cardSlotChoose) { 
+                            cardSlotChoose.innerHTML = '<p>Ładowanie opcji akcji...</p>'; 
+                            cardSlotChoose.style.display = 'block';
+
+                            try {
+                                const chooseResponse = await fetch(`get_tile_choose.php?location=${newLocation}`); 
+                                if (!chooseResponse.ok) {
+                                    throw new Error(`Błąd pobierania opcji akcji: HTTP ${chooseResponse.status}`);
+                                }
+                                const chooseHtml = await chooseResponse.text();
+                                
+                                cardSlotChoose.innerHTML = chooseHtml;
+                                
+                                cardSlotChoose.querySelectorAll('.action-button').forEach(button => {
+                                    button.addEventListener('click', (event) => {
+                                        const actionType = event.target.dataset.actionType;
+                                        const targetPlayerId = event.target.dataset.targetPlayerId;
+
+
+                                        if (cardSlotChoose) {
+                                            cardSlotChoose.innerHTML = '';
+                                            cardSlotChoose.style.display = 'none';
+                                        }
+                                        rollDiceButton.disabled = false;
+                                    });
+                                });
+
+                            } catch (chooseError) {
+                                console.error("Błąd podczas pobierania lub przetwarzania opcji akcji:", chooseError);
+                                if (cardSlotChoose) {
+                                    cardSlotChoose.innerHTML = '<p style="color: red;">Błąd ładowania opcji akcji.</p>';
+                                    cardSlotChoose.style.display = 'block';
+                                }
+                                rollDiceButton.disabled = false;
+                            }
+                        } else {
+                            console.warn("Element cardSlotChoose nie został znaleziony.");
+                            rollDiceButton.disabled = false;
+                        }
+
+                    } catch (msgError) {
+                        console.error("Błąd podczas pobierania wiadomości o polu:", msgError);
+                        if (cardSlotText) {
+                            cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
+                        }
+                        if (cardSlotChoose) {
+                            cardSlotChoose.innerHTML = '';
+                            cardSlotChoose.style.display = 'none';
+                        }
+                        rollDiceButton.disabled = false;
+                    }
                 }, 2000);
+
             } else {
                 wynikTekst.textContent = `Błąd: ${result.message}`;
+                if (cardSlotText) cardSlotText.textContent = result.message;
+                if (cardSlotChoose) {
+                    cardSlotChoose.innerHTML = '';
+                    cardSlotChoose.style.display = 'none';
+                }
             }
 
         } catch (error) {
             wynikTekst.textContent = `Błąd: ${error.message}`;
+            if (cardSlotText) cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            if (cardSlotChoose) {
+                cardSlotChoose.innerHTML = '';
+                cardSlotChoose.style.display = 'none';
+            }
         } finally {
-            rollDiceButton.disabled = false;
+            // rollDiceButton.disabled = false;
             setTimeout(() => {
                 rollDiceButton.textContent = 'Rzuć kostką';
             }, 500);
