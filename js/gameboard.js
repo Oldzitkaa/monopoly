@@ -101,8 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                         const actionType = event.target.dataset.actionType;
                                         const targetPlayerId = event.target.dataset.targetPlayerId;
 
-                                        // Po wykonaniu akcji (lub wysłaniu AJAX), możesz schować/wyczyścić slot akcji
-                                        // Zależnie od logiki gry, możesz też ponownie włączyć przycisk "Rzuć kostką"
                                         if (cardSlotChoose) {
                                             cardSlotChoose.innerHTML = '';
                                             cardSlotChoose.style.display = 'none';
@@ -133,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             cardSlotChoose.style.display = 'none';
                         }
                     }
-                }, 2000); // Opóźnienie przed wyświetleniem wiadomości o polu
+                }, 2000);
 
             } else {
                 wynikTekst.textContent = `Błąd: ${result.message}`;
@@ -152,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardSlotChoose.style.display = 'none';
             }
         } finally {
-            // rollDiceButton.disabled = false; // To jest przeniesione do obsługi akcji, aby gracz najpierw podjął decyzję
+            // rollDiceButton.disabled = false;
             setTimeout(() => {
                 rollDiceButton.textContent = 'Rzuć kostką';
             }, 500);

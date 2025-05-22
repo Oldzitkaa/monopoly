@@ -115,7 +115,7 @@ if (
 ) {
     // pojedynek
     $players_in_game = [];
-    $sql_player_duel = "SELECT id as id_player, name as name_player FROM `players` WHERE game_id = ? AND NOT id != ?;"; 
+    $sql_player_duel = "SELECT id as id_player, name as name_player FROM `players` WHERE game_id = ? AND NOT id= ?;"; 
     $stmt_player_duel = $mysqli->prepare($sql_player_duel);
 
     if ($stmt_player_duel) {
@@ -146,6 +146,7 @@ if (
     }
 
 } elseif (
+    // restauracje
     $location == 1 || $location == 3 || $location == 5 || $location == 6 ||
     $location == 8 || $location == 9 || $location == 12 || $location == 14 ||
     $location == 16 || $location == 18 || $location == 20 || $location == 21 ||
@@ -162,27 +163,25 @@ if (
     $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
 
 } elseif (
+    // niespodzianka
     $location === 4 || $location === 10 || $location === 19 ||
     $location === 23 || $location === 35 || $location === 38
 ) {
-    // niespodzianka
-    // Brak generowanego HTML dla tego typu pola.
-
+    $output_html .= '<button class="action-button accept">Super</button>';
 } elseif ($location === 11) {
     // szkolenie
-    // Brak generowanego HTML dla tego typu pola.
+    $output_html .= '<button class="action-button accept">Lece się szkolić</button>';
 
 } elseif ($location === 33) {
     // urlop
-    // Brak generowanego HTML dla tego typu pola.
+    $output_html .= '<button class="action-button accept">Super</button>';
 
 } elseif (
     $location === 0 || $location === 7 || $location === 15 || 
     $location === 22 || $location === 29 || $location === 37 
 ) {
-    // To są pola STARTOWE / WEJŚĆ DO KONTYNENTÓW
-    // Brak generowanego HTML.
-
+    // WEJŚĆ DO KONTYNENTÓW
+    $output_html .= '<button class="action-button accept">Super</button>';
 }
 
 echo $output_html;

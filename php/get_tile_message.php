@@ -1,6 +1,28 @@
 <?php
-header('Content-Type: text/plain; charset=utf-8');
+session_start();
 
+header('Content-Type: text/html; charset=utf-8'); 
+
+if (!isset($_SESSION['game_id'])) {
+    echo "<p style='color: red;'>Błąd: Brak aktywnej gry.</p>";
+    exit();
+}
+$gameId = $_SESSION['game_id'];
+// $current_player_id = $_SESSION['player_id'];
+// losowe id narazie, potem poprawic trzeba
+$current_player_id = 1;
+$location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
+
+include_once './database_connect.php';
+if (!isset($mysqli) || $mysqli->connect_errno) {
+    echo "<p style='color: red;'>Błąd połączenia z bazą danych: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.') . "</p>";
+    exit();
+}
+
+$mysqli->set_charset("utf8");
+
+
+// sprawdzanie pola
 if (isset($_GET['location'])) {
     $location = (int)$_GET['location'];
 

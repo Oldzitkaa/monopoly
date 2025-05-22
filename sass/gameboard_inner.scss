@@ -1,3 +1,4 @@
+@use "./_color" as c;
 .board-center-placeholder {
     position: relative;
     width: 100%;
@@ -27,25 +28,25 @@
     top: 0;
     left: 0;
     border-bottom-right-radius: 0.5vw;
-    background-color: rgba(185, 171, 255, 0.95);
+    background-color: c.$player1;
 }
 .player2 {
     top: 0;
     right: 0;
     border-bottom-left-radius: 0.5vw;
-    background-color: rgba(231, 150, 246, 0.95);
+    background-color: c.$player2;
 }
 .player3 {
     bottom: 0;
     left: 0;
     border-top-right-radius: 0.5vw;
-    background-color: rgba(156, 255, 161, 0.95);
+    background-color: c.$player3;
 }
 .player4 {
     bottom: 0;
     right: 0;
     border-top-left-radius: 0.5vw;
-    background-color: rgba(249, 128, 128, 0.95);
+    background-color: c.$player4;
 }
 // .player-info.slide-right {
 //     transform: translateX(50%); /* Przesuń w prawo o połowę swojej szerokości */
