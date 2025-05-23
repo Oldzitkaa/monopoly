@@ -294,19 +294,6 @@ function generatePlayerPropertiesTable($properties) {
     $html .= '</div>';
     return $html;
 }
-//to zostalo zmienione
-//$currentPlayerId = null;
-//if (!empty($player)) {
-//    foreach ($player as $p) {
-//        if (isset($p['is_current_turn']) && $p['is_current_turn'] == 1) {
-//            $currentPlayerId = $p['id_player'];
-//            break;
-//        }
-//    }
-//}
-//if ($currentPlayerId === null && !empty($player)) {
-//    error_log("Błąd: Nie znaleziono gracza, którego jest tura dla gry ID: " . $gameId);
-//}
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -321,13 +308,13 @@ function generatePlayerPropertiesTable($properties) {
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 <?php
-    $colors = ['red', 'blue', 'green', 'yellow'];
-    echo '<style>';
-        for ($i = 1; $i <= 20; $i++) {
-            $color = $colors[($i - 1) % count($colors)];
-            echo ".player-token.player-$i { background-color: $color; }";
-        }
-        echo '</style>';
+    // $colors = ['red', 'blue', 'green', 'yellow'];
+    // echo '<style>';
+    //     for ($i = 1; $i <= 20; $i++) {
+    //         $color = $colors[($i - 1) % count($colors)];
+    //         echo ".player-token.player-$i { background-color: $color; }";
+    //     }
+    //     echo '</style>';
 ?>
 </head>
 <body>
@@ -353,24 +340,20 @@ function generatePlayerPropertiesTable($properties) {
                         echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']) . "</td></tr>";
                         echo "</table></div></div>";
                         echo "</div>";
-
                     }
                 } else {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
-
-               if (!empty($current_player_turn_data)) {
-                    // Używamy htmlspecialchars dla bezpieczeństwa, aby zapobiec atakom XSS
-                    echo "<div class='current-player current-player" . htmlspecialchars($initialCurrentTurnPlayerId) . "'>";
-                    echo htmlspecialchars($current_player_turn_data['name']);
-                    echo "</div>";
-                } else {
-                    // Jeśli z jakiegoś powodu dane gracza nie zostały załadowane (np. gra jeszcze nie rozpoczęta, błąd w DB)
-                    echo "<div class='current-player current-player-display'>Ładowanie...</div>";
-                }
+            //    if (!empty($current_player_turn_data)) {
+            //         echo "<div class='current-player current-player" . htmlspecialchars($initialCurrentTurnPlayerId) . "'>";
+            //         echo htmlspecialchars($current_player_turn_data['name']);
+            //         echo "</div>";
+            //     } else {
+            //         echo "<div class='current-player current-player-display'>Ładowanie...</div>";
+            //     }
                 ?>
-
             </div>
+
             <?php
             $tile_counter = 0;
             if (!empty($tiles)) {
@@ -441,15 +424,16 @@ function generatePlayerPropertiesTable($properties) {
     console.log(players);
     function updatePlayerPawns() {
         document.querySelectorAll('.player-token').forEach(pawn => pawn.remove());
-        colors = ['red', 'green', 'yellow', 'blue']
+        // colors = ['red', 'green', 'yellow', 'blue']
         let playerIndex = 0
         players.forEach(player => {
             const pawn = document.createElement('div');
             pawn.classList.add('player-token');
+            pawn.classList.add(`player-pawn${player.turn_order}`);
             pawn.classList.add(`player-${player.id_player}`);
             pawn.dataset.playerId = player.id_player;
             pawn.title = player.name_player;
-            pawn.style.backgroundColor = colors[playerIndex];
+            // pawn.style.backgroundColor = colors[playerIndex];
             const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
             if (playerTile) {
                 playerTile.appendChild(pawn);

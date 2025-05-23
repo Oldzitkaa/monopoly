@@ -161,14 +161,57 @@ if (
     $location == 30 || $location == 31 || $location == 32 || $location == 36 ||
     $location == 39 || $location == 40 || $location == 42 || $location == 43
 ) {
-    if ($tile && isset($tile['name'])) {
-        $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
-    } else {
-        $output_html .= '<p><b>Chcesz kupić tę restaurację?</b> </p>';
-    }
-    $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant">Tak, kupuję</button>';
-    $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie Dziękuje</button>';
+    // if ($tile && isset($tile['name'])) {
+    //     $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
+    // } else {
+    //     $output_html .= '<p>Chcesz kupić tę restaurację? </p>';
+    // }
+    // $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant">Tak, kupuję</button>';
+    // $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
 
+    if ($tile && isset($tile['name'])) {
+            if ($tile['owner_id'] !== null) {
+                if ($tile['owner_id'] == $current_player_id) {
+                    // twoja restauracja
+                    $sql = "SELECT COUNT(*) AS owned
+                        FROM tiles t
+                        JOIN tile_groups tg ON t.group_id = tg.id
+                        JOIN game_tiles gt ON gt.tile_id = t.id
+                        WHERE t.type = 'restaurant'
+                        AND tg.name = ?
+                        AND gt.current_owner_id = ?
+                        AND gt.game_id = ?";
+
+                    $stmt = $mysqli->prepare($sql);
+                    if (!$stmt) {
+                        error_log("Błąd SQL: " . $mysqli->error);
+                        return false;
+                    }
+
+                    $stmt->bind_param('sii', $regionName, $playerId, $gameId);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $row = $result->fetch_assoc();
+                    $stmt->close();
+
+                    $isOwnerOfAll = ((int)$row['owned']) === 4;
+
+                    if ($isOwnerOfAll) {
+                        $output_html .= '<p>Chcesz ulepszyć swoją restauracje za'. htmlspecialchars($tile['upgrade_cost']) .' $ ?</p>';
+                        $output_html .= '<button class="action-button upgrade" data-action-type="buy_restaurant">Ulepszam</button>';
+                    } else {
+                        echo '<p>Kup wszytskie restauracje z tego kontynentu by móc je ulepszyć.</p>';
+                    }
+
+                } else {
+                    $output_html .= '<button class="action-button pay">Płacę</button>';
+                }
+            } else {
+                $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
+                $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant">Tak, kupuję</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            }
+        }
 } elseif (
     // niespodzianka
     $location === 4 || $location === 10 || $location === 19 ||

@@ -11,24 +11,20 @@ $response = [
     'message' => 'Nieznany błąd serwera podczas akcji na polu.'
 ];
 try {
-    // Sprawdź, czy plik database_connect.php istnieje
     $dbConnectPath = __DIR__ . '/database_connect.php';
     if (!file_exists($dbConnectPath)) {
         throw new Exception('Plik database_connect.php nie został znaleziony.');
     }
     require_once $dbConnectPath;
-    // Sprawdź połączenie z bazą danych
     if (!isset($mysqli) || $mysqli->connect_error) {
         throw new Exception('Błąd połączenia z bazą danych: ' . ($mysqli->connect_error ?? 'Nieznany błąd'));
     }
-    // Sprawdź, czy żądanie jest metodą POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         $response['message'] = 'Nieprawidłowa metoda żądania. Wymagana metoda POST.';
         http_response_code(405);
         echo json_encode($response);
         exit;
     }
-    // Pobierz i zdekoduj dane JSON
     $inputData = file_get_contents('php://input');
     if ($inputData === false) {
         throw new Exception('Nie można odczytać danych wejściowych.');
@@ -72,10 +68,7 @@ try {
     }
     $playerCoins = $playerData['coins'];
     $playerLocation = $playerData['location'];
-    // Sprawdź, czy gracz faktycznie jest na tym polu, zanim wykonasz akcję
-    // Ta walidacja może być pominięta dla akcji, które nie wymagają bycia NA polu (np. handel z innego miejsca)
-    // lub gdy lokalizacja jest używana do identyfikacji pola, ale nie jest ścisłym warunkiem bycia gracza.
-    // Dla akcji "duel" i "accept_*" gracz może być na polu, które wywołało akcję, ale sama akcja nie jest ściśle związana z jego POZYCJĄ.
+
     $actionsNotStrictlyBoundToLocation = [
         'duel', 'not_interested', 'skip_action',
         'accept_surprise', 'accept_training', 'accept_vacation',
@@ -163,7 +156,7 @@ try {
             $response['success'] = true;
             $response['message'] = "Kupiłeś {$propertyTypeName} \"{$tileData['name']}\" za {$purchasePrice} zł.";
             $response['new_coins'] = $newPlayerCoins;
-            // Po zakupie, tura zazwyczaj się kończy
+            // Po zakupie, tura zazwyczaj się kończ
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
@@ -493,11 +486,10 @@ try {
         case 'accept_start_tile':
         case 'accept_special_tile':
         case 'accept_continent_entry':
-            // Te akcje po prostu kończą turę obecnego gracza
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Akcja zakończona pomyślnie. Tura zakończona.';
-            $response['new_coins'] = $playerCoins; // Monety gracza nie zmieniają się w tych akcjach
+            $response['new_coins'] = $playerCoins;
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
@@ -509,11 +501,10 @@ try {
     if (isset($mysqli) && $mysqli instanceof mysqli) {
         $mysqli->rollback();
     }
-    // Loguj błąd do pliku, ale nie wyświetlaj w odpowiedzi
     error_log('Błąd w process_tile_action.php: ' . $e->getMessage());
     $response['success'] = false;
     $response['message'] = 'Wystąpił błąd serwera: ' . $e->getMessage();
-    // W środowisku deweloperskim możesz dodać więcej informacji
+
     if (ini_get('display_errors')) {
         $response['debug_info'] = [
             'error_message' => $e->getMessage(),

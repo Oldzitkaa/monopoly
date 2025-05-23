@@ -126,14 +126,15 @@ try {
     $stmt_check_played->close();
 
     if ($check_row && $check_row['has_played'] == 1) {
-        throw new Exception("Ten gracz już wykonał swój ruch w tej turze.");
+        $response['success'] = false;
+        $response['message'] = "Ten gracz już wykonał swój ruch w tej turze.";
+        echo json_encode($response);
+        exit;
     }
 
-    // Generate the dice roll result
     $rollResult = rand(1, 6);
     $response['roll_result'] = $rollResult;
 
-    // --- Fetch current player location and coins ---
     $sql_get_pos_coins = "SELECT location, coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
     $stmt_get_pos_coins = $mysqli->prepare($sql_get_pos_coins);
 
