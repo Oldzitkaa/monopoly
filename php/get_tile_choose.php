@@ -164,10 +164,10 @@ if (
     if ($tile && isset($tile['name'])) {
         $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
     } else {
-        $output_html .= '<p>Chcesz kupić tę restaurację? </p>';
+        $output_html .= '<p><b>Chcesz kupić tę restaurację?</b> </p>';
     }
     $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant">Tak, kupuję</button>';
-    $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+    $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie Dziękuje</button>';
 
 } elseif (
     // niespodzianka

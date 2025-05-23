@@ -464,4 +464,91 @@ $breakpoint-desktop: 768px;
     box-shadow: $shadow-sm;
     word-break: break-word;
     text-align: center;
+    margin: 0 auto;
 }
+
+.card-slot.card-text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    .action-button {
+        padding: 0.6em 1.2em;
+        margin: 0.3em;
+        border: none;
+        border-radius: $border-radius-md;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        box-shadow: $shadow-sm;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        color: #fff;
+        display: inline-block;
+        min-width: 140px;
+        text-align: center;
+
+        &:hover {
+            transform: scale(1.05);
+            box-shadow: $shadow-md;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        // Niespodzianki, szkolenia, urlop, kontynenty
+        &.accept {
+            background-color: red;
+        }
+
+
+        &.restaurant-buy-button {
+            //background-color: #4CAF50;
+            background-color: c.$mint;
+            color: c.$mint2;
+            //background-image: linear-gradient(to top, #4CAF50, #6fd16f);
+        }
+
+        &.restaurant-notbuy-button {
+            //background-color: #c0392b;
+            background-color: c.$red3;
+            color: c.$lightred;
+            //background-image: linear-gradient(to top, #c0392b, #e74c3c);
+        }
+
+        // Wybór rywala
+        &.btn-player1{
+            background-color: c.$player1;
+            color: black;
+            padding: 0;
+        }
+        &.btn-player2{
+            background: c.$player2;
+            color: black;
+            padding: 0;
+        }
+
+        &.btn-player3{
+            background: c.$player3;
+            color: black;
+            padding: 0;
+        }
+
+        &.btn-player4{
+            background: c.$player4;
+            color: black;
+            padding: 0;
+        }
+
+        // Koniec pojedynku
+        &.btn-duel-description {
+            background-color: red;
+            color: #fff;
+        }
+    }
+
+
+

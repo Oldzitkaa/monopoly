@@ -257,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 const rollResult = result.roll_result;
                 const newLocation = result.new_location;
+                // const newLocation = 2;
                 const playerWhoRolledId = currentPlayerId; // This is the player who just rolled
 
                 console.log(`Gracz ID: ${playerWhoRolledId}, nowa pozycja: ${newLocation}`);
