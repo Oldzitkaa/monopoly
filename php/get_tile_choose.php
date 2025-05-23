@@ -9,8 +9,9 @@ if (!isset($_SESSION['game_id'])) {
 }
 $gameId = $_SESSION['game_id'];
 // $current_player_id = $_SESSION['player_id'];
-$current_player_id = 33;
+$current_player_id = 37;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
+$duel_action = isset($_GET['duel']) ? $_GET['duel'] : '';
 
 include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
@@ -19,8 +20,11 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 }
 $mysqli->set_charset("utf8");
 
+include_once './random_duel.php';
+
 // gracze
-$sql_player = "SELECT
+$players = [];
+$sql_all_players = "SELECT
                 p.id as id_player,
                 p.game_id,
                 p.name as name_player,
@@ -41,25 +45,26 @@ $sql_player = "SELECT
             JOIN `characters` c ON p.character_id = c.id
             WHERE p.game_id = ?
             ORDER BY p.turn_order ASC";
-$stmt_player = $mysqli->prepare($sql_player);
-$player = [];
+$stmt_all_players = $mysqli->prepare($sql_all_players);
 
-if ($stmt_player) {
-    $stmt_player->bind_param('i', $gameId);
-    if ($stmt_player->execute()) {
-        $result_player = $stmt_player->get_result();
-        if ($result_player->num_rows > 0) {
-            while($row1 = $result_player->fetch_assoc()) {
-                $player[] = $row1;
+if ($stmt_all_players) {
+    $stmt_all_players->bind_param('i', $gameId);
+    if ($stmt_all_players->execute()) {
+        $result_all_players = $stmt_all_players->get_result();
+        if ($result_all_players->num_rows > 0) {
+            while($row_player = $result_all_players->fetch_assoc()) {
+                $players[$row_player['id_player']] = $row_player;
             }
         } else {
             error_log("Brak graczy w bazie danych dla gry o ID: " . $gameId);
         }
-        $result_player->free();
+        $result_all_players->free();
     } else {
-        error_log("Błąd wykonania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $stmt_player->error);
+        error_log("Błąd wykonania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $stmt_all_players->error);
     }
-    $stmt_player->close();
+    $stmt_all_players->close();
+} else {
+    error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
 }
 
 // pola
@@ -109,42 +114,75 @@ $tile = $tiles_all[$location] ?? null;
 
 $output_html = '';
 
+// pola
+
+        // $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
+
+        // // losowanie kart niespodzianki
+        // $drawnCard = getRandomActionCard($mysqli);
+        // if ($drawnCard) {
+        //     $output_html_message .= '<p class="surprise-description">' . htmlspecialchars($drawnCard->description) . '</p>';
+        // } else {
+        //     $output_html_message .= '<p class="surprise-description">Nie znaleziono kart niespodzianek do wylosowania.</p>';
+        // }
+// if ($duel_action === 'draw_card') {
+//     // pojedynek
+//     $rival_id = isset($_GET['rival_id']) ? (int)$_GET['rival_id'] : null;
+
+//     if ($rival_id === null) {
+//         echo "<p style='color: red;'>Błąd: Brak ID rywala dla pojedynku.</p>";
+//         exit();
+//     }
+
+//     $drawnCard = getRandomDuelCard($mysqli);
+
+//     // if ($drawnCard) {
+//     //     $rival_name = $players[$rival_id]['name_player'] ?? 'Nieznany Rywal';
+//     //     echo '<p class="duel-description">Wybrano rywala: ' . htmlspecialchars($rival_name) . '</p>';
+//     //     echo '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
+//     // } else {
+//     //     echo '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
+//     // }
+//     // exit(); 
+
+// } elseif (
+//     $location === 2 || $location === 13 || $location === 17 ||
+//     $location === 26 || $location === 34 || $location === 41
+
+
 if (
     $location === 2 || $location === 13 || $location === 17 ||
     $location === 26 || $location === 34 || $location === 41
 ) {
-    // pojedynek
-    $players_in_game = [];
-    $sql_player_duel = "SELECT id as id_player, name as name_player FROM `players` WHERE game_id = ? AND NOT id= ?;"; 
-    $stmt_player_duel = $mysqli->prepare($sql_player_duel);
+    $drawnCard = getRandomDuelCard($mysqli);
 
-    if ($stmt_player_duel) {
-        $stmt_player_duel->bind_param('ii', $gameId, $current_player_id); 
-        if ($stmt_player_duel->execute()) {
-            $result_player_duel = $stmt_player_duel->get_result();
-            while($row = $result_player_duel->fetch_assoc()) {
-                $players_in_game[] = $row;
-            }
-            $result_player_duel->free();
-        } else {
-            error_log("Błąd wykonania zapytania SQL dla graczy w pojedynku (gry ID: " . $gameId . "): " . $stmt_player_duel->error);
-            $output_html .= "<p'>Błąd pobierania danych graczy.</p>";
+    $rival_players_data = [];
+    foreach ($players as $player_id => $player_data) {
+        if ($player_id != $current_player_id) {
+            $rival_players_data[] = $player_data;
         }
-        $stmt_player_duel->close();
-    } else {
-        error_log("Błąd przygotowania zapytania SQL dla graczy w pojedynku (gry ID: " . $gameId . "): " . $mysqli->error);
-        $output_html .= "<p>Błąd przygotowania zapytania SQL dla graczy.</p>";
     }
 
-    if (!empty($players_in_game)) {
-        $output_html .= '<p>Wybierz rywala do pojedynku:</p>';
-        foreach ($players_in_game as $player_data) {
-            $output_html .= '<button class="action-button duel-player-button" data-action-type="duel"' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
+    if (!empty($rival_players_data)) {
+        $output_html .= '<div id="game-actions" class="game-actions"';
+        $output_html .= 'data-current-player-id="' . htmlspecialchars($current_player_id) . '" ';
+        $output_html .= 'data-location="' . htmlspecialchars($location) . '">';
+
+        $output_html .= '<p id="duel-prompt">Wybierz rywala do pojedynku:</p>';
+        foreach ($rival_players_data as $player_data) {
+            $output_html .= '<button class="action-button btn-player' . htmlspecialchars($player_data['turn_order']) . '" onclick="randomCard()" data-rival-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
+        $output_html .= '<div id="duel-card-result" class="duel-card-result"></div>';
+        if ($drawnCard) {
+            $output_html .= '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
+        } else {
+            $output_html .= '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
+        }
+        $output_html .= '</div>';
+
     } else {
         $output_html .= '<p>Brak innych graczy do pojedynku.</p>';
     }
-
 } elseif (
     // restauracje
     $location == 1 || $location == 3 || $location == 5 || $location == 6 ||
@@ -184,7 +222,7 @@ if (
     $location === 7 || $location === 15 || 
     $location === 29 || $location === 37 
 ) {
-    // WEJŚĆ DO KONTYNENTÓW
+    // kontynenty
     $output_html .= '<button class="action-button accept">Płacę</button>';
 }
 

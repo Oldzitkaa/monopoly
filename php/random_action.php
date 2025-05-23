@@ -86,7 +86,7 @@ function getRandomActionCard($mysqli) {
     if ($row_action) {
         return $row_action;
     } else {
-        error_log("Nie znaleziono karty akcji o wylosowanym offsetcie.");
+        error_log("Nie znaleziono karty niespodzianki o wylosowanym offsetcie.");
         return null;
     }
     $stmt_action->close();

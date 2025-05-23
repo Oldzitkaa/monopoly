@@ -459,6 +459,7 @@ if ($currentPlayerId === null && !empty($player)) {
 
 <script src="../js/gameboard.js"> </script>
 <script src="../js/gameboard_inner.js"></script>
+<script src="../js/gameboard_side.js"></script>
 
 </body>
 </html>
