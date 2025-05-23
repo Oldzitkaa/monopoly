@@ -324,31 +324,33 @@ if ($currentPlayerId === null && !empty($player)) {
         <div class="monopoly-board" id="monopoly-board">
             <div class="board-center-placeholder">
                 <?php
-                
+
                 if (!empty($player)) {
-                    foreach ($player as $index => $p) {
-                        $playerClassNumber = $index + 1; 
+                    foreach ($player as $p) {
+                        $playerClassNumber = (int)$p['turn_order'];
                         echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
-                        echo "<p><b>" . htmlspecialchars($p['name_player'])." - " . htmlspecialchars($p['character_name']). "</b><br>";
-                        echo "Monety: " . htmlspecialchars($p['coins']). " zł <br>"; 
-                        echo "<table>";
-                        echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']). "</td></tr>";
-                        echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']). "</td></tr>";
-                        echo "<tr><td>Czas przygotowania:</td><td>" . htmlspecialchars($p['prep_time']). "</td></tr>";
-                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']). "</td></tr>"; 
-                        echo "<tr><td>Umiejętności gotowania:</td><td>" . htmlspecialchars($p['cook_skill']). "</td></tr>";
-                        echo "<tr><td>Zmysł do przypraw:</td><td>" . htmlspecialchars($p['spice_sense']). "</td></tr>";
-                        echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']). "</td></tr>";
-                        echo "</table>";
-                        
-                        
-                        echo "</div>"; 
+                        echo "<p><b>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</b><br>";
+                        echo "Monety: " . htmlspecialchars($p['coins']) . " zł <br>";
+
+
+                        echo "<div class='player-stats-scroll'><div class='stats-table-wrapper'><table>";
+                        echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']) . "</td></tr>";
+                        echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']) . "</td></tr>";
+                        echo "<tr><td>Czas przygotowania:</td><td>" . htmlspecialchars($p['prep_time']) . "</td></tr>";
+                        echo "<tr><td>Tradycyjne Powiązania:</td><td>" . htmlspecialchars($p['tradition_affinity']) . "</td></tr>";
+                        echo "<tr><td>Umiejętności gotowania:</td><td>" . htmlspecialchars($p['cook_skill']) . "</td></tr>";
+                        echo "<tr><td>Zmysł do przypraw:</td><td>" . htmlspecialchars($p['spice_sense']) . "</td></tr>";
+                        echo "<tr><td>Łeb do biznesu:</td><td>" . htmlspecialchars($p['business_acumen']) . "</td></tr>";
+                        echo "</table></div></div>";
+                        echo "</div>";
+
                     }
                 } else {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
-                
+
                 ?>
+
             </div>
             <?php
             $tile_counter = 0;

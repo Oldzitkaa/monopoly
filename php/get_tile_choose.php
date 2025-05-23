@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-header('Content-Type: text/html; charset=utf-8'); 
+header('Content-Type: text/html; charset=utf-8');
 
 if (!isset($_SESSION['game_id'])) {
     echo "<p style='color: red;'>Błąd: Brak aktywnej gry.</p>";
@@ -88,7 +88,7 @@ $sql_tiles_all = "SELECT
         ORDER BY t.id";
 
 $stmt_tiles_all = $mysqli->prepare($sql_tiles_all);
-$tiles_all = []; 
+$tiles_all = [];
 
 if ($stmt_tiles_all) {
     $stmt_tiles_all->bind_param('i', $gameId);
@@ -110,21 +110,21 @@ if ($stmt_tiles_all) {
 } else {
     error_log("Błąd przygotowania zapytania SQL dla pól (gry ID: " . $gameId . "): " . $mysqli->error);
 }
-$tile = $tiles_all[$location] ?? null; 
+$tile = $tiles_all[$location] ?? null;
 
 $output_html = '';
 
 // pola
 
-        // $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
+// $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
 
-        // // losowanie kart niespodzianki
-        // $drawnCard = getRandomActionCard($mysqli);
-        // if ($drawnCard) {
-        //     $output_html_message .= '<p class="surprise-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-        // } else {
-        //     $output_html_message .= '<p class="surprise-description">Nie znaleziono kart niespodzianek do wylosowania.</p>';
-        // }
+// // losowanie kart niespodzianki
+// $drawnCard = getRandomActionCard($mysqli);
+// if ($drawnCard) {
+//     $output_html_message .= '<p class="surprise-description">' . htmlspecialchars($drawnCard->description) . '</p>';
+// } else {
+//     $output_html_message .= '<p class="surprise-description">Nie znaleziono kart niespodzianek do wylosowania.</p>';
+// }
 // if ($duel_action === 'draw_card') {
 //     // pojedynek
 //     $rival_id = isset($_GET['rival_id']) ? (int)$_GET['rival_id'] : null;
@@ -143,7 +143,7 @@ $output_html = '';
 //     // } else {
 //     //     echo '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
 //     // }
-//     // exit(); 
+//     // exit();
 
 // } elseif (
 //     $location === 2 || $location === 13 || $location === 17 ||
@@ -219,8 +219,8 @@ if (
 } elseif ($location === 22 ){
     $output_html .= '<button class="action-button accept">Ooo super</button>';
 }elseif (
-    $location === 7 || $location === 15 || 
-    $location === 29 || $location === 37 
+    $location === 7 || $location === 15 ||
+    $location === 29 || $location === 37
 ) {
     // kontynenty
     $output_html .= '<button class="action-button accept">Płacę</button>';

@@ -10,7 +10,7 @@ if (!isset($_SESSION['game_id'])) {
 $gameId = $_SESSION['game_id'];
 // $current_player_id = $_SESSION['player_id'];
 // losowe id narazie, potem poprawic trzeba
-$current_player_id = 33;
+$current_player_id = 88;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 
 include_once './database_connect.php';
