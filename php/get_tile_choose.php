@@ -175,6 +175,7 @@ if (
         $output_html .= '<div id="duel-card-result" class="duel-card-result"></div>';
         if ($drawnCard) {
             $output_html .= '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
+            $output_html .= '<button class="btn-duel-description">Koniec pojedynku</button>';
         } else {
             $output_html .= '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
         }
