@@ -68,7 +68,6 @@ a {
         max-width: none;
     }
 }
-
 // sidebar
 .game-sidebar {
     display: flex;
@@ -690,23 +689,39 @@ a {
     padding: 2px;
     z-index: 10;
 }
-
+// pionki
 .player-token {
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    border: 3px solid #000;
+    // border: 3px solid #000;
     z-index: 10;
 }
+.player-pawn1{
+    background-color: c.$player1;
+    border: c.$player1dark 4px solid;
+}
+.player-pawn2{
+    background-color: c.$player2;
+    border: c.$player2dark 4px solid;
+}
+.player-pawn3{
+    background-color: c.$player3;
+    border: c.$player3dark 4px solid;
+}
+.player-pawn4{
+    background-color: c.$player4;
+    border: c.$player4dark 4px solid;
+}
 
-.player-token.player-1 {
-    background-color: red; }
-.player-token.player-2 {
-    background-color: blue; }
-.player-token.player-3 {
-    background-color: green; }
-.player-token.player-4 {
-    background-color: yellow; }
+// .player-token.player-1 {
+//     background-color: red; }
+// .player-token.player-2 {
+//     background-color: blue; }
+// .player-token.player-3 {
+//     background-color: green; }
+// .player-token.player-4 {
+//     background-color: yellow; }
 
 @keyframes move-token {
     0% { transform: translate(0, 0); }
