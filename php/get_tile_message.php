@@ -143,7 +143,7 @@ if (isset($_GET['location'])) {
                     $output_html_message .= '<p class="restaurant-cost">Koszty za jedzenie wyniosły Cię: ' . htmlspecialchars($tile['base_rent']) . ' $</p>';
                 }
             } else {
-                $output_html_message .= '<h3 class="restaurant">Restauracja ' . htmlspecialchars($tile['name']) . ' - ' . htmlspecialchars($tile['cost']) . ' $</h3><p class="restaurant spec">' . htmlspecialchars($tile['specialization']) . '</p><p class="restaurant des">' . htmlspecialchars($tile['full_description']) . '</p>';
+                $output_html_message .= '<h3 class="restaurant">Restauracja ' . htmlspecialchars($tile['name']) . ' - ' . htmlspecialchars($tile['cost']) . ' $</h3><p class="restaurant spec">' . htmlspecialchars($tile['specialization']) . '</p>';
             }
         } 
     } elseif (

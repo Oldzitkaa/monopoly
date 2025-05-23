@@ -447,11 +447,12 @@ $breakpoint-desktop: 768px;
     margin-bottom: $spacing-lg;
     width: 100%;
     flex-shrink: 0;
+    align-items: stretch;
 }
 
 .card-slot {
     flex: 1;
-    height: 100px;
+    min-height: 150px;
     border: 3px dashed #9c997f;;
     border-radius: $border-radius-md;
     display: flex;
@@ -461,4 +462,6 @@ $breakpoint-desktop: 768px;
     color: #000000;
     background-color: c.$white2;
     box-shadow: $shadow-sm;
+    word-break: break-word;
+    text-align: center;
 }

@@ -324,7 +324,7 @@ a {
     transition: max-height $transition-fast $transition-ease, opacity $transition-fast $transition-ease, visibility $transition-fast $transition-ease;
 
     .player-info-box.active & {
-        max-height: 250px; // Adjusted for visible content height when active
+        max-height: 250px;
         opacity: 1;
         visibility: visible;
         overflow-y: auto;
@@ -930,21 +930,22 @@ a {
     .player-info-box.active {
         .properties,
         .skills-content {
-            margin-bottom: $spacing-md;
-            padding: $spacing-sm;
+            margin-bottom: $spacing-sm;
+            padding: $spacing-xs;
         }
 
         .property-item {
-            padding: $spacing-xs 0;
-            min-height: 28px;
+            padding: 2px 0;
+            min-height: 24px;
         }
 
         .property-name,
         .property-value {
-            font-size: 0.85em;
+            font-size: 0.75em;
         }
     }
 }
+
 
 @keyframes slideIn {
     from {
