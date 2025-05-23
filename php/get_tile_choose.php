@@ -9,9 +9,16 @@ if (!isset($_SESSION['game_id'])) {
 }
 $gameId = $_SESSION['game_id'];
 // $current_player_id = $_SESSION['player_id'];
-$current_player_id = 37;
+$current_player_id = 33;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 $duel_action = isset($_GET['duel']) ? $_GET['duel'] : '';
+
+// Walidacja player_id_for_duel_context
+if ($player_id_for_duel_context === null) {
+    echo "<p style='color: red;'>Błąd: Brak ID gracza dla kontekstu akcji.</p>";
+    exit();
+}
+
 
 include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
