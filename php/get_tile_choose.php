@@ -9,16 +9,10 @@ if (!isset($_SESSION['game_id'])) {
 }
 $gameId = $_SESSION['game_id'];
 // $current_player_id = $_SESSION['player_id'];
-$current_player_id = 33;
+// $current_player_id = 37;
+$current_player_id = isset($_GET['player_id']) ? (int)$_GET['player_id'] : null;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 $duel_action = isset($_GET['duel']) ? $_GET['duel'] : '';
-
-// Walidacja player_id_for_duel_context
-if ($player_id_for_duel_context === null) {
-    echo "<p style='color: red;'>Błąd: Brak ID gracza dla kontekstu akcji.</p>";
-    exit();
-}
-
 
 include_once './database_connect.php';
 if (!isset($mysqli) || $mysqli->connect_errno) {
@@ -122,42 +116,8 @@ $tile = $tiles_all[$location] ?? null;
 $output_html = '';
 
 // pola
-
-// $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
-
-// // losowanie kart niespodzianki
-// $drawnCard = getRandomActionCard($mysqli);
-// if ($drawnCard) {
-//     $output_html_message .= '<p class="surprise-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-// } else {
-//     $output_html_message .= '<p class="surprise-description">Nie znaleziono kart niespodzianek do wylosowania.</p>';
-// }
-// if ($duel_action === 'draw_card') {
-//     // pojedynek
-//     $rival_id = isset($_GET['rival_id']) ? (int)$_GET['rival_id'] : null;
-
-//     if ($rival_id === null) {
-//         echo "<p style='color: red;'>Błąd: Brak ID rywala dla pojedynku.</p>";
-//         exit();
-//     }
-
-//     $drawnCard = getRandomDuelCard($mysqli);
-
-//     // if ($drawnCard) {
-//     //     $rival_name = $players[$rival_id]['name_player'] ?? 'Nieznany Rywal';
-//     //     echo '<p class="duel-description">Wybrano rywala: ' . htmlspecialchars($rival_name) . '</p>';
-//     //     echo '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-//     // } else {
-//     //     echo '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
-//     // }
-//     // exit();
-
-// } elseif (
-//     $location === 2 || $location === 13 || $location === 17 ||
-//     $location === 26 || $location === 34 || $location === 41
-
-
 if (
+    // pojedynek
     $location === 2 || $location === 13 || $location === 17 ||
     $location === 26 || $location === 34 || $location === 41
 ) {
@@ -179,6 +139,7 @@ if (
         foreach ($rival_players_data as $player_data) {
             $output_html .= '<button class="action-button btn-player' . htmlspecialchars($player_data['turn_order']) . '" onclick="randomCard()" data-rival-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
+
         $output_html .= '<div id="duel-card-result" class="duel-card-result"></div>';
         if ($drawnCard) {
             $output_html .= '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';

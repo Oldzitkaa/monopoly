@@ -145,14 +145,13 @@ if (!empty($player)) {
 }
 
 $initialCurrentTurnPlayerId = null;
-if (isset($_SESSION['player_id'])) { // Assuming the *viewer's* player ID is in session
+if (isset($_SESSION['player_id'])) { 
     $viewerPlayerId = (int)$_SESSION['player_id'];
 } else {
-    $viewerPlayerId = 0; // Fallback or handle appropriately if no player is logged in
+    $viewerPlayerId = 0; 
     error_log("Błąd: ID gracza przeglądającego stronę nie znaleziono w sesji.");
 }
-// Fetch the current_player_id from the 'games' table
-// This represents whose turn it *is* in the game, not necessarily the viewer
+
 $sql_current_turn = "SELECT current_player_id FROM games WHERE id = ? LIMIT 1";
 $stmt_current_turn = $mysqli->prepare($sql_current_turn);
 if ($stmt_current_turn) {
@@ -167,6 +166,27 @@ if ($stmt_current_turn) {
     error_log("Błąd przygotowania zapytania SQL dla current_player_id: " . $mysqli->error);
 }
 
+// aktualny gracz
+$current_player_turn_data = []; 
+if ($initialCurrentTurnPlayerId !== null) {
+    $sql_current_player_turn = "SELECT turn_order, name, coins FROM players WHERE id = ?";
+    $stmt_current_player_turn = $mysqli->prepare($sql_current_player_turn);
+
+    if ($stmt_current_player_turn) {
+        $stmt_current_player_turn->bind_param('i', $initialCurrentTurnPlayerId);
+        $stmt_current_player_turn->execute();
+        $result_current_player_turn = $stmt_current_player_turn->get_result();
+
+        if ($result_current_player_turn->num_rows > 0) {
+            $current_player_turn_data = $result_current_player_turn->fetch_assoc();
+        } else {
+            error_log("Nie znaleziono gracza, którego jest aktualna tura (ID: " . $initialCurrentTurnPlayerId . ")");
+        }
+        $stmt_current_player_turn->close();
+    } else {
+        error_log("Błąd przygotowania zapytania SQL dla gracza aktualnej tury: " . $mysqli->error);
+    }
+}
 
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
@@ -339,6 +359,15 @@ function generatePlayerPropertiesTable($properties) {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
 
+               if (!empty($current_player_turn_data)) {
+                    // Używamy htmlspecialchars dla bezpieczeństwa, aby zapobiec atakom XSS
+                    echo "<div class='current-player current-player" . htmlspecialchars($initialCurrentTurnPlayerId) . "'>";
+                    echo htmlspecialchars($current_player_turn_data['name']);
+                    echo "</div>";
+                } else {
+                    // Jeśli z jakiegoś powodu dane gracza nie zostały załadowane (np. gra jeszcze nie rozpoczęta, błąd w DB)
+                    echo "<div class='current-player current-player-display'>Ładowanie...</div>";
+                }
                 ?>
 
             </div>
@@ -402,9 +431,9 @@ function generatePlayerPropertiesTable($properties) {
     </div>
 </div>
 <script>
-    let currentPlayerId = <?= json_encode($viewerPlayerId); ?>; // ZMIENIONO Z 'const' NA 'let'
+    let currentPlayerId = <?= json_encode($viewerPlayerId); ?>;
     const gameId = <?= json_encode($gameId); ?>;
-    const initialCurrentTurnPlayerId = <?= json_encode($initialCurrentTurnPlayerId); ?>; // THIS IS THE NEW LINE
+    const initialCurrentTurnPlayerId = <?= json_encode($initialCurrentTurnPlayerId); ?>;
     console.log('gameId ustawione dla JS:', gameId);
     console.log('currentPlayerId (viewer) ustawione dla JS:', currentPlayerId);
     console.log('initialCurrentTurnPlayerId (current turn) ustawione dla JS:', initialCurrentTurnPlayerId);
