@@ -304,6 +304,7 @@ if ($currentPlayerId === null && !empty($player)) {
     <link rel="stylesheet" href="../css/style_gameboard.css">
     <link rel="stylesheet" href="../css/roll_dice.css">
     <link rel="stylesheet" href="../css/gameboard_inner.css">
+    <link rel="stylesheet" href="../css/gameboard_side.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 <?php

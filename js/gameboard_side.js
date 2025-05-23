@@ -11,4 +11,4 @@ function randomCard() {
     duelCardResult.style.opacity = '1';
 };
 
-// socket
+// socket, boostrap
