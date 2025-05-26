@@ -5,34 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
     const cardSlotText = document.querySelector('.card-slot.card-text');
-    const cardSlotTextMessage = document.querySelector('.text-message');
     const cardSlotChoose = document.querySelector('.card-slot.card-choose');
-
-    // These variables are assumed to be defined globally in the HTML
-    // from your PHP file (gameboard.php) like this:
-    // <script>
-    //     const gameId = <?php echo json_encode($gameId); ?>;
-    //     let currentPlayerId = <?php echo json_encode($currentPlayerId); ?>; // The ID of the player currently viewing the board (THIS WILL NOW CHANGE)
-    //     const initialCurrentTurnPlayerId = <?php echo json_encode($initialCurrentTurnPlayerId); ?>; // The ID of the player whose turn it is when the page loads
-    // </script>
-    // WAŻNE: Upewnij się, że w gameboard.php zmienna currentPlayerId jest deklarowana jako 'let', a nie 'const'.
-    // Przykład w gameboard.php:
-    // <script>
-    //     const gameId = <?php echo json_encode($gameId); ?>;
-    //     let currentPlayerId = <?php echo json_encode($currentPlayerId); ?>; // Zmieniono na 'let'
-    //     const initialCurrentTurnPlayerId = <?php echo json_encode($initialCurrentTurnPlayerId); ?>;
-    // </script>
-    let currentTurnPlayerId = initialCurrentTurnPlayerId; // This will be updated after each roll
-
-    // Interval for refreshing game state (every 3 seconds)
+    let currentTurnPlayerId = initialCurrentTurnPlayerId;
     const GAME_STATE_REFRESH_INTERVAL = 3000;
     let gameStateInterval;
 
-    /**
-     * Translates property type to Polish.
-     * @param {string} type - Property type (e.g., 'restaurant', 'hotel').
-     * @returns {string} Translated type.
-     */
     function translatePropertyType(type) {
         switch (type) {
             case 'restaurant': return 'Restauracja';
@@ -41,11 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Translates region name to Polish.
-     * @param {string} region - Region name (e.g., 'Azja', 'Amerykapln').
-     * @returns {string} Translated region name.
-     */
     function translateRegion(region) {
         switch (region) {
             case 'Azja': return 'Azja';
@@ -64,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Basic validation of initial variables
     if (!diceImage || !wynikTekst || !rollDiceButton || typeof gameId === 'undefined' || typeof currentPlayerId === 'undefined' || typeof initialCurrentTurnPlayerId === 'undefined') {
         if (rollDiceButton) {
             rollDiceButton.textContent = 'Błąd konfiguracji gry (brak ID)';
@@ -74,26 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Debug: Logging initial values
     console.log('Initial configuration:', {
         gameId: gameId,
         currentPlayerId: currentPlayerId,
         initialCurrentTurnPlayerId: initialCurrentTurnPlayerId
     });
 
-    // Initial check of whose turn it is after page load
     updateRollButtonState();
     updateCurrentPlayerIndicator(currentTurnPlayerId);
-
-    // Start refreshing game state every X seconds
     startGameStateRefresh();
-
-    // Add event listener for dice roll button click
     rollDiceButton.addEventListener('click', handleRollDice);
 
-    /**
-     * Starts the dice animation.
-     */
     function startDiceAnimation() {
         if (diceImage) {
             diceImage.classList.add('animacja');
@@ -103,15 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Updates the state of the dice roll button (enabled/disabled)
-     * depending on whether it's the current player's turn.
-     */
     function updateRollButtonState() {
-        // For an offline game on one device, currentPlayerId IS the currentTurnPlayerId
-        // So the button should always be enabled when it's "this device's" turn (which is always)
-        // However, the logic below still checks against currentTurnPlayerId which is updated from server.
-        // This is good for showing whose turn it is even if the button is always enabled.
         console.log('Sprawdzanie stanu przycisku - currentPlayerId:', currentPlayerId, 'currentTurnPlayerId:', currentTurnPlayerId);
 
         if (currentPlayerId === currentTurnPlayerId) {
@@ -130,17 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Helper function for displaying notifications
     function showNotification(message) {
         console.log('Powiadomienie:', message);
-
-        // Remove previous notification if it exists
         const existingNotification = document.querySelector('.game-notification');
         if (existingNotification) {
             existingNotification.remove();
         }
-
-        // Create new notification
         const notification = document.createElement('div');
         notification.className = 'game-notification';
         notification.style.cssText = `
@@ -158,8 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         notification.textContent = message;
         document.body.appendChild(notification);
-
-        // Automatically remove after 3 seconds
         setTimeout(() => {
             if (document.body.contains(notification)) {
                 notification.style.animation = 'slideOut 0.3s ease';
@@ -172,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    // Add CSS styles for notification animations
     const notificationStyles = document.createElement('style');
     notificationStyles.textContent = `
         @keyframes slideIn {
@@ -199,47 +145,29 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(notificationStyles);
 
-    /**
-     * Updates the visual indicator of the active player's turn.
-     * @param {number} playerId - ID of the player whose turn is active.
-     */
     function updateCurrentPlayerIndicator(playerId) {
         playerInfoBoxes.forEach(box => {
-            box.classList.remove('active-turn'); // Remove active turn class from all
+            box.classList.remove('active-turn');
         });
 
         const currentPlayerBox = document.querySelector(`.player-info-box[data-player-id="${playerId}"]`);
         if (currentPlayerBox) {
-            currentPlayerBox.classList.add('active-turn'); // Add class to active player
+            currentPlayerBox.classList.add('active-turn');
         }
     }
 
-    /**
-     * Handles dice roll: sends request to server, updates UI.
-     */
     async function handleRollDice() {
-        // Immediately disable the button to prevent multiple clicks
         rollDiceButton.disabled = true;
         wynikTekst.textContent = 'Rzut...';
         startDiceAnimation();
-
-        // Clear card slots
-        // if (cardSlotText) cardSlotText.textContent = '';
-        // if (cardSlotChoose) {
-        //     cardSlotChoose.innerHTML = '';
-        //     cardSlotChoose.style.display = 'none';
-        // }
-        if (cardSlotTextMessage) cardSlotTextMessage.textContent = '';
+        if (cardSlotText) cardSlotText.textContent = '';
         if (cardSlotChoose) {
             cardSlotChoose.innerHTML = '';
             cardSlotChoose.style.display = 'none';
         }
-
-        // Stop game state refresh during roll and action
         stopGameStateRefresh();
 
         try {
-            // Send dice roll request to PHP API
             const response = await fetch('roll_dice_api.php', {
                 method: 'POST',
                 headers: {
@@ -247,56 +175,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     game_id: gameId,
-                    player_id: currentPlayerId // Send ID of the player making the roll
+                    player_id: currentPlayerId
                 }),
             });
 
-            // Handle HTTP response errors
             if (!response.ok) {
                 const errorBody = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
                 throw new Error(`Błąd serwera (${response.status}): ${errorBody.message}`);
             }
 
             const result = await response.json();
-            console.log('Pełna odpowiedź z roll_dice_api.php:', result); // Debug
+            console.log('Pełna odpowiedź z roll_dice_api.php:', result);
 
             if (result.success) {
                 const rollResult = result.roll_result;
-                // const newLocation = result.new_location;
-                const newLocation = 2;
-                const playerWhoRolledId = currentPlayerId; // This is the player who just rolled
+                const newLocation = result.new_location;
+                // const newLocation = 2;
+                const playerWhoRolledId = currentPlayerId;
 
                 console.log(`Gracz ID: ${playerWhoRolledId}, nowa pozycja: ${newLocation}`);
-
-                // Update dice image
                 diceImage.src = `../zdj/kostki/${rollResult}.png`;
                 diceImage.alt = `Wynik: ${rollResult}`;
-
-                // Move player token on the board
                 movePlayerToken(playerWhoRolledId, newLocation);
-
-                // Update player's coins and location display
                 updatePlayerDisplay(playerWhoRolledId, result.new_coins, newLocation);
-
-                // --- KEY TURN MANAGEMENT LOGIC ---
                 console.log('PRZED aktualizacją tury - currentTurnPlayerId:', currentTurnPlayerId);
-
-                // Check various possible field names in the response
                 let nextPlayerIdFromServer = result.next_player_id || result.current_player_id || result.turn_player_id;
 
                 if (nextPlayerIdFromServer) {
                     console.log('Znaleziono next_player_id w odpowiedzi:', nextPlayerIdFromServer);
                     currentTurnPlayerId = nextPlayerIdFromServer;
-                    // For offline single-device game, currentPlayerId must also update
-                    currentPlayerId = nextPlayerIdFromServer; // <--- THIS IS THE CRUCIAL CHANGE
+                    currentPlayerId = nextPlayerIdFromServer;
                     console.log('PO aktualizacji tury - currentTurnPlayerId:', currentTurnPlayerId);
                     console.log('PO aktualizacji tury - currentPlayerId (viewer):', currentPlayerId);
-
-
-                    // Update visual indicator of active player
                     updateCurrentPlayerIndicator(currentTurnPlayerId);
 
-                    // Optionally show turn change notification
                     if (nextPlayerIdFromServer !== playerWhoRolledId) {
                         const nextPlayerName = document.querySelector(`.player-info-box[data-player-id="${nextPlayerIdFromServer}"] .player-name`);
                         if (nextPlayerName) {
@@ -305,56 +217,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     console.warn('Brak informacji o następnym graczu w odpowiedzi z serwera. Używam fallbacku.');
-                    // Fallback - if server didn't return next_player_id, find next player locally
                     const players = Array.from(document.querySelectorAll('.player-info-box')).map(box => ({
                         id: parseInt(box.dataset.playerId),
                         name: box.querySelector('.player-name').textContent
                     }));
 
-                    const currentPlayerIndex = players.findIndex(p => p.id === playerWhoRolledId); // Use playerWhoRolledId for finding index
+                    const currentPlayerIndex = players.findIndex(p => p.id === playerWhoRolledId);
                     const nextPlayerIndex = (currentPlayerIndex + 1) % players.length;
                     const nextPlayer = players[nextPlayerIndex];
 
                     if (nextPlayer) {
                         currentTurnPlayerId = nextPlayer.id;
-                        currentPlayerId = nextPlayer.id; // <--- THIS IS THE CRUCIAL CHANGE for fallback
+                        currentPlayerId = nextPlayer.id;
                         updateCurrentPlayerIndicator(currentTurnPlayerId);
                         showNotification(`Tura przeszła na: ${nextPlayer.name}`);
                         console.log('Użyto fallback dla zmiany tury na:', nextPlayer.name);
                     }
                 }
-
-                // ZMIANA: Nie włączaj przycisku rzutu kostką tutaj. Zostanie włączony po interakcji.
-                // updateRollButtonState();
-
                 if (result.new_round_started) {
                     console.log("Rozpoczęła się nowa runda!");
                     showNotification("Rozpoczęła się nowa runda!");
                 }
-
-                // Rest of the code remains unchanged...
                 setTimeout(async () => {
                     wynikTekst.textContent = rollResult;
                     try {
-                        // Get tile message
                         const messageResponse = await fetch(`get_tile_message.php?location=${newLocation}`);
                         if (!messageResponse.ok) {
                             throw new Error(`Błąd pobierania wiadomości o polu: HTTP ${messageResponse.status}`);
                         }
                         const messageHtml = await messageResponse.text();
 
-                        // if (cardSlotText) {
-                        //     cardSlotText.innerHTML = messageHtml;
-                        //     cardSlotText.style.display = 'block';
-                        //     // cardSlotText.class = 'text-message';
-                        // }
-                        if (cardSlotTextMessage) {
-                            cardSlotTextMessage.innerHTML = messageHtml;
-                            cardSlotTextMessage.style.display = 'block';
-                            // cardSlotText.class = 'text-message';
+                        if (cardSlotText) {
+                            cardSlotText.innerHTML = messageHtml;
+                            cardSlotText.style.display = 'block';
                         }
-
-                        // Get action options for the tile
                         if (cardSlotChoose) {
                             cardSlotChoose.innerHTML = '<p>Ładowanie opcji akcji...</p>';
                             cardSlotChoose.style.display = 'block';
@@ -367,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const chooseHtml = await chooseResponse.text();
 
                                 cardSlotChoose.innerHTML = chooseHtml;
-
                                 const actionButtons = cardSlotChoose.querySelectorAll('.action-button');
                                 if (actionButtons.length === 0) {
                                     updateRollButtonState();
@@ -379,46 +274,38 @@ document.addEventListener('DOMContentLoaded', () => {
                                             event.stopPropagation();
 
                                             const actionType = event.target.dataset.actionType;
-                                            const propertyId = (actionType === 'duel') ? null : (event.target.dataset.propertyId || newLocation);
-                                            const targetPlayerIdForDuel = event.target.dataset.playerId; // For duel action
 
-                                            // Additional actionType check
-                                            // if (!actionType) {
-                                            //     console.error('Błąd: Brak atrybutu data-action-type na klikniętym przycisku akcji. Sprawdź HTML generowany przez get_tile_choose.php');
-                                            //     if (cardSlotText) cardSlotText.textContent = 'Błąd: Brak typu akcji dla przycisku.';
-                                            //     return; // Stop further processing
-                                            // }
+                                            const propertyId = (actionType === 'duel') ? null : (event.target.dataset.propertyId || newLocation);
+                                            const targetPlayerIdForDuel = event.target.dataset.playerId;
                                             if (!actionType) {
                                                 console.error('Błąd: Brak atrybutu data-action-type na klikniętym przycisku akcji. Sprawdź HTML generowany przez get_tile_choose.php');
-                                                if (cardSlotTextMessage) cardSlotTextMessage.textContent = 'Błąd: Brak typu akcji dla przycisku.';
-                                                return; // Stop further processing
+                                                if (cardSlotText) cardSlotText.textContent = 'Błąd: Brak typu akcji dla przycisku.';
+                                                return;
                                             }
 
                                             console.log('Sending tile action:', {
                                                 actionType: actionType,
-                                                playerWhoRolledId: playerWhoRolledId, // This is the player who initiated the roll
+                                                playerWhoRolledId: playerWhoRolledId,
                                                 gameId: gameId,
                                                 newLocation: newLocation,
-                                                propertyId: propertyId, // Może być null dla pojedynku
-                                                targetPlayerIdForDuel: targetPlayerIdForDuel // Pass target player for duel
+                                                propertyId: propertyId,
+                                                targetPlayerIdForDuel: targetPlayerIdForDuel
                                             });
 
                                             event.target.disabled = true;
 
                                             try {
-                                                // Pass targetPlayerIdForDuel if actionType is 'duel'
                                                 await handleTileAction(actionType, playerWhoRolledId, gameId, newLocation, propertyId, targetPlayerIdForDuel);
                                             } catch (actionError) {
                                                 console.error('Błąd podczas akcji na polu:', actionError);
                                             } finally {
                                                 event.target.disabled = false;
-                                                // ZMIANA: Zawsze wyczyść sloty i odblokuj przycisk rzutu kostką po zakończeniu interakcji
                                                 if (cardSlotChoose) {
                                                     cardSlotChoose.innerHTML = '';
                                                     cardSlotChoose.style.display = 'none';
                                                 }
-                                                updateRollButtonState(); // Re-enable button after action is processed
-                                                startGameStateRefresh(); // Resume game state refresh after action completes
+                                                updateRollButtonState();
+                                                startGameStateRefresh();
                                             }
                                         });
                                     });
@@ -430,69 +317,55 @@ document.addEventListener('DOMContentLoaded', () => {
                                     cardSlotChoose.innerHTML = '<p style="color: red;">Błąd ładowania opcji akcji.</p>';
                                     cardSlotChoose.style.display = 'block';
                                 }
-                                updateRollButtonState(); // Odblokuj przycisk rzutu kostką w przypadku błędu
-                                startGameStateRefresh(); // Wznów odświeżanie stanu gry po błędzie
+                                updateRollButtonState();
+                                startGameStateRefresh();
                             }
                         } else {
                             console.warn("Element cardSlotChoose nie został znaleziony.");
-                            updateRollButtonState(); // Odblokuj przycisk rzutu kostką, jeśli nie ma slotu na akcje
-                            startGameStateRefresh(); // Wznów odświeżanie stanu gry
+                            updateRollButtonState();
+                            startGameStateRefresh();
                         }
 
                     } catch (msgError) {
                         console.error("Błąd podczas pobierania wiadomości o polu:", msgError);
-                        // if (cardSlotText) {
-                        //     cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
-                        // }
-                        if (cardSlotTextMessage) {
-                            cardSlotTextMessage.textContent = "Błąd ładowania wiadomości o polu.";
+                        if (cardSlotText) {
+                            cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
                         }
                         if (cardSlotChoose) {
                             cardSlotChoose.innerHTML = '';
                             cardSlotChoose.style.display = 'none';
                         }
-                        updateRollButtonState(); // Odblokuj przycisk rzutu kostką w przypadku błędu
-                        startGameStateRefresh(); // Wznów odświeżanie stanu gry po błędzie
+                        updateRollButtonState();
+                        startGameStateRefresh();
                     }
                 }, 2000);
 
             } else {
-                // Handle error returned by server
                 wynikTekst.textContent = `Błąd: ${result.message}`;
-                // if (cardSlotText) cardSlotText.textContent = result.message;
-                if (cardSlotTextMessage) cardSlotTextMessage.textContent = result.message;
+                if (cardSlotText) cardSlotText.textContent = result.message;
                 if (cardSlotChoose) {
                     cardSlotChoose.innerHTML = '';
                     cardSlotChoose.style.display = 'none';
                 }
-                updateRollButtonState(); // Odblokuj przycisk rzutu kostką w przypadku błędu
-                startGameStateRefresh(); // Wznów odświeżanie stanu gry po błędzie
+                updateRollButtonState();
+                startGameStateRefresh();
             }
 
         } catch (error) {
-            // Handle network errors
             console.error('Błąd komunikacji z serwerem:', error);
             wynikTekst.textContent = `Błąd: ${error.message}`;
-            // if (cardSlotText) {
-            //     cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
-            // }
-            if (cardSlotTextMessage) {
-                cardSlotTextMessage.textContent = `Błąd sieci/serwera: ${error.message}`;
+            if (cardSlotText) {
+                cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
             }
             if (cardSlotChoose) {
                 cardSlotChoose.innerHTML = '';
                 cardSlotChoose.style.display = 'none';
             }
-            updateRollButtonState(); // Odblokuj przycisk rzutu kostką w przypadku błędu
-            startGameStateRefresh(); // Wznów odświeżanie stanu gry po błędzie
+            updateRollButtonState();
+            startGameStateRefresh();
         }
     }
 
-    /**
-     * Moves the player token to a new position on the board.
-     * @param {number} playerId - ID of the player whose token is to be moved.
-     * @param {number} newTileId - ID of the tile to which the token is to be moved.
-     */
     function movePlayerToken(playerId, newTileId) {
         const playerToken = document.querySelector(`.player-token[data-player-id="${playerId}"]`);
         const newTile = document.getElementById(`space-${newTileId}`);
@@ -505,7 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newTilePlayersContainer = newTile.querySelector('.players-on-tile');
             if (newTilePlayersContainer) {
-                // Prevent adding token if it's already there
                 if (!newTilePlayersContainer.querySelector(`.player-token[data-player-id="${playerId}"]`)) {
                     newTilePlayersContainer.appendChild(playerToken);
                 }
@@ -515,20 +387,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Add event listeners for each player info box
     playerInfoBoxes.forEach(box => {
         box.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Prevent propagation so clicking a box doesn't close others
+            e.stopPropagation();
 
             const isActive = box.classList.contains('active');
 
-            // Close all open player boxes
             playerInfoBoxes.forEach(otherBox => {
                 otherBox.classList.remove('active');
             });
             playerInfoContainer.classList.remove('has-active-player');
 
-            // If the clicked box was not active, open it
             if (!isActive) {
                 box.classList.add('active');
                 playerInfoContainer.classList.add('has-active-player');
@@ -544,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         const data = await loadPlayerDetails(playerId);
                         if (data) {
-                            // Populate properties table
                             if (propertiesTableContainer) {
                                 propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3>';
                                 if (Array.isArray(data.properties) && data.properties.length > 0) {
@@ -584,7 +452,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
 
-                            // Populate skills table
                             if (skillsTableContainer && data.player_stats) {
                                 skillsTableContainer.innerHTML = '<h3>Umiejętności</h3>';
                                 let tableHtml = '<table class="player-stats-table"><thead><tr><th>Umiejętność</th><th>Wartość</th></tr></thead><tbody>';
@@ -609,7 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Close open player boxes if clicked outside
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.player-info-box')) {
             playerInfoBoxes.forEach(box => {
@@ -619,11 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /**
-     * Loads player details (properties and skills) from the server.
-     * @param {number} playerId - Player ID.
-     * @returns {Promise<object|null>} Object with player data or null on error.
-     */
     async function loadPlayerDetails(playerId) {
         try {
             const response = await fetch('get_player_properties.php', {
@@ -655,12 +516,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Updates displayed player information (coins, location, properties/skills).
-     * @param {number} playerId - ID of the player to update.
-     * @param {number} newCoins - New player coin count.
-     * @param {number|null} newLocation - New player location (can be null if only updating coins).
-     */
     function updatePlayerDisplay(playerId, newCoins, newLocation) {
         const playerBox = document.querySelector(`.player-info-box[data-player-id="${playerId}"]`);
         if (playerBox) {
@@ -670,11 +525,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (coinsSpan) {
                 coinsSpan.textContent = `${newCoins} zł`;
             }
-            if (locationSpan && newLocation !== null) { // Update location only if provided
+            if (locationSpan && newLocation !== null) {
                 locationSpan.textContent = `Pole ${newLocation}`;
             }
 
-            // Refresh properties/skills only if the box is currently active (open)
             if (playerBox.classList.contains('active')) {
                 const propertiesTableContainer = playerBox.querySelector('.player-properties-table-container');
                 const skillsTableContainer = playerBox.querySelector('.player-skills-table-container');
@@ -684,7 +538,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 loadPlayerDetails(playerId).then(data => {
                     if (data) {
-                        // Populate properties table
                         if (propertiesTableContainer) {
                             propertiesTableContainer.innerHTML = '<h3>Nieruchomości</h3>';
                             if (Array.isArray(data.properties) && data.properties.length > 0) {
@@ -724,7 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
 
-                        // Populate skills table
                         if (skillsTableContainer && data.player_stats) {
                             skillsTableContainer.innerHTML = '<h3>Umiejętności</h3>';
                             let tableHtml = '<table class="player-stats-table"><thead><tr><th>Umiejętność</th><th>Wartość</th></tr></thead><tbody>';
@@ -748,19 +600,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Sends a request to the server to process a tile action (e.g., buy, pay rent).
-     * @param {string} actionType - Type of action (e.g., 'buy_restaurant', 'pay_rent').
-     * @param {number} playerId - ID of the player performing the action.
-     * @param {number} gameId - ID of the current game.
-     * @param {number} location - ID of the tile where the action is performed.
-     * @param {number|null} propertyId - Optional property ID (if action concerns a specific property).
-     * @param {number|null} targetPlayerIdForDuel - Optional target player ID for duel action.
-     */
     async function handleTileAction(actionType, playerId, gameId, location, propertyId = null, targetPlayerIdForDuel = null) {
         console.log(`Wykonuję akcję: ${actionType} dla gracza ${playerId} na polu ${location}`);
 
-        // Validate required parameters before sending
         if (!actionType || playerId === null || gameId === null || location === null) {
             console.error('Missing required parameters for tile action:', {
                 actionType: actionType,
@@ -769,24 +611,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 location: location
             });
 
-            // if (cardSlotText) {
-            //     cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
-            // }
-            if (cardSlotTextMessage) {
-                cardSlotTextMessage.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
+            if (cardSlotText) {
+                cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
             }
             return;
         }
 
-        // Przygotowanie ciała żądania
         const requestBody = {
             action_type: actionType,
-            player_id: parseInt(playerId), // Ensure it's a number
-            game_id: parseInt(gameId),     // Ensure it's a number
-            location: parseInt(location)   // Ensure it's a number
+            player_id: parseInt(playerId),
+            game_id: parseInt(gameId),
+            location: parseInt(location)
         };
 
-        // Add property_id if provided (for actions like buying specific properties)
         if (propertyId !== null && propertyId !== undefined) {
             requestBody.property_id = parseInt(propertyId);
         }
@@ -863,30 +700,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // if (cardSlotText) {
-                //     cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
-                // }
-                if (cardSlotTextMessage) {
-                    cardSlotTextMessage.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
+                if (cardSlotText) {
+                    cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
                 }
 
             } else {
                 console.error("Błąd podczas akcji na polu:", actionResult.message);
-                // if (cardSlotText) {
-                //     cardSlotText.textContent = `Błąd: ${actionResult.message}`;
-                // }
-                if (cardSlotTextMessage) {
-                    cardSlotTextMessage.textContent = `Błąd: ${actionResult.message}`;
+                if (cardSlotText) {
+                    cardSlotText.textContent = `Błąd: ${actionResult.message}`;
                 }
             }
 
         } catch (error) {
             console.error("Błąd sieci/serwera podczas wykonywania akcji na polu:", error);
-            // if (cardSlotText) {
-            //     cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
-            // }
-            if (cardSlotTextMessage) {
-                cardSlotTextMessage.textContent = `Błąd sieci/serwera: ${error.message}`;
+            if (cardSlotText) {
+                cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
             }
             throw error; // Re-throw error to be caught by the calling function
         }

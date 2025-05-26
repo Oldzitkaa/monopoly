@@ -1,10 +1,9 @@
 <?php
-// process_tile_action.php
-// WYŁĄCZ wyświetlanie błędów w odpowiedzi HTTP
+
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
-ini_set('log_errors', 1); // Zapisuj błędy do loga, ale nie wyświetlaj
-ini_set('error_log', __DIR__ . '/php_errors.log'); // Ścieżka do pliku logów
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/php_errors.log');
 header('Content-Type: application/json');
 $response = [
     'success' => false,
@@ -30,30 +29,26 @@ try {
         throw new Exception('Nie można odczytać danych wejściowych.');
     }
     $data = json_decode($inputData, true);
-    // Sprawdź błędy JSON
     if (json_last_error() !== JSON_ERROR_NONE) {
         $response['message'] = 'Nieprawidłowy format danych JSON: ' . json_last_error_msg();
         http_response_code(400);
         echo json_encode($response);
         exit;
     }
-    // Walidacja podstawowych parametrów
     $actionType = $data['action_type'] ?? null;
     $playerId = $data['player_id'] ?? null;
     $gameId = $data['game_id'] ?? null;
-    $location = $data['location'] ?? null; // To jest tile_id
+    $location = $data['location'] ?? null;
     if (!$actionType || $playerId === null || $gameId === null || $location === null) {
         $response['message'] = 'Brak wymaganych parametrów (action_type, player_id, game_id, location).';
-        $response['received_data'] = $data; // Dodaj to do debugowania
+        $response['received_data'] = $data;
         http_response_code(400);
         echo json_encode($response);
         exit;
     }
-    // Rozpocznij transakcję bazy danych
     $mysqli->begin_transaction();
-    $nextPlayerId = null; // Zmienna do przechowywania ID kolejnego gracza
-    $newRoundStarted = false; // Zmienna informująca o rozpoczęciu nowej rundy
-    // Pobierz aktualne dane gracza (monety, pozycja)
+    $nextPlayerId = null;
+    $newRoundStarted = false;
     $stmt = $mysqli->prepare("SELECT coins, location FROM players WHERE id = ? AND game_id = ?");
     if (!$stmt) {
         throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -68,7 +63,6 @@ try {
     }
     $playerCoins = $playerData['coins'];
     $playerLocation = $playerData['location'];
-
     $actionsNotStrictlyBoundToLocation = [
         'duel', 'not_interested', 'skip_action',
         'accept_surprise', 'accept_training', 'accept_vacation',
@@ -79,11 +73,9 @@ try {
     }
     switch ($actionType) {
         case 'buy_property':
-        case 'buy_restaurant': // Dodaj obsługę kupna restauracji
-        case 'buy_hotel': // Dodaj obsługę kupna hotelu
-            // Wymagany property_id, który będzie ID pola z tabeli 'tiles'
-            $propertyId = $data['property_id'] ?? $location; // Użyj location jako fallback
-            // 1. Pobierz dane pola z 'tiles' (koszt) i 'game_tiles' (current_owner_id)
+        case 'buy_restaurant':
+        case 'buy_hotel':
+            $propertyId = $data['property_id'] ?? $location;
             $stmt = $mysqli->prepare("SELECT t.cost, t.type, t.name, gt.current_owner_id FROM tiles t LEFT JOIN game_tiles gt ON t.id = gt.tile_id AND gt.game_id = ? WHERE t.id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -103,7 +95,6 @@ try {
             if ($purchasePrice === null || $purchasePrice <= 0) {
                 throw new Exception("To pole nie może być kupione.");
             }
-            // Sprawdź zgodność typu akcji z typem pola
             $tileType = $tileData['type'];
             if ($actionType === 'buy_restaurant' && $tileType !== 'restaurant') {
                 throw new Exception("Nie można kupić restauracji na tym polu - to nie jest restauracja.");
@@ -111,11 +102,9 @@ try {
             if ($actionType === 'buy_hotel' && $tileType !== 'hotel') {
                 throw new Exception("Nie można kupić hotelu na tym polu - to nie jest hotel.");
             }
-            // 2. Sprawdź, czy gracz ma wystarczająco pieniędzy
             if ($playerCoins < $purchasePrice) {
                 throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} zł.");
             }
-            // 3. Zaktualizuj tabelę 'game_tiles'
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM game_tiles WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -141,7 +130,6 @@ try {
                 throw new Exception("Błąd wykonania zapytania game_tiles: " . $stmt->error);
             }
             $stmt->close();
-            // 4. Zaktualizuj saldo gracza
             $newPlayerCoins = $playerCoins - $purchasePrice;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
@@ -156,13 +144,11 @@ try {
             $response['success'] = true;
             $response['message'] = "Kupiłeś {$propertyTypeName} \"{$tileData['name']}\" za {$purchasePrice} zł.";
             $response['new_coins'] = $newPlayerCoins;
-            // Po zakupie, tura zazwyczaj się kończ
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
         case 'pay_rent':
-            // Implementacja pay_rent
             $propertyId = $data['property_id'] ?? $location;
             $stmt = $mysqli->prepare("
                 SELECT
@@ -210,12 +196,10 @@ try {
                 $response['new_coins'] = $playerCoins;
                 break;
             }
-            // Oblicz czynsz (uproszczona wersja - tylko base_rent)
-            $rentAmount = $tileInfo['base_rent'] * ($level + 1); // Proste mnożenie przez poziom
+            $rentAmount = $tileInfo['base_rent'] * ($level + 1);
             if ($playerCoins < $rentAmount) {
                 throw new Exception("Masz za mało pieniędzy na opłacenie czynszu ({$rentAmount} zł)! Obecne saldo: {$playerCoins} zł.");
             }
-            // Odejmij czynsz od gracza
             $newPlayerCoins = $playerCoins - $rentAmount;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
@@ -226,7 +210,6 @@ try {
                 throw new Exception("Błąd odejmowania czynszu: " . $stmt->error);
             }
             $stmt->close();
-            // Dodaj czynsz do właściciela
             $stmt = $mysqli->prepare("UPDATE players SET coins = coins + ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania UPDATE owner coins: " . $mysqli->error);
@@ -240,7 +223,6 @@ try {
             $response['message'] = "Zapłacono czynsz w wysokości {$rentAmount} zł za \"{$tileInfo['name']}\".";
             $response['new_coins'] = $newPlayerCoins;
             $response['affected_player_id'] = $ownerId;
-            // Pobierz nowe saldo właściciela
             $stmt = $mysqli->prepare("SELECT coins FROM players WHERE id = ? AND game_id = ?");
             if ($stmt) {
                 $stmt->bind_param('ii', $ownerId, $gameId);
@@ -255,7 +237,7 @@ try {
             $response['new_round_started'] = $newRoundStarted;
             break;
         case 'pass_turn':
-        case 'skip_action': // Dodaj obsługę pomijania akcji
+        case 'skip_action':
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Tura zakończona pomyślnie.';
@@ -264,9 +246,7 @@ try {
             $response['new_round_started'] = $newRoundStarted;
             break;
         case 'upgrade_property':
-            // Implementacja upgrade nieruchomości
             $propertyId = $data['property_id'] ?? $location;
-            // Pobierz informacje o nieruchomości
             $stmt = $mysqli->prepare("
                 SELECT
                     gt.current_owner_id,
@@ -308,7 +288,6 @@ try {
             if ($playerCoins < $upgradeCost) {
                 throw new Exception("Masz za mało pieniędzy na ulepszenie ({$upgradeCost} zł).");
             }
-            // Wykonaj ulepszenie
             $newLevel = $upgradeInfo['current_level'] + 1;
             $stmt = $mysqli->prepare("UPDATE game_tiles SET current_level = ? WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
@@ -319,7 +298,6 @@ try {
                 throw new Exception("Błąd wykonania aktualizacji poziomu: " . $stmt->error);
             }
             $stmt->close();
-            // Zaktualizuj saldo gracza
             $newPlayerCoins = $playerCoins - $upgradeCost;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
@@ -333,13 +311,11 @@ try {
             $response['success'] = true;
             $response['message'] = "Ulepszono \"{$upgradeInfo['name']}\" do poziomu {$newLevel} za {$upgradeCost} zł.";
             $response['new_coins'] = $newPlayerCoins;
-            // Po ulepszeniu zazwyczaj kończy się tura
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
         case 'mortgage_property':
-            // Implementacja zastawiania nieruchomości
             $propertyId = $data['property_id'] ?? $location;
             $stmt = $mysqli->prepare("
                 SELECT
@@ -372,9 +348,8 @@ try {
             if ($mortgageInfo['is_mortgaged']) {
                 throw new Exception("Ta nieruchomość jest już zastawiona.");
             }
-            // Wartość zastawu to zazwyczaj połowa kosztu zakupu
             $mortgageValue = floor($mortgageInfo['cost'] / 2);
-            // Zastaw nieruchomość
+
             $stmt = $mysqli->prepare("UPDATE game_tiles SET is_mortgaged = 1 WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd zastawiania nieruchomości: " . $mysqli->error);
@@ -399,86 +374,194 @@ try {
             $response['message'] = "Zastawiono \"{$mortgageInfo['name']}\" za {$mortgageValue} zł.";
             $response['new_coins'] = $newPlayerCoins;
             break;
-        case 'duel':
-            // ZMIANA: Poprawne pobieranie targetPlayerId z 'target_player_id'
-            $targetPlayerId = $data['target_player_id'] ?? null;
-            if ($targetPlayerId === null) {
-                throw new Exception("Nie wybrano rywala do pojedynku.");
-            }
-            if ($targetPlayerId == $playerId) {
-                throw new Exception("Nie możesz pojedynkować się sam ze sobą!");
-            }
-            // Get target player's coins and name
-            $stmt = $mysqli->prepare("SELECT coins, name FROM players WHERE id = ? AND game_id = ?");
-            if (!$stmt) {
-                throw new Exception("Błąd przygotowania zapytania dla rywala: " . $mysqli->error);
-            }
-            $stmt->bind_param('ii', $targetPlayerId, $gameId);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $targetPlayerData = $result->fetch_assoc();
-            $stmt->close();
-            if (!$targetPlayerData) {
-                throw new Exception("Rywal o ID {$targetPlayerId} nie istnieje w tej grze.");
-            }
-            $targetPlayerCoins = $targetPlayerData['coins'];
-            $targetPlayerName = $targetPlayerData['name'];
-            // Simple duel logic: each player "rolls a dice" (random number)
-            $playerRoll = rand(1, 6);
-            $targetRoll = rand(1, 6);
-            $duelMessage = "Pojedynek między Tobą a {$targetPlayerName}! Twój rzut: {$playerRoll}, rzut {$targetPlayerName}: {$targetRoll}. ";
-            $duelAmount = 100; // Amount to win/lose in duel
-            $affectedPlayerId = null;
-            $affectedPlayerNewCoins = null;
-            if ($playerRoll > $targetRoll) {
-                // Player wins
-                $newPlayerCoins = $playerCoins + $duelAmount;
-                $newTargetPlayerCoins = $targetPlayerCoins - $duelAmount;
-                $duelMessage .= "Wygrałeś! Otrzymujesz {$duelAmount} zł od {$targetPlayerName}.";
-            } elseif ($playerRoll < $targetRoll) {
-                // Player loses
-                $newPlayerCoins = $playerCoins - $duelAmount;
-                $newTargetPlayerCoins = $targetPlayerCoins + $duelAmount;
-                $duelMessage .= "Przegrałeś! Płacisz {$duelAmount} zł dla {$targetPlayerName}.";
-            } else {
-                // Tie
-                $newPlayerCoins = $playerCoins;
-                $newTargetPlayerCoins = $targetPlayerCoins;
-                $duelMessage .= "Remis! Nikt nie płaci.";
-            }
-            // Update player's coins
-            $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
-            if (!$stmt) {
-                throw new Exception("Błąd przygotowania zapytania aktualizacji monet gracza: " . $mysqli->error);
-            }
-            $stmt->bind_param('iii', $newPlayerCoins, $playerId, $gameId);
-            if (!$stmt->execute()) {
-                throw new Exception("Błąd aktualizacji monet gracza: " . $stmt->error);
-            }
-            $stmt->close();
-            // Update target player's coins (if not a tie)
-            if ($playerRoll !== $targetRoll) {
-                $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
-                if (!$stmt) {
-                    throw new Exception("Błąd przygotowania zapytania aktualizacji monet rywala: " . $mysqli->error);
-                }
-                $stmt->bind_param('iii', $newTargetPlayerCoins, $targetPlayerId, $gameId);
-                if (!$stmt->execute()) {
-                    throw new Exception("Błąd aktualizacji monet rywala: " . $stmt->error);
-                }
-                $stmt->close();
-                $affectedPlayerId = $targetPlayerId;
-                $affectedPlayerNewCoins = $newTargetPlayerCoins;
-            }
-            $response['success'] = true;
-            $response['message'] = $duelMessage;
-            $response['new_coins'] = $newPlayerCoins;
-            $response['affected_player_id'] = $affectedPlayerId;
-            $response['affected_player_new_coins'] = $affectedPlayerNewCoins;
-            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
-            $response['next_player_id'] = $nextPlayerId;
-            $response['new_round_started'] = $newRoundStarted;
-            break;
+       case 'duel':
+    $targetPlayerId = $data['target_player_id'] ?? null;
+    if ($targetPlayerId === null) {
+        throw new Exception("Nie wybrano rywala do pojedynku.");
+    }
+    if ($targetPlayerId == $playerId) {
+        throw new Exception("Nie możesz pojedynkować się sam ze sobą!");
+    }
+
+    $stmt = $mysqli->prepare("
+        SELECT 
+            id, name, coins, cook_skill, tolerance, business_acumen, 
+            belly_capacity, spice_sense, prep_time, tradition_affinity 
+        FROM players 
+        WHERE id IN (?, ?) AND game_id = ?
+    ");
+    if (!$stmt) {
+        throw new Exception("Błąd przygotowania zapytania dla graczy: " . $mysqli->error);
+    }
+    $stmt->bind_param('iii', $playerId, $targetPlayerId, $gameId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $playersData = [];
+    while ($row = $result->fetch_assoc()) {
+        $playersData[$row['id']] = $row;
+    }
+    $stmt->close();
+
+    if (!isset($playersData[$playerId]) || !isset($playersData[$targetPlayerId])) {
+        throw new Exception("Jeden z graczy nie istnieje w tej grze.");
+    }
+
+    $currentPlayer = $playersData[$playerId];
+    $targetPlayer = $playersData[$targetPlayerId];
+
+    $stmt = $mysqli->prepare("SELECT * FROM duel_cards ORDER BY RAND() LIMIT 1");
+    if (!$stmt) {
+        throw new Exception("Błąd przygotowania zapytania dla karty pojedynku: " . $mysqli->error);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $duelCard = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!$duelCard) {
+        throw new Exception("Brak dostępnych kart pojedynków w bazie danych.");
+    }
+
+    $relatedStat = $duelCard['related_stat'];
+    $cardName = $duelCard['name'];
+    $cardDescription = $duelCard['description'];
+
+    $statDisplayNames = [
+        'cook_skill' => 'Umiejętności gotowania',
+        'tolerance' => 'Tolerancja ostrości', 
+        'business_acumen' => 'Łeb do biznesu',
+        'belly_capacity' => 'Pojemność brzucha',
+        'spice_sense' => 'Zmysł do przypraw',
+        'prep_time' => 'Czas przygotowania',
+        'tradition_affinity' => 'Tradycyjne powiązania'
+    ];
+
+    $statDisplayName = $statDisplayNames[$relatedStat] ?? $relatedStat;
+
+    $playerStatValue = $currentPlayer[$relatedStat] ?? 0;
+    $targetStatValue = $targetPlayer[$relatedStat] ?? 0;
+
+    $playerWins = false;
+    $targetWins = false;
+    
+    if ($relatedStat === 'prep_time') {
+        $playerWins = $playerStatValue < $targetStatValue;
+        $targetWins = $playerStatValue > $targetStatValue;
+    } else {
+        $playerWins = $playerStatValue > $targetStatValue;
+        $targetWins = $playerStatValue < $targetStatValue;
+    }
+
+    $duelAmount = 100;
+    $affectedPlayerId = null;
+    $affectedPlayerNewCoins = null;
+
+    $duelMessage = "🎯 Karta pojedynku: \"{$cardName}\"\n";
+    $duelMessage .= "📜 {$cardDescription}\n\n";
+    $duelMessage .= "⚔️ Porównanie statystyki '{$statDisplayName}':\n";
+    
+    if ($relatedStat === 'prep_time') {
+        $duelMessage .= "⏱️ Twój czas przygotowania: {$playerStatValue} min\n";
+        $duelMessage .= "⏱️ Czas {$targetPlayer['name']}: {$targetStatValue} min\n\n";
+    } else {
+        $duelMessage .= "📊 Twoja wartość: {$playerStatValue}\n";
+        $duelMessage .= "📊 Wartość {$targetPlayer['name']}: {$targetStatValue}\n\n";
+    }
+
+    if ($playerWins) {
+        $newPlayerCoins = $currentPlayer['coins'] + $duelAmount;
+        $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
+        
+        if ($relatedStat === 'prep_time') {
+            $duelMessage .= "🏆 Wygrałeś! Twój szybszy czas przygotowania ({$playerStatValue} min) dał Ci przewagę nad {$targetPlayer['name']} ({$targetStatValue} min). ";
+        } else {
+            $duelMessage .= "🏆 Wygrałeś! Twoja wyższa statystyka '{$statDisplayName}' ({$playerStatValue}) dała Ci przewagę nad {$targetPlayer['name']} ({$targetStatValue}). ";
+        }
+        $duelMessage .= "💰 Otrzymujesz {$duelAmount} zł od {$targetPlayer['name']}.";
+        $affectedPlayerId = $targetPlayerId;
+        $affectedPlayerNewCoins = $newTargetPlayerCoins;
+    } elseif ($targetWins) {
+        $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
+        $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
+        
+        if ($relatedStat === 'prep_time') {
+            $duelMessage .= "😔 Przegrałeś! Szybszy czas przygotowania {$targetPlayer['name']} ({$targetStatValue} min) dał mu/jej przewagę nad Tobą ({$playerStatValue} min). ";
+        } else {
+            $duelMessage .= "😔 Przegrałeś! Wyższa statystyka '{$statDisplayName}' {$targetPlayer['name']} ({$targetStatValue}) dała mu/jej przewagę nad Tobą ({$playerStatValue}). ";
+        }
+        $duelMessage .= "💸 Płacisz {$duelAmount} zł dla {$targetPlayer['name']}.";
+        $affectedPlayerId = $targetPlayerId;
+        $affectedPlayerNewCoins = $newTargetPlayerCoins;
+    } else {
+        $playerRoll = rand(1, 6);
+        $targetRoll = rand(1, 6);
+        $duelMessage .= "🤝 Remis w statystyce '{$statDisplayName}'! Dodatkowy rzut kostką:\n";
+        $duelMessage .= "🎲 Twój rzut: {$playerRoll}, rzut {$targetPlayer['name']}: {$targetRoll}. ";
+        
+        if ($playerRoll > $targetRoll) {
+            $newPlayerCoins = $currentPlayer['coins'] + $duelAmount;
+            $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
+            $duelMessage .= "🏆 Wygrałeś w rzucie kostką! 💰 Otrzymujesz {$duelAmount} zł.";
+            $affectedPlayerId = $targetPlayerId;
+            $affectedPlayerNewCoins = $newTargetPlayerCoins;
+        } elseif ($playerRoll < $targetRoll) {
+            $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
+            $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
+            $duelMessage .= "😔 Przegrałeś w rzucie kostką! 💸 Płacisz {$duelAmount} zł.";
+            $affectedPlayerId = $targetPlayerId;
+            $affectedPlayerNewCoins = $newTargetPlayerCoins;
+        } else {
+            $newPlayerCoins = $currentPlayer['coins'];
+            $newTargetPlayerCoins = $targetPlayer['coins'];
+            $duelMessage .= "🤝 Całkowity remis! Nikt nie płaci.";
+        }
+    }
+
+    if ($newPlayerCoins < 0) {
+        throw new Exception("Masz za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$currentPlayer['coins']} zł.");
+    }
+    if ($newTargetPlayerCoins < 0) {
+        throw new Exception("{$targetPlayer['name']} ma za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$targetPlayer['coins']} zł.");
+    }
+
+    $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
+    if (!$stmt) {
+        throw new Exception("Błąd przygotowania zapytania aktualizacji monet gracza: " . $mysqli->error);
+    }
+    $stmt->bind_param('iii', $newPlayerCoins, $playerId, $gameId);
+    if (!$stmt->execute()) {
+        throw new Exception("Błąd aktualizacji monet gracza: " . $stmt->error);
+    }
+    $stmt->close();
+    
+    if ($newPlayerCoins !== $currentPlayer['coins'] || $newTargetPlayerCoins !== $targetPlayer['coins']) {
+        $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
+        if (!$stmt) {
+            throw new Exception("Błąd przygotowania zapytania aktualizacji monet rywala: " . $mysqli->error);
+        }
+        $stmt->bind_param('iii', $newTargetPlayerCoins, $targetPlayerId, $gameId);
+        if (!$stmt->execute()) {
+            throw new Exception("Błąd aktualizacji monet rywala: " . $stmt->error);
+        }
+        $stmt->close();
+    }
+
+    $response['success'] = true;
+    $response['message'] = $duelMessage;
+    $response['new_coins'] = $newPlayerCoins;
+    $response['affected_player_id'] = $affectedPlayerId;
+    $response['affected_player_new_coins'] = $affectedPlayerNewCoins;
+    $response['duel_card'] = [
+        'name' => $cardName,
+        'description' => $cardDescription,
+        'related_stat' => $relatedStat,
+        'related_stat_display' => $statDisplayName
+    ];
+
+    $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+    $response['next_player_id'] = $nextPlayerId;
+    $response['new_round_started'] = $newRoundStarted;
+    break;
         case 'not_interested':
         case 'accept_surprise':
         case 'accept_training':
@@ -489,7 +572,7 @@ try {
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Akcja zakończona pomyślnie. Tura zakończona.';
-            $response['new_coins'] = $playerCoins;
+            $response['new_coins'] = $playerCoins; 
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
@@ -501,10 +584,10 @@ try {
     if (isset($mysqli) && $mysqli instanceof mysqli) {
         $mysqli->rollback();
     }
+
     error_log('Błąd w process_tile_action.php: ' . $e->getMessage());
     $response['success'] = false;
     $response['message'] = 'Wystąpił błąd serwera: ' . $e->getMessage();
-
     if (ini_get('display_errors')) {
         $response['debug_info'] = [
             'error_message' => $e->getMessage(),
@@ -519,9 +602,6 @@ try {
     }
 }
 echo json_encode($response);
-/**
- * Funkcja pomocnicza do określania kolejnego gracza w turze
- */
 function getNextPlayerAndAdvanceTurn(mysqli $mysqli, int $gameId, int $currentPlayingPlayerId, bool &$newRoundStarted): ?int {
     $newRoundStarted = false;
     $stmt = $mysqli->prepare("SELECT id, turn_order FROM players WHERE game_id = ? ORDER BY turn_order ASC");
@@ -552,21 +632,18 @@ function getNextPlayerAndAdvanceTurn(mysqli $mysqli, int $gameId, int $currentPl
             $stmt->close();
         }
     }
-    // Wyłącz turę dla obecnego gracza
     $stmt = $mysqli->prepare("UPDATE players SET is_current_turn = 0 WHERE game_id = ? AND id = ?");
     if ($stmt) {
         $stmt->bind_param('ii', $gameId, $currentPlayingPlayerId);
         $stmt->execute();
         $stmt->close();
     }
-    // Włącz turę dla następnego gracza
     $stmt = $mysqli->prepare("UPDATE players SET is_current_turn = 1 WHERE game_id = ? AND id = ?");
     if ($stmt) {
         $stmt->bind_param('ii', $gameId, $nextPlayerId);
         $stmt->execute();
         $stmt->close();
     }
-    // Zaktualizuj current_player_id w tabeli games
     $stmt = $mysqli->prepare("UPDATE games SET current_player_id = ? WHERE id = ?");
     if ($stmt) {
         $stmt->bind_param('ii', $nextPlayerId, $gameId);
