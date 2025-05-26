@@ -112,6 +112,7 @@ if ($stmt_tiles_all) {
     error_log("Błąd przygotowania zapytania SQL dla pól (gry ID: " . $gameId . "): " . $mysqli->error);
 }
 $tile = $tiles_all[$location] ?? null;
+$currentPlayer = $players[$current_player_id] ?? null;
 
 $output_html = '';
 
@@ -180,7 +181,7 @@ if (
                     return false;
                 }
 
-                $regionName = $tile['group_name']; // Dodaj tę linię
+                $regionName = $tile['group_name'];
                 $stmt->bind_param('sii', $regionName, $current_player_id, $gameId);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -205,9 +206,14 @@ if (
             }
         } else {
             // niezakupiona restauracja
-            $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
-            $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
-            $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            if ($currentPlayer && $currentPlayer['coins'] >= $tile['cost']) {
+                $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
+                $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            } else {
+                $output_html .= '<p>Nie stać Cię by kupić restaurację ' . htmlspecialchars($tile['name']) . '.</p>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">A to sory</button>';
+            }
         }
     }
 } elseif (

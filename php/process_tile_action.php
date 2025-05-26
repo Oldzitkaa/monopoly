@@ -102,9 +102,9 @@ try {
             if ($actionType === 'buy_hotel' && $tileType !== 'hotel') {
                 throw new Exception("Nie można kupić hotelu na tym polu - to nie jest hotel.");
             }
-            if ($playerCoins < $purchasePrice) {
-                throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} zł.");
-            }
+            // if ($playerCoins < $purchasePrice) {
+            //     throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} zł.");
+            // }
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM game_tiles WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -198,7 +198,8 @@ try {
             }
             $rentAmount = $tileInfo['base_rent'] * ($level + 1);
             if ($playerCoins < $rentAmount) {
-                throw new Exception("Masz za mało pieniędzy na opłacenie czynszu ({$rentAmount} zł)! Obecne saldo: {$playerCoins} zł.");
+                throw new Exception("Nie masz nic. Jesteś bankrutem!");
+                
             }
             $newPlayerCoins = $playerCoins - $rentAmount;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
@@ -518,7 +519,7 @@ try {
     }
 
     if ($newPlayerCoins < 0) {
-        throw new Exception("Masz za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$currentPlayer['coins']} zł.");
+        throw new Exception("Nie masz nic. Jesteś bankrutem!");
     }
     if ($newTargetPlayerCoins < 0) {
         throw new Exception("{$targetPlayer['name']} ma za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$targetPlayer['coins']} zł.");
