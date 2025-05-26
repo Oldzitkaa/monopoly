@@ -398,6 +398,7 @@ function generatePlayerPropertiesTable($properties) {
         </div>
         <div class="card-slots-container">
             <div class="card-slot card-text">
+                <p class="text-message"> </p>
             </div>
             <div class="card-slot card-choose"></div>
         </div>

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerInfoContainer = document.getElementById('playerInfoContainer');
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
     const cardSlotText = document.querySelector('.card-slot.card-text');
+    const cardSlotTextMessage = document.querySelector('.text-message');
     const cardSlotChoose = document.querySelector('.card-slot.card-choose');
 
     // These variables are assumed to be defined globally in the HTML
@@ -223,7 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
         startDiceAnimation();
 
         // Clear card slots
-        if (cardSlotText) cardSlotText.textContent = '';
+        // if (cardSlotText) cardSlotText.textContent = '';
+        // if (cardSlotChoose) {
+        //     cardSlotChoose.innerHTML = '';
+        //     cardSlotChoose.style.display = 'none';
+        // }
+        if (cardSlotTextMessage) cardSlotTextMessage.textContent = '';
         if (cardSlotChoose) {
             cardSlotChoose.innerHTML = '';
             cardSlotChoose.style.display = 'none';
@@ -256,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 const rollResult = result.roll_result;
-                const newLocation = result.new_location;
-                // const newLocation = 2;
+                // const newLocation = result.new_location;
+                const newLocation = 2;
                 const playerWhoRolledId = currentPlayerId; // This is the player who just rolled
 
                 console.log(`Gracz ID: ${playerWhoRolledId}, nowa pozycja: ${newLocation}`);
@@ -337,9 +343,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         const messageHtml = await messageResponse.text();
 
-                        if (cardSlotText) {
-                            cardSlotText.innerHTML = messageHtml;
-                            cardSlotText.style.display = 'block';
+                        // if (cardSlotText) {
+                        //     cardSlotText.innerHTML = messageHtml;
+                        //     cardSlotText.style.display = 'block';
+                        //     // cardSlotText.class = 'text-message';
+                        // }
+                        if (cardSlotTextMessage) {
+                            cardSlotTextMessage.innerHTML = messageHtml;
+                            cardSlotTextMessage.style.display = 'block';
+                            // cardSlotText.class = 'text-message';
                         }
 
                         // Get action options for the tile
@@ -356,28 +368,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 cardSlotChoose.innerHTML = chooseHtml;
 
-                                // ZMIANA: Sprawdź, czy jakieś przyciski akcji zostały wyrenderowane.
                                 const actionButtons = cardSlotChoose.querySelectorAll('.action-button');
                                 if (actionButtons.length === 0) {
-                                    // Jeśli nie ma przycisków akcji, odblokuj przycisk rzutu kostką
                                     updateRollButtonState();
                                     startGameStateRefresh();
                                 } else {
-                                    // Add event listeners to action buttons
                                     actionButtons.forEach(button => {
                                         button.addEventListener('click', async (event) => {
                                             event.preventDefault();
                                             event.stopPropagation();
 
                                             const actionType = event.target.dataset.actionType;
-                                            // ZMIANA: Ustaw propertyId na null dla akcji 'duel', aby uniknąć wysyłania ID pola jako ID gracza
                                             const propertyId = (actionType === 'duel') ? null : (event.target.dataset.propertyId || newLocation);
                                             const targetPlayerIdForDuel = event.target.dataset.playerId; // For duel action
 
                                             // Additional actionType check
+                                            // if (!actionType) {
+                                            //     console.error('Błąd: Brak atrybutu data-action-type na klikniętym przycisku akcji. Sprawdź HTML generowany przez get_tile_choose.php');
+                                            //     if (cardSlotText) cardSlotText.textContent = 'Błąd: Brak typu akcji dla przycisku.';
+                                            //     return; // Stop further processing
+                                            // }
                                             if (!actionType) {
                                                 console.error('Błąd: Brak atrybutu data-action-type na klikniętym przycisku akcji. Sprawdź HTML generowany przez get_tile_choose.php');
-                                                if (cardSlotText) cardSlotText.textContent = 'Błąd: Brak typu akcji dla przycisku.';
+                                                if (cardSlotTextMessage) cardSlotTextMessage.textContent = 'Błąd: Brak typu akcji dla przycisku.';
                                                 return; // Stop further processing
                                             }
 
@@ -428,8 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     } catch (msgError) {
                         console.error("Błąd podczas pobierania wiadomości o polu:", msgError);
-                        if (cardSlotText) {
-                            cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
+                        // if (cardSlotText) {
+                        //     cardSlotText.textContent = "Błąd ładowania wiadomości o polu.";
+                        // }
+                        if (cardSlotTextMessage) {
+                            cardSlotTextMessage.textContent = "Błąd ładowania wiadomości o polu.";
                         }
                         if (cardSlotChoose) {
                             cardSlotChoose.innerHTML = '';
@@ -443,7 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Handle error returned by server
                 wynikTekst.textContent = `Błąd: ${result.message}`;
-                if (cardSlotText) cardSlotText.textContent = result.message;
+                // if (cardSlotText) cardSlotText.textContent = result.message;
+                if (cardSlotTextMessage) cardSlotTextMessage.textContent = result.message;
                 if (cardSlotChoose) {
                     cardSlotChoose.innerHTML = '';
                     cardSlotChoose.style.display = 'none';
@@ -456,8 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Handle network errors
             console.error('Błąd komunikacji z serwerem:', error);
             wynikTekst.textContent = `Błąd: ${error.message}`;
-            if (cardSlotText) {
-                cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            // if (cardSlotText) {
+            //     cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            // }
+            if (cardSlotTextMessage) {
+                cardSlotTextMessage.textContent = `Błąd sieci/serwera: ${error.message}`;
             }
             if (cardSlotChoose) {
                 cardSlotChoose.innerHTML = '';
@@ -749,8 +769,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 location: location
             });
 
-            if (cardSlotText) {
-                cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
+            // if (cardSlotText) {
+            //     cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
+            // }
+            if (cardSlotTextMessage) {
+                cardSlotTextMessage.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
             }
             return;
         }
@@ -840,21 +863,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                if (cardSlotText) {
-                    cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
+                // if (cardSlotText) {
+                //     cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
+                // }
+                if (cardSlotTextMessage) {
+                    cardSlotTextMessage.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
                 }
 
             } else {
                 console.error("Błąd podczas akcji na polu:", actionResult.message);
-                if (cardSlotText) {
-                    cardSlotText.textContent = `Błąd: ${actionResult.message}`;
+                // if (cardSlotText) {
+                //     cardSlotText.textContent = `Błąd: ${actionResult.message}`;
+                // }
+                if (cardSlotTextMessage) {
+                    cardSlotTextMessage.textContent = `Błąd: ${actionResult.message}`;
                 }
             }
 
         } catch (error) {
             console.error("Błąd sieci/serwera podczas wykonywania akcji na polu:", error);
-            if (cardSlotText) {
-                cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            // if (cardSlotText) {
+            //     cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+            // }
+            if (cardSlotTextMessage) {
+                cardSlotTextMessage.textContent = `Błąd sieci/serwera: ${error.message}`;
             }
             throw error; // Re-throw error to be caught by the calling function
         }

@@ -465,13 +465,13 @@ $breakpoint-desktop: 768px;
     word-break: break-word;
     text-align: center;
     margin: 0 auto;
+    &.card-text{
+        text-align: center;
+        color: red;
+    }
 }
-
-.card-slot.card-text{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+.text-message{
+    color: black;
 }
 
     .action-button {
@@ -517,6 +517,11 @@ $breakpoint-desktop: 768px;
             background-color: c.$red3;
             color: c.$lightred;
             //background-image: linear-gradient(to top, #c0392b, #e74c3c);
+        }
+
+        &.pay{
+            background-color: c.$red3;
+            color: c.$lightred;
         }
 
         // Wybór rywala
