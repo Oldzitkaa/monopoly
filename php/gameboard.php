@@ -383,8 +383,8 @@ function generatePlayerPropertiesTable($properties) {
                     
                     echo "<div class='player-info-box' data-player-id='" . htmlspecialchars($p['id_player']) . "'>";
                     
-                    echo "<div class='player-header' style='border-color: " . htmlspecialchars($p['player_color']) . ";'>";
-                    echo "<div class='name'>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</div>";
+                    echo "<div class='player-header player-header" . htmlspecialchars($p['turn_order']) . "'>";
+                    echo "<div class='name name-player".htmlspecialchars($p['turn_order'])."'>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</div>";
                     echo "</div>"; 
                     echo "<div class='properties-and-skills-wrapper'>";
                     echo generatePlayerPropertiesTable(isset($playerProperties[$p['id_player']]) ? $playerProperties[$p['id_player']] : []);
@@ -425,7 +425,6 @@ function generatePlayerPropertiesTable($properties) {
     console.log(players);
     function updatePlayerPawns() {
         document.querySelectorAll('.player-token').forEach(pawn => pawn.remove());
-        // colors = ['red', 'green', 'yellow', 'blue']
         let playerIndex = 0
         players.forEach(player => {
             const pawn = document.createElement('div');
@@ -434,7 +433,6 @@ function generatePlayerPropertiesTable($properties) {
             pawn.classList.add(`player-${player.id_player}`);
             pawn.dataset.playerId = player.id_player;
             pawn.title = player.name_player;
-            // pawn.style.backgroundColor = colors[playerIndex];
             const playerTile = document.querySelector(`#space-${player.location_player} .players-on-tile`);
             if (playerTile) {
                 playerTile.appendChild(pawn);
