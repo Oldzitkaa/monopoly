@@ -1,0 +1,93 @@
+@use "./_color" as c;
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', Arial, sans-serif;
+    height: 100%;
+    background: linear-gradient(90deg,rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgba(255, 255, 255, 1) 100%);
+    // overflow: hidden;
+    color: c.$white1;
+}
+.info-div{
+    background-color: c.$red1;
+    border: 2px solid c.$mint;
+    box-shadow: 0px 0px 10px c.$mint;
+    height: 30px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    &.rule{
+        width: 80px;
+        top: 10px;
+        right: 10px;
+        border-radius: 40%;
+    }
+    &.author{
+        width: 80px;
+        top: 50px;
+        right: 10px;
+        border-radius: 40%;
+    }
+}
+.info-div:hover{
+    background-color: c.$red2;
+        box-shadow: 0px 0px 15px c.$mint;
+        cursor: pointer;
+}
+.info{
+    color: c.$white1;
+}
+.backg {
+    position: relative;
+    width: 2000px;
+    top: 20px;
+    display: block;
+    transform: translateX(-40%);
+}
+.logo-div {
+    background-color: c.$red1;
+    width: 85%;
+    height: auto;
+    position: absolute;
+    top: 50px;
+    border-radius: 40%;
+    box-shadow: 0 0 50px c.$red1;
+    box-sizing: border-box;
+    padding: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.step-title {
+    font-size: clamp(1rem, 5vw, 2rem);
+    margin-top: -30px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+    color: c.$white1;
+}
+.logo-zdj {
+    width: 300px;
+    max-width: 80%;
+    height: auto;
+    display: block;
+    animation: pulse 2s infinite;
+    margin-left: auto;
+    margin-right: auto;
+}
+.rule-text{
+    padding-left: 20%;
+    padding-right: 20%;
+}
+.inner-rule{
+    padding-left: 30px;
+}
+.xd{
+    height: 150px;
+}
+.easter-egg{
+    width: 100%;
+    color: c.$red1;
+    text-align: center;
+}

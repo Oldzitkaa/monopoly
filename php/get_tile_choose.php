@@ -190,7 +190,7 @@ if (
 
             } else {
                 // czyjaś restauracja - płać czynsz
-                $output_html .= '<p>Musisz zapłacić czynsz za restaurację ' . htmlspecialchars($tile['name']) . '.</p>';
+                $output_html .= '<p>Musisz zapłacić za posiłek ' . htmlspecialchars($tile['name']) . '.</p>';
                 $output_html .= '<button class="action-button pay" data-action-type="pay_rent" data-property-id="' . htmlspecialchars($location) . '">Płacę</button>';
             }
         } else {
