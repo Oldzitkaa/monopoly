@@ -694,7 +694,7 @@ p {
   pointer-events: none;
 }
 .logo_div.step3.characters .character-card.disabled::after {
-  content: "Zajęta";
+  content: "Postać nieaktywna";
   position: absolute;
   top: 0;
   left: 0;

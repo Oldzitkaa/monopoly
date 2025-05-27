@@ -8,6 +8,7 @@ if (!isset($_SESSION['game_id'])) {
 $gameId = $_SESSION['game_id'];
 include_once './database_connect.php';
 
+// gracze
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -37,9 +38,8 @@ if ($stmt_player) {
         $player = [];
         if ($result_player->num_rows > 0) {
             while($row1 = $result_player->fetch_assoc()) {
-                // Jawne rzutowanie na int dla coins i location
                 $row1['coins'] = (int)$row1['coins'];
-                $row1['location'] = (int)$row1['location_player']; // Poprawione: było location_player
+                $row1['location'] = (int)$row1['location_player'];
                 $players_data[] = $row1;
             }
         } else {
@@ -56,7 +56,7 @@ if ($stmt_player) {
     error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
 }
-// Pobieranie danych o restauracjach (TEN BLOK BYŁ BRAKUJĄCY I POWODOWAŁ BŁĄD)
+//restauracja
 $sql_game_tiles = "SELECT
                     gt.tile_id,
                     gt.current_owner_id,
@@ -86,9 +86,9 @@ if ($stmt_game_tiles) {
     error_log("Błąd przygotowania zapytania SQL dla pól gry (ID: " . $gameId . "): " . $mysqli->error);
 }
 
-// Obliczanie końcowej wartości dla każdego gracza
+// wycena
 $final_player_results = [];
-$winner_name = "Nikt";
+// $winner_name = "Nikt";
 $max_final_value = -1;
 
 foreach ($players_data as $player) {
@@ -117,10 +117,17 @@ foreach ($players_data as $player) {
         'final_value' => $all_income
     ];
 
-    // Sprawdzenie zwycięzcy
+    // zwyciesca
+
     if ($all_income > $max_final_value) {
         $max_final_value = $all_income;
-        $winner_name = $player_name;
+    }
+}
+// zwyciescy
+$winners = [];
+foreach ($final_player_results as $player_result) {
+    if ($player_result['final_value'] == $max_final_value) {
+        $winners[] = $player_result['name'];
     }
 }
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
@@ -140,9 +147,17 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
 <body>
     <div class="logo-div">
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
-         <p class="win-player">Zwycięzcą zostaje &rarr; 
+         <p class="win-player"> 
             <?php
-                echo $winner_name;
+                if (!empty($winners)) {
+                    if (count($winners) == 1) {
+                        echo "Zwycięzcą zostaje &rarr; " . htmlspecialchars($winners[0]);
+                    } else {
+                        echo "Oto zwycięzcy: &rarr; " . implode(', ', $winners);
+                    }
+                } else {
+                    echo "Nikt";
+                }
             ?>
          </p>
         <table class="player-result">

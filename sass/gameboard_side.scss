@@ -127,7 +127,7 @@ $breakpoint-desktop: 768px;
     flex-grow: 0;
     transition: all $transition-fast $transition-ease;
     padding: $spacing-xs $spacing-sm;
-    border: 1px solid #e0e0e0;
+    border: 2px solid c.$white3;
     border-radius: $border-radius-md;
     background-color: rgba(c.$white2, 0.95);
     box-shadow: $shadow-sm;
@@ -145,20 +145,20 @@ $breakpoint-desktop: 768px;
 
     &:hover {
         box-shadow: $shadow-md;
-        border-color: #3498db;
+        border-color: navy;
         transform: translateY(-2px);
     }
 
     &.active {
         min-height: 350px;
-        max-height: 90vh; // Adjusted to reduce max height
+        max-height: 90vh;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         z-index: 100;
         background-color: c.$white1;
-        overflow-y: auto; // Added for player info box scrolling
+        overflow-y: auto;
         opacity: 1;
         transform: scale(1);
-        border: 2px solid #3498db;
+        border: 2px solid c.$white3;
         width: 100%;
         max-width: none;
         margin: 0 auto;

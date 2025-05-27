@@ -307,15 +307,6 @@ function generatePlayerPropertiesTable($properties) {
     <link rel="stylesheet" href="../css/gameboard_side.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
-<?php
-    // $colors = ['red', 'blue', 'green', 'yellow'];
-    // echo '<style>';
-    //     for ($i = 1; $i <= 20; $i++) {
-    //         $color = $colors[($i - 1) % count($colors)];
-    //         echo ".player-token.player-$i { background-color: $color; }";
-    //     }
-    //     echo '</style>';
-?>
 </head>
 <body>
 <div class="game-wrapper">
@@ -329,7 +320,7 @@ function generatePlayerPropertiesTable($properties) {
                         $playerClassNumber = (int)$p['turn_order'];
                         echo "<div class='player-info player" . htmlspecialchars($playerClassNumber) . "'>";
                         echo "<p><b>" . htmlspecialchars($p['name_player']) . " - " . htmlspecialchars($p['character_name']) . "</b><br>";
-                        echo "Monety: " . htmlspecialchars($p['coins']) . " zł <br>";
+                        echo "Monety: " . htmlspecialchars($p['coins']) . " $ <br>";
                         echo "<div class='player-stats-scroll'><div class='stats-table-wrapper'><table>";
                         echo "<tr><td>Pojemność brzucha:</td><td>" . htmlspecialchars($p['belly_capacity']) . "</td></tr>";
                         echo "<tr><td>Tolerancja ostrości:</td><td>" . htmlspecialchars($p['tolerance']) . "</td></tr>";
