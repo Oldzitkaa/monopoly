@@ -139,16 +139,6 @@ if (
         foreach ($rival_players_data as $player_data) {
             $output_html .= '<button class="action-button btn-player' . htmlspecialchars($player_data['turn_order']) . '" onclick="randomCard()" data-action-type="duel" data-player-id="' . htmlspecialchars($player_data['id_player']) . '" data-rival-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
-
-        $output_html .= '<div id="duel-card-result" class="duel-card-result"></div>';
-        if ($drawnCard) {
-            $output_html .= '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-            $output_html .= '<button class="btn-duel-description" data-action-type="duel_end">Koniec pojedynku</button>';
-        } else {
-            $output_html .= '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
-        }
-        $output_html .= '</div>';
-
     } else {
         $output_html .= '<p>Brak innych graczy do pojedynku.</p>';
     }
@@ -215,7 +205,7 @@ if (
     $location === 4 || $location === 10 || $location === 19 ||
     $location === 23 || $location === 35 || $location === 38
 ) {
-    $output_html .= '<button class="action-button accept" data-action-type="accept_surprise">Super</button>';
+    $output_html .= '<button class="action-button accept" data-action-type="accept_surprise">Odwróć kartę</button>';
 } elseif ($location === 11) {
     // szkolenie
     $output_html .= '<button class="action-button accept" data-action-type="accept_training">Lece się szkolić</button>';

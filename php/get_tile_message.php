@@ -157,14 +157,6 @@ if (isset($_GET['location'])) {
         $location === 23 || $location === 35 || $location === 38
     ) {
         $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
-
-        // losowanie kart niespodzianki
-        $drawnCard = getRandomActionCard($mysqli);
-        if ($drawnCard) {
-            $output_html_message .= '<p class="surprise-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-        } else {
-            $output_html_message .= '<p class="surprise-description">Nie znaleziono kart niespodzianek do wylosowania.</p>';
-        }
         
     } elseif (
         $location === 7 || $location === 15 || $location === 22 || $location === 29 || $location === 37
