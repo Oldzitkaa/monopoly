@@ -8,6 +8,7 @@ if (!isset($_SESSION['game_id'])) {
 $gameId = $_SESSION['game_id'];
 include_once './database_connect.php';
 
+// gracze
 $sql_player = "SELECT
                 p.id as id_player,
                 p.game_id,
@@ -37,7 +38,9 @@ if ($stmt_player) {
         $player = [];
         if ($result_player->num_rows > 0) {
             while($row1 = $result_player->fetch_assoc()) {
-                $player[] = $row1;
+                $row1['coins'] = (int)$row1['coins'];
+                $row1['location'] = (int)$row1['location_player'];
+                $players_data[] = $row1;
             }
         } else {
             error_log("Brak graczy w bazie danych dla gry o ID: " . $gameId);
@@ -52,6 +55,80 @@ if ($stmt_player) {
 } else {
     error_log("Błąd przygotowania zapytania SQL dla graczy (gry ID: " . $gameId . "): " . $mysqli->error);
     echo "<p style='color: red;'>Błąd przygotowania zapytania SQL dla graczy: " . $mysqli->error . "</p>";
+}
+//restauracja
+$sql_game_tiles = "SELECT
+                    gt.tile_id,
+                    gt.current_owner_id,
+                    gt.current_level,
+                    t.cost,
+                    t.type
+                FROM `game_tiles` gt
+                JOIN `tiles` t ON gt.tile_id = t.id
+                WHERE gt.game_id = ? AND t.type = 'restaurant'";
+$stmt_game_tiles = $mysqli->prepare($sql_game_tiles);
+$game_tiles_data = [];
+if ($stmt_game_tiles) {
+    $stmt_game_tiles->bind_param('i', $gameId);
+    if ($stmt_game_tiles->execute()) {
+        $result_game_tiles = $stmt_game_tiles->get_result();
+        while($row_tile = $result_game_tiles->fetch_assoc()) {
+            $row_tile['cost'] = (int)$row_tile['cost'];
+            $row_tile['current_level'] = (int)$row_tile['current_level'];
+            $game_tiles_data[] = $row_tile;
+        }
+        $result_game_tiles->free();
+    } else {
+        error_log("Błąd wykonania zapytania SQL dla pól gry (ID: " . $gameId . "): " . $stmt_game_tiles->error);
+    }
+    $stmt_game_tiles->close();
+} else {
+    error_log("Błąd przygotowania zapytania SQL dla pól gry (ID: " . $gameId . "): " . $mysqli->error);
+}
+
+// wycena
+$final_player_results = [];
+// $winner_name = "Nikt";
+$max_final_value = -1;
+
+foreach ($players_data as $player) {
+    $player_id = $player['id_player'];
+    $player_coins = $player['coins'];
+    $player_name = $player['name_player'];
+    $restaurants_owned_count = 0;
+    $restaurants_value = 0;
+
+    foreach ($game_tiles_data as $tile) {
+        if ($tile['current_owner_id'] == $player_id && $tile['type'] == 'restaurant') {
+            $restaurants_owned_count++;
+            $tile_value = $tile['cost'];
+            $effective_level = (isset($tile['current_level']) ? (int)$tile['current_level'] : 0) + 1;
+            $tile_value *= $effective_level;
+            $restaurants_value += $tile_value;
+        }
+    }
+
+    $all_income = $player_coins + $restaurants_value;
+
+    $final_player_results[] = [
+        'name' => $player_name,
+        'coins' => $player_coins,
+        'restaurants_count' => $restaurants_owned_count,
+        'final_value' => $all_income
+    ];
+
+    // zwyciesca
+
+    if ($all_income > $max_final_value) {
+        $max_final_value = $all_income;
+    }
+}
+// zwyciescy
+$winners = [];
+foreach ($final_player_results as $player_result) {
+    if ($player_result['final_value'] == $max_final_value) {
+        $winners[] = $player_result['name'];
+    }
 }
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
@@ -70,20 +147,32 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
 <body>
     <div class="logo-div">
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
-         <p class="win-player">Zwycięzcą zostaje &rarr; 
+         <p class="win-player"> 
             <?php
-                
+                if (!empty($winners)) {
+                    if (count($winners) == 1) {
+                        echo "Zwycięzcą zostaje &rarr; " . htmlspecialchars($winners[0]);
+                    } else {
+                        echo "Oto zwycięzcy: &rarr; " . implode(', ', $winners);
+                    }
+                } else {
+                    echo "Nikt";
+                }
             ?>
          </p>
         <table class="player-result">
             <?php
-            if (!empty($player)) {
-                echo "<tr> <th>✫</th> <th>Monety $</th> <th>Ilość zebranych restauracji</th> </tr>";
-                foreach ($player as $index => $p) {
-                    $playerClassNumber = $index + 1;
-                    echo "<tr> <td>". htmlspecialchars($p['name_player']) ."</td><td>". htmlspecialchars($p['coins']) ."</td><td>". "</td></tr>";
-                    }
+            if (!empty($final_player_results)) {
+                echo "<tr> <th>Gracz</th> <th>Monety $</th> <th>Ilość zebranych restauracji</th> <th>Wycena końcowa</th> </tr>";
+                foreach ($final_player_results as $player_result) {
+                    echo "<tr>";
+                    echo "<td>". htmlspecialchars($player_result['name']) ."</td>";
+                    echo "<td>". htmlspecialchars($player_result['coins']) ."</td>";
+                    echo "<td>". htmlspecialchars($player_result['restaurants_count']) . "</td>";
+                    echo "<td>". htmlspecialchars($player_result['final_value']) . "</td>";
+                    echo "</tr>";
                 }
+            }
             ?>
         </table>
         <button class="end-btn" id="endGameButton">OK</button>

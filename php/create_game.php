@@ -166,8 +166,9 @@ try {
                             tradition_affinity,
                             turn_order,
                             is_current_turn,
-                            turns_to_miss
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                            turns_to_miss,
+                            is_in_game
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)';
         $stmtPlayer = $mysqli->prepare($sqlPlayer);
         if (!$stmtPlayer) {
             throw new Exception("Błąd przygotowania zapytania gracza: " . $mysqli->error);
@@ -175,19 +176,19 @@ try {
 
         $firstPlayerId = null;
         $playerIds = [];
-        $playersForTurnQueue = []; // To store player data for turn_queue insertion
+        $playersForTurnQueue = [];
 
         foreach ($playersData as $index => $player) {
             $characterId = (int)$player['characterId'];
             $nickname = trim($player['nickname']);
-            $turnOrder = $index + 1; // Assuming turn order is based on the input array order
-            $isCurrentTurn = ($index === 0) ? 1 : 0; // First player in the array starts
+            $turnOrder = $index + 1;
+            $isCurrentTurn = ($index === 0) ? 1 : 0;
 
             $charStats = $charactersBaseStats[$characterId];
 
             $initialCoins = 1500;
             $initialPopularity = 0;
-            $initialLocation = 0; // Assuming start tile is 0 or 1, adjust as needed
+            $initialLocation = 0;
             $initialTurnsToMiss = 0;
 
             $stmtPlayer->bind_param(

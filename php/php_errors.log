@@ -1,3 +1,11 @@
 [22-May-2025 23:47:14 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 710 zł.
 [23-May-2025 12:58:05 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 1 ma już właściciela.
 [23-May-2025 13:11:14 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 8 ma już właściciela.
+[26-May-2025 12:07:37 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 550 zł.
+[26-May-2025 12:38:39 Europe/Berlin] Błąd w process_tile_action.php: asd ma za mało pieniędzy na opłacenie pojedynku (100 zł)! Obecne saldo: 41 zł.
+[26-May-2025 12:38:54 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na opłacenie pojedynku (100 zł)! Obecne saldo: 41 zł.
+[26-May-2025 12:40:38 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na opłacenie czynszu (60 zł)! Obecne saldo: 41 zł.
+[26-May-2025 13:44:13 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na opłacenie pojedynku (100 zł)! Obecne saldo: 20 zł.
+[27-May-2025 08:06:25 Europe/Berlin] Błąd w process_tile_action.php: ty ma za mało pieniędzy na opłacenie pojedynku (100 zł)! Obecne saldo: 79 zł.
+[27-May-2025 08:07:36 Europe/Berlin] Błąd w process_tile_action.php: ty ma za mało pieniędzy na opłacenie pojedynku (100 zł)! Obecne saldo: 92 zł.
+[27-May-2025 08:09:31 Europe/Berlin] Błąd w process_tile_action.php: Nieznany typ akcji: upgrade_restaurant. Dostępne akcje: buy_property, buy_restaurant, buy_hotel, pay_rent, pass_turn, skip_action, upgrade_property, mortgage_property, duel, not_interested, accept_surprise, accept_training, accept_vacation, accept_start_tile, accept_special_tile, accept_continent_entry
