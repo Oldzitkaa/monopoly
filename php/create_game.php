@@ -166,9 +166,8 @@ try {
                             tradition_affinity,
                             turn_order,
                             is_current_turn,
-                            turns_to_miss,
-                            is_in_game
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)';
+                            turns_to_miss
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         $stmtPlayer = $mysqli->prepare($sqlPlayer);
         if (!$stmtPlayer) {
             throw new Exception("Błąd przygotowania zapytania gracza: " . $mysqli->error);
