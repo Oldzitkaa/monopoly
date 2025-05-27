@@ -117,7 +117,6 @@ $output_html = '';
 
 // pola
 if (
-    // pojedynek
     $location === 2 || $location === 13 || $location === 17 ||
     $location === 26 || $location === 34 || $location === 41
 ) {
@@ -131,28 +130,38 @@ if (
     }
 
     if (!empty($rival_players_data)) {
-        $output_html .= '<div id="game-actions" class="game-actions"';
+        $output_html .= '<div id="game-actions" class="game-actions" ';
         $output_html .= 'data-current-player-id="' . htmlspecialchars($current_player_id) . '" ';
         $output_html .= 'data-location="' . htmlspecialchars($location) . '">';
 
         $output_html .= '<p id="duel-prompt">Wybierz rywala do pojedynku:</p>';
+
         foreach ($rival_players_data as $player_data) {
-            $output_html .= '<button class="action-button btn-player' . htmlspecialchars($player_data['turn_order']) . '" onclick="randomCard()" data-action-type="duel" data-player-id="' . htmlspecialchars($player_data['id_player']) . '" data-rival-id="' . htmlspecialchars($player_data['id_player']) . '">' . htmlspecialchars($player_data['name_player']) . '</button>';
+            $output_html .= '<button 
+                class="action-button btn-player' . htmlspecialchars($player_data['turn_order']) . '" 
+                data-action-type="duel" 
+                data-player-id="' . htmlspecialchars($player_data['id_player']) . '" 
+                data-rival-id="' . htmlspecialchars($player_data['id_player']) . '" 
+                data-description="' . htmlspecialchars($drawnCard ? $drawnCard->description : 'Brak opisu walki') . '"
+            >' . htmlspecialchars($player_data['name_player']) . '</button>';
         }
 
-        $output_html .= '<div id="duel-card-result" class="duel-card-result"></div>';
+        $output_html .= '<div id="duel-card-result" class="duel-card-result" style="display: none;">';
+
         if ($drawnCard) {
-            $output_html .= '<p class="duel-description">' . htmlspecialchars($drawnCard->description) . '</p>';
-            $output_html .= '<button class="btn-duel-description" data-action-type="duel_end">Koniec pojedynku</button>';
+            $output_html .= '<p class="duel-description" id="duel-description-text"></p>';
+            $output_html .= '<button class="btn-duel-end" style="display: none;">Koniec pojedynku</button>';
         } else {
             $output_html .= '<p class="duel-description">Nie znaleziono kart pojedynku do wylosowania.</p>';
         }
-        $output_html .= '</div>';
 
+        $output_html .= '</div>';
+        $output_html .= '</div>';
     } else {
         $output_html .= '<p>Brak innych graczy do pojedynku.</p>';
     }
-} elseif (
+}
+ elseif (
     // restauracje
     $location == 1 || $location == 3 || $location == 5 || $location == 6 ||
     $location == 8 || $location == 9 || $location == 12 || $location == 14 ||
@@ -207,7 +216,7 @@ if (
             // niezakupiona restauracja
             $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
             $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
-            $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie kupuje!</button>';
         }
     }
 } elseif (
@@ -242,4 +251,35 @@ echo $output_html;
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
 }
-?>  
+?>
+
+<script>
+    document.querySelectorAll('.action-button[data-action-type="duel"]').forEach(button => {
+        button.addEventListener('click', () => {
+            const description = button.dataset.description || 'Brak opisu karty.';
+            const resultContainer = document.getElementById('duel-card-result');
+            const descriptionText = document.getElementById('duel-description-text');
+            const endButton = document.querySelector('.btn-duel-end');
+
+            document.querySelectorAll('.action-button').forEach(btn => btn.style.display = 'none');
+
+            if (descriptionText) {
+                descriptionText.textContent = description;
+            }
+
+            if (resultContainer) resultContainer.style.display = 'block';
+            if (endButton) {
+                endButton.style.display = 'inline-block';
+                endButton.addEventListener('click', () => {
+                    resultContainer.style.display = 'none';
+                    document.querySelector('.card-slot.card-choose').style.display = 'none';
+                }, { once: true });
+            }
+
+            const prompt = document.getElementById('duel-prompt');
+            if (prompt) {
+                prompt.textContent = 'Walka rozpoczęta. Przeczytaj opis i kliknij „Koniec pojedynku”.';
+            }
+        });
+    });
+</script>

@@ -563,19 +563,68 @@ try {
     $response['new_round_started'] = $newRoundStarted;
     break;
         case 'not_interested':
-        case 'accept_surprise':
-        case 'accept_training':
-        case 'accept_vacation':
-        case 'accept_start_tile':
-        case 'accept_special_tile':
-        case 'accept_continent_entry':
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
-            $response['message'] = 'Akcja zakończona pomyślnie. Tura zakończona.';
-            $response['new_coins'] = $playerCoins; 
+            $response['message'] = 'Rezygnacja z zakupu!';
+            $response['new_coins'] = $playerCoins;
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
+
+        case 'accept_surprise':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Niespodzianka zaakceptowana!';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
+        case 'accept_training':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Szkolenie rozpoczęte!';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
+        case 'accept_vacation':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Miłego urlopu!';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
+        case 'accept_start_tile':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Wróciłeś na pole start.';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
+        case 'accept_special_tile':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Pole specjalne zaakceptowane.';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
+        case 'accept_continent_entry':
+            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+            $response['success'] = true;
+            $response['message'] = 'Witaj na nowym kontynencie!';
+            $response['new_coins'] = $playerCoins;
+            $response['next_player_id'] = $nextPlayerId;
+            $response['new_round_started'] = $newRoundStarted;
+            break;
+
         default:
             throw new Exception('Nieznany typ akcji: ' . $actionType . '. Dostępne akcje: buy_property, buy_restaurant, buy_hotel, pay_rent, pass_turn, skip_action, upgrade_property, mortgage_property, duel, not_interested, accept_surprise, accept_training, accept_vacation, accept_start_tile, accept_special_tile, accept_continent_entry');
     }
