@@ -21,3 +21,10 @@ Stack trace:
   thrown in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 605
 [27-May-2025 08:02:17 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 600 zł.
 [27-May-2025 08:04:23 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na opłacenie czynszu (21 zł)! Obecne saldo: 15 zł.
+[27-May-2025 08:26:36 Europe/Berlin] Karta o ID: 18 wróciła do puli.
+[27-May-2025 08:26:44 Europe/Berlin] Karta o ID: 16 wróciła do puli.
+[27-May-2025 08:26:48 Europe/Berlin] Karta o ID: 13 wróciła do puli.
+[27-May-2025 08:26:52 Europe/Berlin] Karta o ID: 10 wróciła do puli.
+[27-May-2025 08:28:51 Europe/Berlin] Karta o ID: 1 wróciła do puli.
+[27-May-2025 08:29:15 Europe/Berlin] Karta o ID: 20 wróciła do puli.
+[27-May-2025 08:29:23 Europe/Berlin] Karta o ID: 5 wróciła do puli.

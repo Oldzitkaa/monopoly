@@ -359,7 +359,6 @@ try {
                 throw new Exception("Błąd wykonania zastawu: " . $stmt->error);
             }
             $stmt->close();
-            // Dodaj pieniądze graczowi
             $newPlayerCoins = $playerCoins + $mortgageValue;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
@@ -566,8 +565,7 @@ try {
     $response['next_player_id'] = $nextPlayerId;
     $response['new_round_started'] = $newRoundStarted;
     break;
-      case 'duel':
-    // Include the random duel card function
+     case 'duel':
     include_once 'random_duel.php';
     
     $targetPlayerId = $data['target_player_id'] ?? null;
@@ -577,8 +575,6 @@ try {
     if ($targetPlayerId == $playerId) {
         throw new Exception("Nie możesz pojedynkować się sam ze sobą!");
     }
-
-    // Get players data
     $stmt = $mysqli->prepare("
         SELECT 
             id, name, coins, cook_skill, tolerance, business_acumen, 
@@ -604,52 +600,26 @@ try {
 
     $currentPlayer = $playersData[$playerId];
     $targetPlayer = $playersData[$targetPlayerId];
-
-    // Get random duel card using the function from random_duel.php
     $duelCardObject = getRandomDuelCard($mysqli);
     
     if (!$duelCardObject) {
         throw new Exception("Brak dostępnych kart pojedynków w bazie danych.");
     }
-
-    // Convert object to array for easier access
     $duelCard = [
         'id' => $duelCardObject->id,
-        'name' => $duelCardObject->name ?? 'Karta pojedynku', // Fallback if name doesn't exist
         'description' => $duelCardObject->description,
         'related_stat' => $duelCardObject->related_stat,
         'effect_json' => $duelCardObject->effect_json ?? null
     ];
 
-    // Add the drawn card to session tracking
-    if (!isset($_SESSION['drawn_duel_card_ids'])) {
-        $_SESSION['drawn_duel_card_ids'] = [];
-    }
-    $_SESSION['drawn_duel_card_ids'][] = $duelCard['id'];
-
     $relatedStat = $duelCard['related_stat'];
-    $cardName = $duelCard['name'];
     $cardDescription = $duelCard['description'];
-
-    $statDisplayNames = [
-        'cook_skill' => 'Umiejętności gotowania',
-        'tolerance' => 'Tolerancja ostrości', 
-        'business_acumen' => 'Łeb do biznesu',
-        'belly_capacity' => 'Pojemność brzucha',
-        'spice_sense' => 'Zmysł do przypraw',
-        'prep_time' => 'Czas przygotowania',
-        'tradition_affinity' => 'Tradycyjne powiązania'
-    ];
-
-    $statDisplayName = $statDisplayNames[$relatedStat] ?? $relatedStat;
 
     $playerStatValue = $currentPlayer[$relatedStat] ?? 0;
     $targetStatValue = $targetPlayer[$relatedStat] ?? 0;
 
     $playerWins = false;
     $targetWins = false;
-    
-    // For prep_time, lower is better
     if ($relatedStat === 'prep_time') {
         $playerWins = $playerStatValue < $targetStatValue;
         $targetWins = $playerStatValue > $targetStatValue;
@@ -661,79 +631,50 @@ try {
     $duelAmount = 100;
     $affectedPlayerId = null;
     $affectedPlayerNewCoins = null;
-
-    $duelMessage = "🎯 Karta pojedynku: \"{$cardName}\"\n";
-    $duelMessage .= "📜 {$cardDescription}\n\n";
-    $duelMessage .= "⚔️ Porównanie statystyki '{$statDisplayName}':\n";
-    
-    if ($relatedStat === 'prep_time') {
-        $duelMessage .= "⏱️ Twój czas przygotowania: {$playerStatValue} min\n";
-        $duelMessage .= "⏱️ Czas {$targetPlayer['name']}: {$targetStatValue} min\n\n";
-    } else {
-        $duelMessage .= "📊 Twoja wartość: {$playerStatValue}\n";
-        $duelMessage .= "📊 Wartość {$targetPlayer['name']}: {$targetStatValue}\n\n";
-    }
+    $duelMessage = $cardDescription . "\n\n";
 
     if ($playerWins) {
         $newPlayerCoins = $currentPlayer['coins'] + $duelAmount;
         $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
-        
-        if ($relatedStat === 'prep_time') {
-            $duelMessage .= "🏆 Wygrałeś! Twój szybszy czas przygotowania ({$playerStatValue} min) dał Ci przewagę nad {$targetPlayer['name']} ({$targetStatValue} min). ";
-        } else {
-            $duelMessage .= "🏆 Wygrałeś! Twoja wyższa statystyka '{$statDisplayName}' ({$playerStatValue}) dała Ci przewagę nad {$targetPlayer['name']} ({$targetStatValue}). ";
-        }
-        $duelMessage .= "💰 Otrzymujesz {$duelAmount} zł od {$targetPlayer['name']}.";
         $affectedPlayerId = $targetPlayerId;
         $affectedPlayerNewCoins = $newTargetPlayerCoins;
+        $duelMessage .= "Wygrałeś pojedynek!";
     } elseif ($targetWins) {
         $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
         $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
-        
-        if ($relatedStat === 'prep_time') {
-            $duelMessage .= "😔 Przegrałeś! Szybszy czas przygotowania {$targetPlayer['name']} ({$targetStatValue} min) dał mu/jej przewagę nad Tobą ({$playerStatValue} min). ";
-        } else {
-            $duelMessage .= "😔 Przegrałeś! Wyższa statystyka '{$statDisplayName}' {$targetPlayer['name']} ({$targetStatValue}) dała mu/jej przewagę nad Tobą ({$playerStatValue}). ";
-        }
-        $duelMessage .= "💸 Płacisz {$duelAmount} zł dla {$targetPlayer['name']}.";
         $affectedPlayerId = $targetPlayerId;
         $affectedPlayerNewCoins = $newTargetPlayerCoins;
+        $duelMessage .= "Przegrałeś pojedynek!";
     } else {
-        // Tie - dice roll
+        $duelMessage .= "Remis! Dodatkowy rzut kostką:\n";
         $playerRoll = rand(1, 6);
         $targetRoll = rand(1, 6);
-        $duelMessage .= "🤝 Remis w statystyce '{$statDisplayName}'! Dodatkowy rzut kostką:\n";
-        $duelMessage .= "🎲 Twój rzut: {$playerRoll}, rzut {$targetPlayer['name']}: {$targetRoll}. ";
+        $duelMessage .= "Twój rzut: {$playerRoll}, rzut {$targetPlayer['name']}: {$targetRoll}\n";
         
         if ($playerRoll > $targetRoll) {
             $newPlayerCoins = $currentPlayer['coins'] + $duelAmount;
             $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
-            $duelMessage .= "🏆 Wygrałeś w rzucie kostką! 💰 Otrzymujesz {$duelAmount} zł.";
             $affectedPlayerId = $targetPlayerId;
             $affectedPlayerNewCoins = $newTargetPlayerCoins;
+            $duelMessage .= "Wygrałeś rzut kostką!";
         } elseif ($playerRoll < $targetRoll) {
             $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
             $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
-            $duelMessage .= "😔 Przegrałeś w rzucie kostką! 💸 Płacisz {$duelAmount} zł.";
             $affectedPlayerId = $targetPlayerId;
             $affectedPlayerNewCoins = $newTargetPlayerCoins;
+            $duelMessage .= "Przegrałeś rzut kostką!";
         } else {
-            // Complete tie
             $newPlayerCoins = $currentPlayer['coins'];
             $newTargetPlayerCoins = $targetPlayer['coins'];
-            $duelMessage .= "🤝 Całkowity remis! Nikt nie płaci.";
+            $duelMessage .= "Całkowity remis! Nikt nie płaci.";
         }
     }
-
-    // Check if players have enough money
     if ($newPlayerCoins < 0) {
         throw new Exception("Masz za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$currentPlayer['coins']} zł.");
     }
     if ($newTargetPlayerCoins < 0) {
         throw new Exception("{$targetPlayer['name']} ma za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$targetPlayer['coins']} zł.");
     }
-
-    // Update current player's coins
     $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
     if (!$stmt) {
         throw new Exception("Błąd przygotowania zapytania aktualizacji monet gracza: " . $mysqli->error);
@@ -743,8 +684,6 @@ try {
         throw new Exception("Błąd aktualizacji monet gracza: " . $stmt->error);
     }
     $stmt->close();
-    
-    // Update target player's coins if they changed
     if ($newTargetPlayerCoins !== $targetPlayer['coins']) {
         $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
         if (!$stmt) {
@@ -756,8 +695,6 @@ try {
         }
         $stmt->close();
     }
-
-    // Prepare response
     $response['success'] = true;
     $response['message'] = $duelMessage;
     $response['new_coins'] = $newPlayerCoins;
@@ -765,14 +702,11 @@ try {
     $response['affected_player_new_coins'] = $affectedPlayerNewCoins;
     $response['duel_card'] = [
         'id' => $duelCard['id'],
-        'name' => $cardName,
         'description' => $cardDescription,
         'related_stat' => $relatedStat,
-        'related_stat_display' => $statDisplayName,
         'effect_json' => $duelCard['effect_json']
     ];
 
-    // Get next player and advance turn
     $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
     $response['next_player_id'] = $nextPlayerId;
     $response['new_round_started'] = $newRoundStarted;

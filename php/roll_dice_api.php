@@ -32,11 +32,9 @@ if (empty($data) || !isset($data['game_id']) || !isset($data['player_id'])) {
 $gameId = (int) $data['game_id'];
 $playerId = (int) $data['player_id'];
 
-// Start transaction
 $mysqli->begin_transaction();
 
 try {
-    // Get current turn number from games table
     $sql_get_turn = "SELECT current_turn FROM games WHERE id = ? LIMIT 1";
     $stmt_get_turn = $mysqli->prepare($sql_get_turn);
     if (!$stmt_get_turn) {
@@ -52,8 +50,6 @@ try {
         throw new Exception("Nie znaleziono gry o podanym ID.");
     }
     $currentTurnNumber = (int)$turn_row['current_turn'];
-
-    // POPRAWKA 1: Sprawdź czy istnieje kolejka dla bieżącej tury, jeśli nie - utwórz ją
     $sql_check_queue_exists = "SELECT COUNT(*) as queue_count FROM turn_queue WHERE game_id = ? AND turn_number = ?";
     $stmt_check_queue = $mysqli->prepare($sql_check_queue_exists);
     if (!$stmt_check_queue) {
@@ -66,7 +62,6 @@ try {
     $stmt_check_queue->close();
 
     if ($queue_row['queue_count'] == 0) {
-        // Brak kolejki dla bieżącej tury - utwórz ją
         $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
         $stmt_get_players = $mysqli->prepare($sql_get_players);
         if (!$stmt_get_players) {
@@ -98,8 +93,6 @@ try {
             $stmt_create_queue->close();
         }
     }
-
-    // POPRAWKA 2: Dodaj sprawdzenie czy wpis gracza istnieje w turn_queue
     $sql_ensure_player_in_queue = "INSERT IGNORE INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) 
                                    SELECT ?, ?, ?, 
                                           COALESCE((SELECT MAX(queue_position) FROM turn_queue tq WHERE tq.game_id = ? AND tq.turn_number = ?), 0) + 1,
@@ -112,8 +105,6 @@ try {
     $stmt_ensure_player->bind_param('iiiiiiii', $gameId, $playerId, $currentTurnNumber, $gameId, $currentTurnNumber, $gameId, $playerId, $currentTurnNumber);
     $stmt_ensure_player->execute();
     $stmt_ensure_player->close();
-
-    // Check if the player has already played in this turn
     $sql_check_played = "SELECT has_played FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ? LIMIT 1";
     $stmt_check_played = $mysqli->prepare($sql_check_played);
     if (!$stmt_check_played) {
@@ -151,16 +142,14 @@ try {
         $currentLocation = (int)$row['location'];
         $currentCoins = (int)$row['coins'];
 
-        // Calculate new location
-        $newLocation = ($currentLocation + $rollResult);
-        $boardSize = 40;
-        if ($newLocation >= $boardSize) {
-            $newLocation = $newLocation % $boardSize;
-            // Optional: Pass Go bonus
-            // $currentCoins += 200;
-        }
+$newLocation = ($currentLocation + $rollResult);
+$boardSize = 40;
 
-        // --- Update player's location in the database ---
+if ($newLocation >= $boardSize) {
+    $newLocation = $newLocation % $boardSize;
+    $currentCoins += 200;
+    echo "Przeszedłeś przez START! Dostajesz 200 monet!";
+}
         $sql_update_location = "UPDATE players SET location = ?, coins = ? WHERE id = ? AND game_id = ?";
         $stmt_update_location = $mysqli->prepare($sql_update_location);
 
@@ -171,8 +160,6 @@ try {
         $stmt_update_location->bind_param('iiii', $newLocation, $currentCoins, $playerId, $gameId);
         $stmt_update_location->execute();
         $stmt_update_location->close();
-
-        // POPRAWKA 3: Użyj bardziej precyzyjnego UPDATE z dodatkowymi warunkami
         $sql_mark_played = "UPDATE turn_queue SET has_played = 1 WHERE game_id = ? AND player_id = ? AND turn_number = ? AND has_played = 0";
         $stmt_mark_played = $mysqli->prepare($sql_mark_played);
 
@@ -182,16 +169,11 @@ try {
 
         $stmt_mark_played->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
         $stmt_mark_played->execute();
-        
-        // POPRAWKA 4: Sprawdź czy UPDATE rzeczywiście zmienił rekord
         $affected_rows = $stmt_mark_played->affected_rows;
         $stmt_mark_played->close();
         
         if ($affected_rows === 0) {
-            // Dodatkowe logowanie dla debugowania
             error_log("WARNING: No rows affected when marking player $playerId as played in game $gameId, turn $currentTurnNumber");
-            
-            // Sprawdź aktualny stan kolejki
             $sql_debug = "SELECT * FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ?";
             $stmt_debug = $mysqli->prepare($sql_debug);
             $stmt_debug->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
@@ -202,8 +184,6 @@ try {
             
             error_log("Current queue state for player $playerId: " . json_encode($debug_row));
         }
-
-        // --- Check for next player in current turn ---
         $sql_next_player = "SELECT player_id FROM turn_queue 
                            WHERE game_id = ? AND turn_number = ? AND has_played = 0 AND is_skipped = 0 
                            ORDER BY queue_position ASC LIMIT 1";
@@ -218,10 +198,7 @@ try {
         $stmt_next_player->close();
 
         if ($next_player_row) {
-            // There's still a player who hasn't played in this turn
             $nextPlayerId = (int)$next_player_row['player_id'];
-            
-            // Update current_player_id in games table
             $sql_update_current_player = "UPDATE games SET current_player_id = ? WHERE id = ?";
             $stmt_update_current_player = $mysqli->prepare($sql_update_current_player);
             if ($stmt_update_current_player) {
@@ -233,10 +210,8 @@ try {
             $response['current_player_id'] = $nextPlayerId;
             $response['turn_info'] = "Następny gracz w kolejce: " . $nextPlayerId;
         } else {
-            // All players have played in this turn, create next turn queue
             $nextTurnNumber = $currentTurnNumber + 1;
             
-            // Get all active players in the game
             $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
             $stmt_get_players = $mysqli->prepare($sql_get_players);
             if (!$stmt_get_players) {
@@ -253,7 +228,6 @@ try {
             $stmt_get_players->close();
             
             if (!empty($players)) {
-                // Create new turn queue
                 $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
                 $stmt_create_queue = $mysqli->prepare($sql_create_queue);
                 if (!$stmt_create_queue) {
@@ -267,8 +241,6 @@ try {
                     $queuePosition++;
                 }
                 $stmt_create_queue->close();
-                
-                // Update game's current turn and current player
                 $firstPlayerId = $players[0]['id'];
                 $sql_update_game = "UPDATE games SET current_turn = ?, current_player_id = ? WHERE id = ?";
                 $stmt_update_game = $mysqli->prepare($sql_update_game);
@@ -284,8 +256,6 @@ try {
                 throw new Exception("Brak aktywnych graczy do utworzenia nowej tury.");
             }
         }
-
-        // --- Fetch updated coins ---
         $sql_get_updated_coins = "SELECT coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
         $stmt_get_updated_coins = $mysqli->prepare($sql_get_updated_coins);
 
@@ -333,7 +303,5 @@ try {
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
 }
-
-// Send the final JSON response
 echo json_encode($response);
 ?>
