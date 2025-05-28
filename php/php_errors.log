@@ -1,3 +1,4 @@
 [22-May-2025 23:47:14 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 710 zł.
 [23-May-2025 12:58:05 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 1 ma już właściciela.
 [23-May-2025 13:11:14 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 8 ma już właściciela.
+[27-May-2025 09:48:10 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type bool in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 642

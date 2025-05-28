@@ -103,7 +103,7 @@ try {
                 throw new Exception("Nie można kupić hotelu na tym polu - to nie jest hotel.");
             }
             if ($playerCoins < $purchasePrice) {
-                throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} zł.");
+                throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} $.");
             }
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM game_tiles WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
@@ -142,7 +142,7 @@ try {
             $stmt->close();
             $propertyTypeName = ($tileType === 'restaurant') ? 'restaurację' : (($tileType === 'hotel') ? 'hotel' : 'nieruchomość');
             $response['success'] = true;
-            $response['message'] = "Kupiłeś {$propertyTypeName} \"{$tileData['name']}\" za {$purchasePrice} zł.";
+            $response['message'] = "Kupiłeś {$propertyTypeName} \"{$tileData['name']}\" za {$purchasePrice} $.";
             $response['new_coins'] = $newPlayerCoins;
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
@@ -198,7 +198,7 @@ try {
             }
             $rentAmount = $tileInfo['base_rent'] * ($level + 1);
             if ($playerCoins < $rentAmount) {
-                throw new Exception("Masz za mało pieniędzy na opłacenie czynszu ({$rentAmount} zł)! Obecne saldo: {$playerCoins} zł.");
+                throw new Exception("Masz za mało pieniędzy na opłacenie czynszu ({$rentAmount} $)! Obecne saldo: {$playerCoins} $.");
             }
             $newPlayerCoins = $playerCoins - $rentAmount;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
@@ -220,7 +220,7 @@ try {
             }
             $stmt->close();
             $response['success'] = true;
-            $response['message'] = "Zapłacono czynsz w wysokości {$rentAmount} zł za \"{$tileInfo['name']}\".";
+            $response['message'] = "Zapłacono czynsz w wysokości {$rentAmount} $ za \"{$tileInfo['name']}\".";
             $response['new_coins'] = $newPlayerCoins;
             $response['affected_player_id'] = $ownerId;
             $stmt = $mysqli->prepare("SELECT coins FROM players WHERE id = ? AND game_id = ?");
@@ -286,7 +286,7 @@ try {
                 throw new Exception("Ta nieruchomość nie może być ulepszona.");
             }
             if ($playerCoins < $upgradeCost) {
-                throw new Exception("Masz za mało pieniędzy na ulepszenie ({$upgradeCost} zł).");
+                throw new Exception("Masz za mało pieniędzy na ulepszenie ({$upgradeCost} $).");
             }
             $newLevel = $upgradeInfo['current_level'] + 1;
             $stmt = $mysqli->prepare("UPDATE game_tiles SET current_level = ? WHERE game_id = ? AND tile_id = ?");
@@ -309,7 +309,7 @@ try {
             }
             $stmt->close();
             $response['success'] = true;
-            $response['message'] = "Ulepszono \"{$upgradeInfo['name']}\" do poziomu {$newLevel} za {$upgradeCost} zł.";
+            $response['message'] = "Ulepszono \"{$upgradeInfo['name']}\" do poziomu {$newLevel} za {$upgradeCost} $.";
             $response['new_coins'] = $newPlayerCoins;
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
@@ -370,7 +370,7 @@ try {
             }
             $stmt->close();
             $response['success'] = true;
-            $response['message'] = "Zastawiono \"{$mortgageInfo['name']}\" za {$mortgageValue} zł.";
+            $response['message'] = "Zastawiono \"{$mortgageInfo['name']}\" za {$mortgageValue} $.";
             $response['new_coins'] = $newPlayerCoins;
             break;
        case 'accept_surprise':
@@ -392,7 +392,8 @@ try {
     }
 
     $cardInfo = $result['card'];
-    $actionMessage = "🎴 Karta akcji: \"{$cardInfo['name']}\"\n📜 {$cardInfo['description']}\n\n";
+    // $actionMessage = "🎴 Karta akcji: \"{$cardInfo['name']}\"\n📜 {$cardInfo['description']}\n\n";
+    $actionMessage = "{$cardInfo['name']}\"{$cardInfo['description']}\n\n";
     $newPlayerCoins = $playerCoins;
     $newPlayerLocation = $playerLocation;
     $affectedPlayerId = null;
@@ -428,7 +429,7 @@ try {
 
                 $newPlayerCoins = $playerCoins + $moneyValue;
                 if ($newPlayerCoins < 0) {
-                    throw new Exception("Nie masz wystarczająco pieniędzy na opłacenie kary (" . abs($moneyValue) . " zł)!");
+                    throw new Exception("Nie masz wystarczająco pieniędzy na opłacenie kary (" . abs($moneyValue) . " $)!");
                 }
 
                 $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
@@ -442,9 +443,9 @@ try {
                 $stmt->close();
 
                 if ($moneyValue > 0) {
-                    $actionMessage .= "💰 Otrzymujesz {$moneyValue} zł!";
+                    $actionMessage .= "💰 Otrzymujesz {$moneyValue} $!";
                 } else {
-                    $actionMessage .= "💸 Płacisz " . abs($moneyValue) . " zł!";
+                    $actionMessage .= "💸 Płacisz " . abs($moneyValue) . " $!";
                 }
                 break;
 
@@ -638,13 +639,13 @@ try {
         $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
         $affectedPlayerId = $targetPlayerId;
         $affectedPlayerNewCoins = $newTargetPlayerCoins;
-        $duelMessage .= "Wygrałeś pojedynek!";
+        $duelMessage .= "Wygrywa {$currentPlayer['name']}";
     } elseif ($targetWins) {
         $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
         $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
         $affectedPlayerId = $targetPlayerId;
         $affectedPlayerNewCoins = $newTargetPlayerCoins;
-        $duelMessage .= "Przegrałeś pojedynek!";
+        $duelMessage .= "Wygrywa {$targetPlayer['name']}";
     } else {
         $duelMessage .= "Remis! Dodatkowy rzut kostką:\n";
         $playerRoll = rand(1, 6);
@@ -670,10 +671,10 @@ try {
         }
     }
     if ($newPlayerCoins < 0) {
-        throw new Exception("Masz za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$currentPlayer['coins']} zł.");
+        throw new Exception("Masz za mało pieniędzy na opłacenie pojedynku ({$duelAmount} $)! Obecne saldo: {$currentPlayer['coins']} $.");
     }
     if ($newTargetPlayerCoins < 0) {
-        throw new Exception("{$targetPlayer['name']} ma za mało pieniędzy na opłacenie pojedynku ({$duelAmount} zł)! Obecne saldo: {$targetPlayer['coins']} zł.");
+        throw new Exception("{$targetPlayer['name']} ma za mało pieniędzy na opłacenie pojedynku ({$duelAmount} $)! Obecne saldo: {$targetPlayer['coins']} $.");
     }
     $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
     if (!$stmt) {
@@ -759,7 +760,7 @@ try {
         case 'accept_special_tile':
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
-            $response['message'] = 'Pole specjalne zaakceptowane.';
+            $response['message'] = 'Witaj na nowym kontynencie!';
             $response['new_coins'] = $playerCoins;
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;

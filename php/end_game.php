@@ -163,7 +163,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
         <table class="player-result">
             <?php
             if (!empty($final_player_results)) {
-                echo "<tr> <th>Gracz</th> <th>Monety $</th> <th>Ilość zebranych restauracji</th> <th>Wycena końcowa</th> </tr>";
+                echo "<tr> <th>★</th> <th>Monety $</th> <th>Ilość zebranych restauracji</th> <th>Wycena końcowa</th> </tr>";
                 foreach ($final_player_results as $player_result) {
                     echo "<tr>";
                     echo "<td>". htmlspecialchars($player_result['name']) ."</td>";

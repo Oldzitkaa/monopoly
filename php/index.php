@@ -16,10 +16,13 @@ include_once './database_connect.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Potęga Smaku</title>
     <link rel="stylesheet" href="../css/styl.css"> 
+    <link rel="stylesheet" href="../css/rule.css"> 
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
     </head>
 <body>
+    <a href="./rule.php"><div class="info-div rule"><p class="info">Zasady</p></div></a>
+    <a href=""><div class="info-div author"><p class="info">U・ᴥ・U</p></div></a>
     <div class="logo_div step1">
         <p class="step-title">MONOPOLY</p>
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
@@ -47,7 +50,7 @@ include_once './database_connect.php';
         </div>
     </div>
     <div class="logo_div step3 nick" style="display: none; opacity: 0;">
-        <p class="step-title">Utwórz graczy: Podaj nicki</p> <div id="nicknameInputsContainer">
+        <p class="step-title">Utwórz graczy: <br> Podaj nicki</p> <div id="nicknameInputsContainer">
             </div>
         <div class="buttons-container"> 
             <button class="back-button" onclick="goBackToStepTwo()">&larr; WSTECZ</button>
