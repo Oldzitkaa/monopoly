@@ -249,7 +249,7 @@ function generatePlayerStatsTable($playerData) {
     $html .= '<tr><th>Cecha</th><th>Wartość</th></tr>';
     $html .= '</thead>';
     $html .= '<tbody>';
-    $html .= '<tr><td>Monety</td><td class="numeric">' . htmlspecialchars($playerData['coins']) . ' zł</td></tr>';
+    $html .= '<tr><td>Monety</td><td class="numeric">' . htmlspecialchars($playerData['coins']) . ' $</td></tr>';
     $html .= '<tr><td>Pozycja</td><td>Pole ' . htmlspecialchars($playerData['location_player']) . '</td></tr>';
     $html .= '<tr><td>Umiejętność Gotowania</td><td class="numeric">' . htmlspecialchars($playerData['cook_skill']) . '</td></tr>';
     $html .= '<tr><td>Tolerancja</td><td class="numeric">' . htmlspecialchars($playerData['tolerance']) . '</td></tr>';
@@ -280,8 +280,8 @@ function generatePlayerPropertiesTable($properties) {
             $html .= '<td>' . htmlspecialchars($prop['name']) . '</td>';
             $html .= '<td>' . htmlspecialchars($prop['type']) . '</td>';
             $html .= '<td class="property-type-region">' . htmlspecialchars($prop['region']) . '</td>';
-            $html .= '<td class="numeric property-cost-rent">' . htmlspecialchars($prop['cost']) . ' zł</td>';
-            $html .= '<td class="numeric property-cost-rent">' . htmlspecialchars($prop['base_rent']) . ' zł</td>';
+            $html .= '<td class="numeric property-cost-rent">' . htmlspecialchars($prop['cost']) . ' $</td>';
+            $html .= '<td class="numeric property-cost-rent">' . htmlspecialchars($prop['base_rent']) . ' $</td>';
             $html .= '<td class="numeric">' . htmlspecialchars($prop['level']) . '</td>';
             $html .= '<td>' . ($prop['mortgaged'] ? 'Tak' : 'Nie') . '</td>';
             $html .= '</tr>';
@@ -342,7 +342,17 @@ function generatePlayerPropertiesTable($properties) {
             //     } else {
             //         echo "<div class='current-player current-player-display'>Ładowanie...</div>";
             //     }
-                ?>
+                ?><div class="current-player">
+    <h3 id="current-player-name">
+<?php         
+if (!empty($current_player_turn_data)) {              
+    echo htmlspecialchars($current_player_turn_data['name']);
+} else {              
+    echo "Ładowanie...";          
+}          
+?>
+    </h3>
+</div>
             </div>
 
             <?php

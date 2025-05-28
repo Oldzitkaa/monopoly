@@ -164,14 +164,20 @@ try {
         $currentLocation = (int)$row['location'];
         $currentCoins = (int)$row['coins'];
 
-$newLocation = ($currentLocation + $rollResult);
-$boardSize = 40;
 
+$newLocation = ($currentLocation + $rollResult);
+$boardSize = 44;
+$passGoBonus = 200;
 if ($newLocation >= $boardSize) {
     $newLocation = $newLocation % $boardSize;
-    $currentCoins += 200;
-    echo "Przeszedłeś przez START! Dostajesz 200 monet!";
+    $currentCoins += $passGoBonus;
+    $passedGo = true;
 }
+
+if (isset($passedGo) && $passedGo) {
+    $passGoMessage = "Gracz przeszedł całą planszę i otrzymał bonus $passGoBonus monet!";
+}
+
         $sql_update_location = "UPDATE players SET location = ?, coins = ? WHERE id = ? AND game_id = ?";
         $stmt_update_location = $mysqli->prepare($sql_update_location);
 
