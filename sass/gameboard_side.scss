@@ -466,6 +466,7 @@ $breakpoint-desktop: 768px;
 
 .card-slots-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
     gap: $spacing-md;
     margin-bottom: $spacing-lg;
@@ -475,9 +476,8 @@ $breakpoint-desktop: 768px;
 }
 
 .card-slot {
-    flex: 1;
-    min-height: 150px;
-    // border: 3px dashed #9c997f;
+    flex: 1 1 200px;
+    min-height: 160px;
     border: 3px solid c.$white3;
     border-radius: $border-radius-md;
     display: flex !important;
@@ -488,99 +488,126 @@ $breakpoint-desktop: 768px;
     color: #000000;
     background-color: c.$white2;
     box-shadow: $shadow-sm;
-    word-break: break-word;
     text-align: center;
-    margin: 0 auto;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    max-width: 100%;
 
-    &.card-text{
+    &.card-text {
         text-align: center;
         color: black;
+        font-size: 1rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        overflow: hidden;
+        max-width: 100%;
     }
 }
-.text-message{
+
+.text-message {
     color: black;
+    font-size: 1rem;
+    text-align: center;
+    padding: 0.5rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+    max-width: 100%;
 }
+
+
+.action-button {
+    padding: 0.6em 1.2em;
+    margin: 0.3em;
+    border: none;
+    border-radius: $border-radius-md;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: $shadow-sm;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    display: inline-block;
+    min-width: 120px;
+    max-width: 100%;
+    text-align: center;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: $shadow-md;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    &.accept {
+        background-color: c.$buton;
+    }
+
+    &.restaurant-buy-button {
+        background-color: c.$mint;
+        color: c.$mint2;
+    }
+
+    &.restaurant-notbuy-button,
+    &.pay {
+        background-color: c.$red3;
+        color: c.$lightred;
+    }
+
+    &.btn-player1,
+    &.btn-player2,
+    &.btn-player3,
+    &.btn-player4 {
+        color: black;
+        padding: 0.3em 0.6em;
+        width: 80%;
+    }
+
+    &.btn-player1 { background-color: c.$player1; }
+    &.btn-player2 { background-color: c.$player2; }
+    &.btn-player3 { background-color: c.$player3; }
+    &.btn-player4 { background-color: c.$player4; }
+
+    &.btn-duel-description {
+        background-color: red;
+        color: #fff;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-slot {
+        font-size: 0.85em;
+    }
 
     .action-button {
-        padding: 0.6em 1.2em;
-        margin: 0.3em;
-        border: none;
-        border-radius: $border-radius-md;
-        font-size: 1em;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        box-shadow: $shadow-sm;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-        color: #fff;
-        display: inline-block;
-        min-width: 140px;
-        text-align: center;
-
-        &:hover {
-            transform: scale(1.05);
-            box-shadow: $shadow-md;
-        }
-
-        &:active {
-            transform: scale(0.98);
-        }
-
-        // Niespodzianki, szkolenia, urlop, kontynenty
-        &.accept {
-            background-color: c.$buton;
-        }
-
-
-        &.restaurant-buy-button {
-            //background-color: #4CAF50;
-            background-color: c.$mint;
-            color: c.$mint2;
-            //background-image: linear-gradient(to top, #4CAF50, #6fd16f);
-        }
-
-        &.restaurant-notbuy-button {
-            //background-color: #c0392b;
-            background-color: c.$red3;
-            color: c.$lightred;
-            //background-image: linear-gradient(to top, #c0392b, #e74c3c);
-        }
-
-        &.pay{
-            background-color: c.$red3;
-            color: c.$lightred;
-        }
-
-        // Wybór rywala
-        &.btn-player1{
-            background-color: c.$player1;
-            color: black;
-            padding: 0;
-        }
-        &.btn-player2{
-            background: c.$player2;
-            color: black;
-            padding: 0;
-        }
-
-        &.btn-player3{
-            background: c.$player3;
-            color: black;
-            padding: 0;
-        }
-
-        &.btn-player4{
-            background: c.$player4;
-            color: black;
-            padding: 0;
-        }
-
-        // Koniec pojedynku
-        &.btn-duel-description {
-            background-color: red;
-            color: #fff;
-        }
+        font-size: 0.9em;
+        min-width: 100px;
+        padding: 0.5em 1em;
     }
+}
+
+@media (max-width: 480px) {
+    .card-slot {
+        flex: 1 1 100%;
+        font-size: 0.8em;
+    }
+
+    .action-button {
+        font-size: 0.85em;
+        min-width: 90px;
+        padding: 0.4em 0.8em;
+    }
+}
+
 
 
 

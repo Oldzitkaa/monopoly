@@ -34,6 +34,16 @@ $playerId = (int) $data['player_id'];
 
 $mysqli->begin_transaction();
 
+function getCurrentPlayerId($gameId, $mysqli) {
+    $stmt = $mysqli->prepare("SELECT current_player_id FROM games WHERE id = ?");
+    $stmt->bind_param("i", $gameId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+    return $row ? (int)$row['current_player_id'] : null;
+}
+
 try {
     $sql_get_turn = "SELECT current_turn FROM games WHERE id = ? LIMIT 1";
     $stmt_get_turn = $mysqli->prepare($sql_get_turn);
@@ -91,6 +101,18 @@ try {
                 $queuePosition++;
             }
             $stmt_create_queue->close();
+          
+            if (!empty($players)) {
+                $firstPlayerId = $players[0]['id'];
+                $sql_set_current_player = "UPDATE games SET current_player_id = ? WHERE id = ?";
+                $stmt_set_current_player = $mysqli->prepare($sql_set_current_player);
+                if ($stmt_set_current_player) {
+                    $stmt_set_current_player->bind_param('ii', $firstPlayerId, $gameId);
+                    $stmt_set_current_player->execute();
+                    $stmt_set_current_player->close();
+                }
+            }
+
         }
     }
     $sql_ensure_player_in_queue = "INSERT IGNORE INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) 
@@ -160,14 +182,15 @@ if ($newLocation >= $boardSize) {
         $stmt_update_location->bind_param('iiii', $newLocation, $currentCoins, $playerId, $gameId);
         $stmt_update_location->execute();
         $stmt_update_location->close();
-        $sql_mark_played = "UPDATE turn_queue SET has_played = 1 WHERE game_id = ? AND player_id = ? AND turn_number = ? AND has_played = 0";
+        $sql_mark_played = "UPDATE turn_queue SET has_played = 1, last_roll = ? WHERE game_id = ? AND player_id = ? AND turn_number = ? AND has_played = 0";
         $stmt_mark_played = $mysqli->prepare($sql_mark_played);
 
         if (!$stmt_mark_played) {
-            throw new Exception("Błąd przygotowania zapytania oznaczania gracza jako zagranego: " . $mysqli->error);
+            throw new Exception("Błąd przygotowania zapytania oznaczania gracza jako zagranego i zapisu rzutu: " . $mysqli->error);
         }
 
-        $stmt_mark_played->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
+        $stmt_mark_played->bind_param('iiii', $rollResult, $gameId, $playerId, $currentTurnNumber);
+
         $stmt_mark_played->execute();
         $affected_rows = $stmt_mark_played->affected_rows;
         $stmt_mark_played->close();
@@ -292,6 +315,9 @@ if ($newLocation >= $boardSize) {
     $stmt_get_pos_coins->close();
 
     $mysqli->commit();
+
+    $response['current_player_id_db'] = getCurrentPlayerId($gameId, $mysqli);
+
 
 } catch (Exception $e) {
     $mysqli->rollback();
