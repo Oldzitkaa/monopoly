@@ -139,6 +139,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     <title>Potęga Smaku - Wyniki</title>
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/end_game.css">
+    <link rel="stylesheet" href="../css/rule.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 </head>
@@ -176,6 +177,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
         <button class="end-btn" id="endGameButton">OK</button>
     </div>
     <img src="../zdj/tlo3.png" alt="Tło gry" class="backg">
+    <a href="./author.php"><div class="info-div rule" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

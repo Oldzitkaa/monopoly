@@ -14,10 +14,11 @@
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
         <h2 class="step-title">MONOPOLY - ZASADY</h2>
         <div class="rule-text">
-            <h3>Cel Gry:</h3>
-            <p>Zostań prawdziwym potentatem restauracyjnym! Twoim zadaniem jest doprowadzenie innych graczy do bankructwa poprzez 
-                strategiczne kupowanie lokali, rozwijanie sieci restauracji oraz sprytne wykorzystywanie umiejętności w pojedynkach.</p>
-                
+                <h3>Cel Gry:</h3>
+                <div class="inner-rule">
+                    <p>Zostań prawdziwym potentatem restauracyjnym! Twoim zadaniem jest doprowadzenie innych graczy do bankructwa poprzez 
+                        strategiczne kupowanie lokali, rozwijanie sieci restauracji oraz sprytne wykorzystywanie umiejętności w pojedynkach.</p>
+                </div>
                 <h3>Rozgrywka:</h3>
                 <div class="inner-rule">
                     <p>
@@ -107,19 +108,18 @@
             <div class="xd">
                 <!-- <p class="easter-egg">☭<br>☭<br>☭<br>☭</p> -->
                 <p class="easter-egg">
-                    ░░░░░░░░░░░░░░░▄▄▄▄▄▄▄▄░░░░░░░░░░░░░░ <br>
-                    ░▄█▀███▄▄████████████████████▄▄███▀█░ <br>
-                    ░█░░▀████████████████████████████░░█░ <br>
-                    ░░█▄░░▀████████████████████████░░░▄▀░ <br>
-                    ░░░▀█▄▄████▀▀▀░░░░██░░░▀▀▀█████▄▄█▀░░ <br>
-                    ░░░▄███▀▀░░░░░░░░░██░░░░░░░░░▀███▄░░░ <br>
-                    ░░▄██▀░░░░░▄▄▄██▄▄██░▄██▄▄▄░░░░░▀██▄░ <br>
-                    ▄██▀░░░▄▄▄███▄██████████▄███▄▄▄░░░▀█▄ <br>
-                    ▀██▄▄██████████▀░███▀▀▀█████████▄▄▄█▀ <br>
-                    ░░▀██████████▀░░░███░░░▀███████████▀░ <br>
-                    ░░░░▀▀▀██████░░░█████▄░░▀██████▀▀░░░░ <br>
-                    ░░░░░░░░░▀▀▀▀▄░░█████▀░▄█▀▀▀░░░░░░░░░ <br>
-                    ░░░░░░░░░░░░░░▀▀▄▄▄▄▄▀▀░░░░░░░░░░░░░░ <br> 
+                    ░░░░░░░░▄██▄░░░░░░▄▄░░ <br>
+                    ░░░░░░░▐███▀░░░░░▄███▌ <br>
+                    ░░▄▀░░▄█▀▀░░░░░░░░▀██░ <br>
+                    ░█░░░██░░░░░░░░░░░░░░░ <br>
+                    █▌░░▐██░░▄██▌░░▄▄▄░░░▄ <br>
+                    ██░░▐██▄░▀█▀░░░▀██░░▐▌ <br>
+                    ██▄░▐███▄▄░░▄▄▄░▀▀░▄██ <br>
+                    ▐███▄██████▄░▀░▄█████▌ <br>
+                    ▐████████████▀▀██████░ <br>
+                    ░▐████▀██████░░█████░░ <br>
+                    ░░░▀▀▀░░█████▌░████▀░░ <br>
+                    ░░░░░░░░░▀▀███░▀▀▀░░░░ <br> 
             </p>
             </div>
         </div>
