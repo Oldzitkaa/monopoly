@@ -241,8 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-
     async function handleRollDice() {
         rollDiceButton.disabled = true;
         wynikTekst.textContent = 'Rzut...';

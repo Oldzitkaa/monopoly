@@ -1,4 +1,5 @@
 <?php
+global $mysqli;
 header('Content-Type: application/json');
 require_once './database_connect.php';
 

@@ -36,23 +36,47 @@ try {
 
     $mysqli->begin_transaction();
 
+    // Resetuj flagi tury
     $resetStmt = $mysqli->prepare("
-    UPDATE players 
-    SET is_current_turn = 0, turns_to_miss = IF(turns_to_miss > 0, turns_to_miss - 1, 0) 
-    WHERE game_id = ? ");
+        UPDATE players 
+        SET is_current_turn = 0, turns_to_miss = IF(turns_to_miss > 0, turns_to_miss - 1, 0) 
+        WHERE game_id = ?
+    ");
     $resetStmt->bind_param("i", $gameId);
     $resetStmt->execute();
     $resetStmt->close();
 
+    // Ustaw nowego gracza jako aktywnego
     $setStmt = $mysqli->prepare("UPDATE players SET is_current_turn = 1 WHERE id = ? AND game_id = ?");
     $setStmt->bind_param("ii", $newTurnPlayerId, $gameId);
     $setStmt->execute();
     $setStmt->close();
 
+    // Ustaw gracza w tabeli 'games'
     $updateGameStmt = $mysqli->prepare("UPDATE games SET current_player_id = ? WHERE id = ?");
     $updateGameStmt->bind_param("ii", $newTurnPlayerId, $gameId);
     $updateGameStmt->execute();
     $updateGameStmt->close();
+
+    // Pobierz numer aktualnej tury
+    $turnQuery = $mysqli->prepare("SELECT current_turn FROM games WHERE id = ?");
+    $turnQuery->bind_param("i", $gameId);
+    $turnQuery->execute();
+    $turnResult = $turnQuery->get_result();
+    $turnRow = $turnResult->fetch_assoc();
+    $turnQuery->close();
+
+    if (!$turnRow) {
+        throw new Exception("Nie znaleziono informacji o aktualnej turze.");
+    }
+
+    $currentTurnNumber = (int)$turnRow['current_turn'];
+
+    // Resetuj has_played w turn_queue dla nowego gracza (na bieżącą turę)
+    $resetQueue = $mysqli->prepare("UPDATE turn_queue SET has_played = 0 WHERE game_id = ? AND player_id = ? AND turn_number = ?");
+    $resetQueue->bind_param("iii", $gameId, $newTurnPlayerId, $currentTurnNumber);
+    $resetQueue->execute();
+    $resetQueue->close();
 
     $mysqli->commit();
 
@@ -74,8 +98,6 @@ try {
         $mysqli->close();
     }
 }
-
-error_log("Tura ustawiona na gracza ID: $newTurnPlayerId w grze ID: $gameId");
 
 echo json_encode($response);
 ?>
