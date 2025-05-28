@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardSlotText = document.querySelector('.card-slot.card-text');
     const cardSlotChoose = document.querySelector('.card-slot.card-choose');
     let currentTurnPlayerId = initialCurrentTurnPlayerId;
-    const GAME_STATE_REFRESH_INTERVAL = 3000;
+    const GAME_STATE_REFRESH_INTERVAL = 1000;
     let gameStateInterval;
 
     function translatePropertyType(type) {
@@ -419,10 +419,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th><th>Upgrade</th></tr></thead><tbody>';
                                     data.properties.forEach(prop => {
                                         let costRentDisplay = '';
-                                        if (prop.cost) { costRentDisplay += `${prop.cost} zł`; }
+                                        if (prop.cost) { costRentDisplay += `${prop.cost} $`; }
                                         if (prop.calculated_rent) {
                                             if (costRentDisplay) costRentDisplay += ' | ';
-                                            costRentDisplay += `${prop.calculated_rent} zł`;
+                                            costRentDisplay += `${prop.calculated_rent} $`;
                                         }
                                         if (prop.level !== undefined) { costRentDisplay += ` (Poziom: ${prop.level})`; }
                                         if (prop.is_mortgaged) { costRentDisplay += ` (Zastawiono)`; }
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         if (prop.level >= 5) {
                                             upgradeCostDisplay = 'MAX. POZIOM';
                                         } else if (prop.upgrade_cost !== null && prop.upgrade_cost !== undefined) {
-                                            upgradeCostDisplay = `${prop.upgrade_cost} zł`;
+                                            upgradeCostDisplay = `${prop.upgrade_cost} $`;
                                         }
 
                                         const translatedType = translatePropertyType(prop.type || '');
@@ -517,19 +517,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePlayerDisplay(playerId, newCoins, newLocation) {
-        const playerBox = document.querySelector(`.player-info-box[data-player-id="${playerId}"]`);
-        if (playerBox) {
-            const coinsSpan = playerBox.querySelector('.player-coins');
-            const locationSpan = playerBox.querySelector('.player-location');
+    console.log(`[DEBUG] updatePlayerDisplay wywołane dla gracza ${playerId}, monety: ${newCoins}, lokacja: ${newLocation}`);
+    
+    const playerBox = document.querySelector(`.player-info-box[data-player-id="${playerId}"]`);
+    if (playerBox) {
+        const coinsSpan = playerBox.querySelector('.player-coins');
+        const locationSpan = playerBox.querySelector('.player-location');
 
-            if (coinsSpan) {
-                coinsSpan.textContent = `${newCoins} zł`;
-            }
-            if (locationSpan && newLocation !== null) {
-                locationSpan.textContent = `Pole ${newLocation}`;
-            }
+        if (coinsSpan) {
+            const oldCoins = coinsSpan.textContent;
+            coinsSpan.textContent = `${newCoins} $`;
+            console.log(`[DEBUG] Zaktualizowano monety gracza ${playerId}: ${oldCoins} -> ${newCoins} $`);
+        } else {
+            console.warn(`[DEBUG] Nie znaleziono elementu .player-coins dla gracza ${playerId}`);
+        }
+        
+        if (locationSpan && newLocation !== null) {
+            const oldLocation = locationSpan.textContent;
+            locationSpan.textContent = `Pole ${newLocation}`;
+            console.log(`[DEBUG] Zaktualizowano lokację gracza ${playerId}: ${oldLocation} -> Pole ${newLocation}`);
+        } else if (!locationSpan) {
+            console.warn(`[DEBUG] Nie znaleziono elementu .player-location dla gracza ${playerId}`);
+        }
 
-            if (playerBox.classList.contains('active')) {
+        // DODANE: Wymuszenie odświeżenia widoku
+        playerBox.style.display = 'none';
+        playerBox.offsetHeight; // trigger reflow
+        playerBox.style.display = '';
+
+        // Reszta kodu bez zmian...
+        if (playerBox.classList.contains('active'))  {
                 const propertiesTableContainer = playerBox.querySelector('.player-properties-table-container');
                 const skillsTableContainer = playerBox.querySelector('.player-skills-table-container');
 
@@ -544,10 +561,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 let tableHtml = '<table class="player-properties-table"><thead><tr><th>Nazwa</th><th>Typ/Grupa</th><th>Koszt/Czynsz</th><th>Upgrade</th></tr></thead><tbody>';
                                 data.properties.forEach(prop => {
                                     let costRentDisplay = '';
-                                    if (prop.cost) { costRentDisplay += `${prop.cost} zł`; }
+                                    if (prop.cost) { costRentDisplay += `${prop.cost} $`; }
                                     if (prop.calculated_rent) {
                                         if (costRentDisplay) costRentDisplay += ' | ';
-                                        costRentDisplay += `${prop.calculated_rent} zł`;
+                                        costRentDisplay += `${prop.calculated_rent} $`;
                                     }
                                     if (prop.level !== undefined) { costRentDisplay += ` (Poziom: ${prop.level})`; }
                                     if (prop.is_mortgaged) { costRentDisplay += ` (Zastawiono)`; }
@@ -557,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     if (prop.level >= 5) {
                                         upgradeCostDisplay = 'MAX. POZIOM';
                                     } else if (prop.upgrade_cost !== null && prop.upgrade_cost !== undefined) {
-                                        upgradeCostDisplay = `${prop.upgrade_cost} zł`;
+                                        upgradeCostDisplay = `${prop.upgrade_cost} $`;
                                     }
 
                                     const translatedType = translatePropertyType(prop.type || '');
@@ -600,197 +617,495 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     async function handleTileAction(actionType, playerId, gameId, location, propertyId = null, targetPlayerIdForDuel = null) {
-        console.log(`Wykonuję akcję: ${actionType} dla gracza ${playerId} na polu ${location}`);
+    console.log(`Wykonuję akcję: ${actionType} dla gracza ${playerId} na polu ${location}`);
 
-        if (!actionType || playerId === null || gameId === null || location === null) {
-            console.error('Missing required parameters for tile action:', {
-                actionType: actionType,
-                playerId: playerId,
-                gameId: gameId,
-                location: location
-            });
+    if (!actionType || playerId === null || gameId === null || location === null) {
+        console.error('Missing required parameters for tile action:', {
+            actionType: actionType,
+            playerId: playerId,
+            gameId: gameId,
+            location: location
+        });
 
-            if (cardSlotText) {
-                cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
-            }
-            return;
+        if (cardSlotText) {
+            cardSlotText.textContent = 'Błąd: Brak wymaganych parametrów akcji.';
         }
+        return;
+    }
 
-        const requestBody = {
-            action_type: actionType,
-            player_id: parseInt(playerId),
-            game_id: parseInt(gameId),
-            location: parseInt(location)
-        };
+    const requestBody = {
+        action_type: actionType,
+        player_id: parseInt(playerId),
+        game_id: parseInt(gameId),
+        location: parseInt(location)
+    };
 
-        if (propertyId !== null && propertyId !== undefined) {
-            requestBody.property_id = parseInt(propertyId);
-        }
+    if (propertyId !== null && propertyId !== undefined) {
+        requestBody.property_id = parseInt(propertyId);
+    }
 
-        // Add targetPlayerIdForDuel if provided and action is duel
-        if (actionType === 'duel' && targetPlayerIdForDuel !== null && targetPlayerIdForDuel !== undefined) {
-            requestBody.target_player_id = parseInt(targetPlayerIdForDuel);
-        }
+    // Add targetPlayerIdForDuel if provided and action is duel
+    if (actionType === 'duel' && targetPlayerIdForDuel !== null && targetPlayerIdForDuel !== undefined) {
+        requestBody.target_player_id = parseInt(targetPlayerIdForDuel);
+    }
 
+    console.log('Sending request body:', requestBody);
 
-        console.log('Sending request body:', requestBody);
+    try {
+        const actionResponse = await fetch('process_tile_action.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
 
-        try {
-            const actionResponse = await fetch('process_tile_action.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody),
-            });
+        // Log response status and headers for debugging
+        console.log('Response status:', actionResponse.status);
+        console.log('Response headers:', [...actionResponse.headers.entries()]);
 
-            // Log response status and headers for debugging
-            console.log('Response status:', actionResponse.status);
-            console.log('Response headers:', [...actionResponse.headers.entries()]);
-
-            if (!actionResponse.ok) {
-                // Try to read error message from response body
-                let errorMessage;
+        if (!actionResponse.ok) {
+            // Try to read error message from response body
+            let errorMessage;
+            try {
+                const errorBody = await actionResponse.json();
+                errorMessage = errorBody.message || `HTTP ${actionResponse.status}`;
+                console.log('Error response body:', errorBody);
+            } catch (parseError) {
+                // If JSON cannot be parsed, try to get text
                 try {
-                    const errorBody = await actionResponse.json();
-                    errorMessage = errorBody.message || `HTTP ${actionResponse.status}`;
-                    console.log('Error response body:', errorBody);
-                } catch (parseError) {
-                    // If JSON cannot be parsed, try to get text
-                    try {
-                        const errorText = await actionResponse.text();
-                        console.log('Error response text:', errorText);
-                        errorMessage = errorText || `HTTP ${actionResponse.status}`;
-                    } catch (textError) {
-                        errorMessage = `HTTP ${actionResponse.status}`; // Corrected error variable
-                    }
+                    const errorText = await actionResponse.text();
+                    console.log('Error response text:', errorText);
+                    errorMessage = errorText || `HTTP ${actionResponse.status}`;
+                } catch (textError) {
+                    errorMessage = `HTTP ${actionResponse.status}`; // Corrected error variable
                 }
-                throw new Error(`Błąd serwera podczas akcji na polu (${actionResponse.status}): ${errorMessage}`);
+            }
+            throw new Error(`Błąd serwera podczas akcji na polu (${actionResponse.status}): ${errorMessage}`);
+        }
+
+        const actionResult = await actionResponse.json();
+        console.log('Action result:', actionResult);
+
+        if (actionResult.success) {
+            console.log("Akcja na polu zakończona sukcesem:", actionResult.message);
+
+            // Update player display after action
+            if (actionResult.new_coins !== undefined) {
+                updatePlayerDisplay(playerId, actionResult.new_coins, location);
             }
 
-            const actionResult = await actionResponse.json();
-            console.log('Action result:', actionResult);
-
-            if (actionResult.success) {
-                console.log("Akcja na polu zakończona sukcesem:", actionResult.message);
-
-                // Update player display after action
-                if (actionResult.new_coins !== undefined) {
-                    updatePlayerDisplay(playerId, actionResult.new_coins, location);
-                }
-
-                // If action affected another player (e.g., paying rent)
-                if (actionResult.affected_player_id && actionResult.affected_player_id !== playerId) {
-                    if (actionResult.affected_player_new_coins !== undefined) {
-                        updatePlayerDisplay(actionResult.affected_player_id, actionResult.affected_player_new_coins, null); // null for location, as it doesn't change
-                    }
-                }
-
-                // If action changed the turn (e.g., after purchase/rent payment)
-                if (actionResult.next_player_id) {
-                    currentTurnPlayerId = actionResult.next_player_id;
-                    currentPlayerId = actionResult.next_player_id; // <--- CRUCIAL: Update currentPlayerId for single-device game
-                    updateCurrentPlayerIndicator(currentTurnPlayerId);
-                    updateRollButtonState();
-
-                    if (actionResult.new_round_started) {
-                        console.log("Rozpoczęła się nowa runda!");
-                        // You can add additional UI logic for a new round here
-                    }
-                }
-
-                if (cardSlotText) {
-                    cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
-                }
-
-            } else {
-                console.error("Błąd podczas akcji na polu:", actionResult.message);
-                if (cardSlotText) {
-                    cardSlotText.textContent = `Błąd: ${actionResult.message}`;
+            // If action affected another player (e.g., paying rent)
+            if (actionResult.affected_player_id && actionResult.affected_player_id !== playerId) {
+                if (actionResult.affected_player_new_coins !== undefined) {
+                    updatePlayerDisplay(actionResult.affected_player_id, actionResult.affected_player_new_coins, null); // null for location, as it doesn't change
                 }
             }
 
-        } catch (error) {
-            console.error("Błąd sieci/serwera podczas wykonywania akcji na polu:", error);
+            // If action changed the turn (e.g., after purchase/rent payment)
+            if (actionResult.next_player_id) {
+                currentTurnPlayerId = actionResult.next_player_id;
+                currentPlayerId = actionResult.next_player_id; // <--- CRUCIAL: Update currentPlayerId for single-device game
+                updateCurrentPlayerIndicator(currentTurnPlayerId);
+                updateRollButtonState();
+
+                if (actionResult.new_round_started) {
+                    console.log("Rozpoczęła się nowa runda!");
+                    // You can add additional UI logic for a new round here
+                }
+            }
+
             if (cardSlotText) {
-                cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
+                cardSlotText.textContent = actionResult.message || "Akcja wykonana pomyślnie.";
             }
-            throw error; // Re-throw error to be caught by the calling function
-        }
-    }
 
-    /**
-     * Starts cyclic refreshing of game state.
-     */
-    function startGameStateRefresh() {
-        // Clear previous interval if it exists
-        if (gameStateInterval) {
-            clearInterval(gameStateInterval);
+        } else {
+            console.error("Błąd podczas akcji na polu:", actionResult.message);
+            if (cardSlotText) {
+                cardSlotText.textContent = `Błąd: ${actionResult.message}`;
+            }
         }
-        // Set new interval
-        gameStateInterval = setInterval(refreshPlayerStats, GAME_STATE_REFRESH_INTERVAL);
-        console.log(`Rozpoczęto odświeżanie stanu gry co ${GAME_STATE_REFRESH_INTERVAL / 1000} sekundy.`);
-    }
 
-    /**
-     * Stops cyclic refreshing of game state.
-     */
-    function stopGameStateRefresh() {
-        if (gameStateInterval) {
-            clearInterval(gameStateInterval);
-            gameStateInterval = null;
-            console.log('Zatrzymano odświeżanie stanu gry.');
+    } catch (error) {
+        console.error("Błąd sieci/serwera podczas wykonywania akcji na polu:", error);
+        if (cardSlotText) {
+            cardSlotText.textContent = `Błąd sieci/serwera: ${error.message}`;
         }
+        throw error; // Re-throw error to be caught by the calling function
     }
+}
 
-    /**
-     * Function to refresh player stats and their positions on the board.
-     * Fetches full game state from the server.
-     */
-    async function refreshPlayerStats() {
-        try {
-            const response = await fetch('get_game_state.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    game_id: gameId
-                })
+/**
+ * Starts cyclic refreshing of game state.
+ */
+  function startGameStateRefresh() {
+    // Clear previous interval if it exists
+    if (gameStateInterval) {
+        clearInterval(gameStateInterval);
+    }
+    // Set new interval
+    gameStateInterval = setInterval(refreshPlayerStats, GAME_STATE_REFRESH_INTERVAL);
+    console.log(`Rozpoczęto odświeżanie stanu gry co ${GAME_STATE_REFRESH_INTERVAL / 1000} sekundy.`);
+}
+
+/**
+ * Stops cyclic refreshing of game state.
+ */
+function stopGameStateRefresh() {
+    if (gameStateInterval) {
+        clearInterval(gameStateInterval);
+        gameStateInterval = null;
+        console.log('Zatrzymano odświeżanie stanu gry.');
+    }
+}
+/**
+ * Function to refresh player stats and their positions on the board.
+ * Fetches full game state from the server.
+ */
+async function refreshPlayerStats() {
+    console.log('[DEBUG] refreshPlayerStats - rozpoczęcie');
+    
+    try {
+        const response = await fetch('get_game_state.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                game_id: gameId
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[ERROR] Błąd HTTP podczas pobierania stanu gry: ${response.status} ${response.statusText}. Odpowiedź:`, errorText);
+            throw new Error(`Błąd HTTP: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('[DEBUG] Otrzymane dane z get_game_state.php:', data);
+        
+        if (data.success && data.players) {
+            console.log(`[DEBUG] Aktualizacja ${data.players.length} graczy`);
+            
+            // Update displayed player information
+            data.players.forEach((player, index) => {
+                console.log(`[DEBUG] Aktualizacja gracza ${index + 1}/${data.players.length}:`, player);
+                
+                // Update coins and location in player panel
+                updatePlayerDisplay(player.id, player.coins, player.location);
+                
+                // Move player token on the board
+                movePlayerToken(player.id, player.location);
+                
+                // Update center stats
+                updateCenterPlayerStats(player);
             });
-
-            // Check if the response is OK (status 200)
-            if (!response.ok) {
-                const errorText = await response.text(); // Get raw text to debug HTML response
-                console.error(`Błąd HTTP podczas pobierania stanu gry: ${response.status} ${response.statusText}. Odpowiedź:`, errorText);
-                throw new Error(`Błąd HTTP: ${response.status} ${response.statusText}`);
+            
+            // Update currentTurnPlayerId from server
+            if (data.current_turn_player_id !== undefined && data.current_turn_player_id !== currentTurnPlayerId) {
+                console.log(`[DEBUG] Polling: Zmiana currentTurnPlayerId z ${currentTurnPlayerId} na ${data.current_turn_player_id}`);
+                currentTurnPlayerId = data.current_turn_player_id;
+                currentPlayerId = data.current_turn_player_id;
+                updateCurrentPlayerIndicator(currentTurnPlayerId);
+                updateRollButtonState();
+                
+                // NOWE: Aktualizuj centrum planszy
+                updateCurrentPlayerCenterDisplay(currentTurnPlayerId, data.players);
             }
-
-            const data = await response.json();
-            if (data.success && data.players) {
-                // Update displayed player information
-                data.players.forEach(player => {
-                    // Update coins and location in player panel
-                    updatePlayerDisplay(player.id, player.coins, player.location);
-                    // Move player token on the board
-                    movePlayerToken(player.id, player.location);
-                });
-
-                // Update currentTurnPlayerId from server
-                if (data.current_turn_player_id !== undefined && data.current_turn_player_id !== currentTurnPlayerId) {
-                    console.log(`Polling: Zmiana currentTurnPlayerId z ${currentTurnPlayerId} na ${data.current_turn_player_id}`);
-                    currentTurnPlayerId = data.current_turn_player_id;
-                    currentPlayerId = data.current_turn_player_id; // <--- CRUCIAL: Update currentPlayerId during polling
-                    updateCurrentPlayerIndicator(currentTurnPlayerId);
-                    updateRollButtonState();
-                }
-
-            } else {
-                console.error('Błąd odświeżania statystyk gry:', data.message || 'Brak danych.');
-            }
-        } catch (error) {
-            console.error('Błąd komunikacji podczas odświeżania statystyk:', error);
+            
+            // Zawsze aktualizuj centrum planszy (nawet jeśli gracz się nie zmienił)
+            updateCurrentPlayerCenterDisplay(currentTurnPlayerId || data.current_turn_player_id, data.players);
+            
+            console.log('[DEBUG] refreshPlayerStats - zakończone pomyślnie');
+        } else {
+            console.error('[ERROR] Błąd odświeżania statystyk gry:', data.message || 'Brak danych.');
         }
+    } catch (error) {
+        console.error('[ERROR] Błąd komunikacji podczas odświeżania statystyk:', error);
     }
+}
+function updateCenterPlayerStats(playerData) {
+    console.log(`[DEBUG] updateCenterPlayerStats dla gracza:`, playerData);
+    
+    // Spróbuj różnych selektorów w kolejności priorytetów
+    let playerContainer = null;
+    
+    // Selektor 1: Oryginalny z kodu
+    playerContainer = document.querySelector(`.player-info.player${playerData.turn_order}`);
+    
+    if (!playerContainer) {
+        // Selektor 2: Na podstawie data-player-id
+        playerContainer = document.querySelector(`.player-info[data-player-id="${playerData.id}"]`);
+        console.log(`[DEBUG] Używam selektora data-player-id dla gracza ${playerData.id}`);
+    }
+    
+    if (!playerContainer) {
+        // Selektor 3: Szukaj w kontenerach z nazwą gracza
+        const allPlayerInfos = document.querySelectorAll('.player-info');
+        allPlayerInfos.forEach(container => {
+            const nameElement = container.querySelector('p b');
+            if (nameElement && nameElement.textContent.includes(playerData.name)) {
+                playerContainer = container;
+                console.log(`[DEBUG] Znaleziono kontener przez nazwę gracza: ${playerData.name}`);
+            }
+        });
+    }
+    
+    if (!playerContainer) {
+        console.warn(`[WARNING] Nie znaleziono kontenera dla gracza:`, {
+            id: playerData.id,
+            turn_order: playerData.turn_order,
+            name: playerData.name
+        });
+        
+        // Debug: Wyświetl wszystkie dostępne kontenery graczy
+        const allContainers = document.querySelectorAll('.player-info, [data-player-id]');
+        console.log('[DEBUG] Dostępne kontenery graczy:', Array.from(allContainers).map(el => ({
+            className: el.className,
+            id: el.id,
+            dataPlayerId: el.dataset.playerId,
+            textContent: el.textContent?.substring(0, 50) + '...'
+        })));
+        return;
+    }
+    
+    console.log(`[DEBUG] Znaleziono kontener gracza:`, playerContainer.className);
+    
+    // ZMIENIONE: Aktualizuj tylko nazwę gracza (bez postaci)
+    const playerNameElement = playerContainer.querySelector('p b');
+    if (playerNameElement && playerData.name) {
+        const oldText = playerNameElement.textContent;
+        const newText = playerData.name; // Usunięto character_name
+        if (oldText !== newText) {
+            playerNameElement.textContent = newText;
+            console.log(`[DEBUG] Zaktualizowano nazwę gracza: ${oldText} -> ${newText}`);
+        }
+    } else if (!playerNameElement) {
+        console.warn(`[WARNING] Nie znaleziono elementu 'p b' dla gracza ${playerData.id}`);
+    }
+    
+    // ZMIENIONE: Aktualizuj monety - tylko nazwa gracza bez postaci
+    const playerParagraph = playerContainer.querySelector('p');
+    if (playerParagraph && playerData.coins !== undefined) {
+        const oldHTML = playerParagraph.innerHTML;
+        const newHTML = `<b>${playerData.name}</b><br>Monety: ${playerData.coins} $ <br>`; // Usunięto character_name
+        
+        if (oldHTML !== newHTML) {
+            playerParagraph.innerHTML = newHTML;
+            console.log(`[DEBUG] Zaktualizowano monety gracza ${playerData.id}: ${playerData.coins} $`);
+        }
+    } else if (!playerParagraph) {
+        console.warn(`[WARNING] Nie znaleziono elementu 'p' dla gracza ${playerData.id}`);
+    }
+    
+    // Aktualizuj statystyki w tabeli
+    const statsTable = playerContainer.querySelector('.stats-table-wrapper table');
+    if (statsTable) {
+        console.log(`[DEBUG] Znaleziono tabelę statystyk dla gracza ${playerData.id}`);
+        const rows = statsTable.querySelectorAll('tr');
+        
+        rows.forEach((row, rowIndex) => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 2) {
+                const statName = cells[0].textContent.trim();
+                const valueCell = cells[1];
+                const oldValue = valueCell.textContent.trim();
+                
+                // Mapowanie nazw statystyk na dane z serwera
+                let newValue = null;
+                switch (statName) {
+                    case 'Pojemność brzucha:':
+                        newValue = playerData.belly_capacity;
+                        break;
+                    case 'Tolerancja ostrości:':
+                        newValue = playerData.tolerance;
+                        break;
+                    case 'Czas przygotowania:':
+                        newValue = playerData.prep_time;
+                        break;
+                    case 'Tradycyjne Powiązania:':
+                        newValue = playerData.tradition_affinity;
+                        break;
+                    case 'Umiejętności gotowania:':
+                        newValue = playerData.cook_skill;
+                        break;
+                    case 'Zmysł do przypraw:':
+                        newValue = playerData.spice_sense;
+                        break;
+                    case 'Łeb do biznesu:':
+                        newValue = playerData.business_acumen;
+                        break;
+                    default:
+                        console.log(`[DEBUG] Nieznana statystyka: ${statName}`);
+                        break;
+                }
+                
+                if (newValue !== null && newValue !== undefined) {
+                    const newValueStr = newValue.toString();
+                    if (oldValue !== newValueStr) {
+                        valueCell.textContent = newValueStr;
+                        console.log(`[DEBUG] Zaktualizowano ${statName} dla gracza ${playerData.id}: ${oldValue} -> ${newValueStr}`);
+                        
+                        // Dodaj wizualny efekt zmiany
+                        valueCell.style.backgroundColor = '#ffff99';
+                        setTimeout(() => {
+                            valueCell.style.backgroundColor = '';
+                        }, 1000);
+                    }
+                } else {
+                    console.log(`[DEBUG] Brak danych dla statystyki ${statName}, otrzymano:`, newValue);
+                }
+            } else {
+                console.log(`[DEBUG] Wiersz ${rowIndex} ma nieprawidłową liczbę komórek:`, cells.length);
+            }
+        });
+    } else {
+        console.warn(`[WARNING] Nie znaleziono tabeli statystyk (.stats-table-wrapper table) dla gracza ${playerData.id}`);
+        
+        // Debug: Sprawdź dostępne elementy w kontenerze
+        console.log('[DEBUG] Dostępne elementy w kontenerze gracza:', {
+            'stats-table-wrapper': !!playerContainer.querySelector('.stats-table-wrapper'),
+            'table': !!playerContainer.querySelector('table'),
+            'stats-table-wrapper table': !!playerContainer.querySelector('.stats-table-wrapper table'),
+            innerHTML: playerContainer.innerHTML.substring(0, 200) + '...'
+        });
+    }
+    
+    // Wymuszenie odświeżenia renderowania
+    playerContainer.style.display = 'none';
+    playerContainer.offsetHeight; // trigger reflow
+    playerContainer.style.display = '';
+    
+    console.log(`[DEBUG] updateCenterPlayerStats zakończone dla gracza ${playerData.id}`);
+}
+
+function debugPlayerContainers() {
+    console.log('[DEBUG] === DIAGNOSTYKA KONTENERÓW GRACZY ===');
+    
+    // Sprawdź player-info kontenery
+    const playerInfos = document.querySelectorAll('.player-info');
+    console.log(`Znaleziono ${playerInfos.length} kontenerów .player-info:`);
+    
+    playerInfos.forEach((container, index) => {
+        console.log(`Kontener ${index + 1}:`);
+        console.log(`  - className: "${container.className}"`);
+        console.log(`  - id: "${container.id}"`);
+        console.log(`  - data-player-id: "${container.dataset.playerId}"`);
+        
+        const nameElement = container.querySelector('p b');
+        console.log(`  - nazwa gracza: "${nameElement ? nameElement.textContent : 'BRAK'}"`)
+        
+        const table = container.querySelector('.stats-table-wrapper table');
+        console.log(`  - tabela statystyk: ${table ? 'ZNALEZIONA' : 'BRAK'}`);
+        
+        if (table) {
+            const rows = table.querySelectorAll('tr');
+            console.log(`    - liczba wierszy: ${rows.length}`);
+        }
+        
+        console.log(`  - innerHTML (pierwsze 100 znaków): "${container.innerHTML.substring(0, 100)}..."`);
+        console.log('---');
+    });
+    
+    // Sprawdź player-info-box kontenery
+    const playerBoxes = document.querySelectorAll('.player-info-box');
+    console.log(`\nZnaleziono ${playerBoxes.length} kontenerów .player-info-box:`);
+    
+    playerBoxes.forEach((box, index) => {
+        console.log(`Box ${index + 1}:`);
+        console.log(`  - data-player-id: "${box.dataset.playerId}"`);
+        console.log(`  - coins element: ${box.querySelector('.player-coins') ? 'ZNALEZIONY' : 'BRAK'}`);
+        console.log(`  - location element: ${box.querySelector('.player-location') ? 'ZNALEZIONY' : 'BRAK'}`);
+    });
+}
+
+function testPlayerStatsUpdate() {
+    console.log('[TEST] Testowanie aktualizacji statystyk gracza...');
+    debugPlayerContainers();
+    
+    setTimeout(() => {
+        console.log('[TEST] Uruchamianie refreshPlayerStats...');
+        refreshPlayerStats();
+    }, 1000);
+}
+
+function updateCurrentPlayerInfo(currentPlayerId, players) {
+    console.log(`[DEBUG] updateCurrentPlayerInfo dla gracza ID: ${currentPlayerId}`);
+    
+    // Znajdź element wyświetlający informacje o aktualnym graczu
+    const currentPlayerElement = document.querySelector('.current-player-info');
+    
+    if (!currentPlayerElement) {
+        console.warn('[WARNING] Nie znaleziono elementu .current-player-info');
+        return;
+    }
+    
+    // Znajdź dane aktualnego gracza
+    const currentPlayer = players.find(player => player.id === currentPlayerId);
+    
+    if (!currentPlayer) {
+        console.warn(`[WARNING] Nie znaleziono danych dla gracza ID: ${currentPlayerId}`);
+        currentPlayerElement.innerHTML = '<h3>Błąd ładowania gracza</h3>';
+        return;
+    }
+    
+    // ZMIENIONE: Aktualizuj zawartość elementu - tylko nazwa gracza
+    const playerName = currentPlayer.name || 'Nieznany gracz';
+    const displayName = playerName; // Usunięto character_name
+    
+    currentPlayerElement.innerHTML = `<h3>${displayName}</h3>`;
+    
+    console.log(`[DEBUG] Zaktualizowano informacje o aktualnym graczu: ${displayName}`);
+}
+
+function updateCurrentPlayerCenterDisplay(currentPlayerId, players) {
+    console.log(`[DEBUG] updateCurrentPlayerCenterDisplay dla gracza ID: ${currentPlayerId}`);
+    
+    // POPRAWKA: Użyj ID zamiast selektora klasy
+    const currentPlayerNameElement = document.getElementById('current-player-name');
+    
+    if (!currentPlayerNameElement) {
+        console.warn('[WARNING] Nie znaleziono elementu #current-player-name');
+        // Fallback - spróbuj oryginalnego selektora
+        const fallbackElement = document.querySelector('.current-player h3');
+        if (fallbackElement) {
+            console.log('[DEBUG] Używam fallback selektora .current-player h3');
+            updatePlayerNameElement(fallbackElement, currentPlayerId, players);
+        }
+        return;
+    }
+    
+    updatePlayerNameElement(currentPlayerNameElement, currentPlayerId, players);
+}
+
+function updatePlayerNameElement(element, currentPlayerId, players) {
+    // Znajdź dane aktualnego gracza
+    const currentPlayer = players.find(player => player.id == currentPlayerId);
+    
+    if (!currentPlayer) {
+        console.warn(`[WARNING] Nie znaleziono danych dla gracza ID: ${currentPlayerId}`);
+        element.textContent = 'Ładowanie...';
+        return;
+    }
+    
+    // ZMIENIONE: Aktualizuj nazwę gracza - tylko name bez character_name
+    const playerName = currentPlayer.name || 'Nieznany gracz';
+    const displayName = playerName; // Usunięto character_name
+    
+    // Sprawdź czy nazwa się zmieniła przed aktualizacją
+    const currentText = element.textContent.trim();
+    if (currentText !== displayName) {
+        element.textContent = displayName;
+        console.log(`[DEBUG] Zaktualizowano aktualnego gracza w centrum: ${currentText} -> ${displayName}`);
+        
+        // Dodaj efekt wizualny zmiany
+        element.style.backgroundColor = '#ffff99';
+        setTimeout(() => {
+            element.style.backgroundColor = '';
+        }, 1000);
+    }
+}
 });

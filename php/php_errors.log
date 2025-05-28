@@ -1,3 +1,36 @@
 [22-May-2025 23:47:14 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 710 zł.
 [23-May-2025 12:58:05 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 1 ma już właściciela.
 [23-May-2025 13:11:14 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 8 ma już właściciela.
+<<<<<<< Updated upstream
+=======
+[26-May-2025 13:10:41 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function getRandomActionCard() in C:\xampp\htdocs\monopoly\php\process_tile_action.php:384
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 384
+[26-May-2025 13:18:31 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function getRandomActionCard() in C:\xampp\htdocs\monopoly\php\process_tile_action.php:384
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 384
+[26-May-2025 13:37:35 Europe/Berlin] Błąd w process_tile_action.php: Nieznany typ efektu karty akcji: change_coins
+[26-May-2025 14:19:13 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function getRandomDuelCard() in C:\xampp\htdocs\monopoly\php\process_tile_action.php:630
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 630
+[27-May-2025 07:46:24 Europe/Berlin] Błąd w process_tile_action.php: Plik action_card_handler.php nie został znaleziony.
+[27-May-2025 07:53:49 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function getRandomDuelCard() in C:\xampp\htdocs\monopoly\php\process_tile_action.php:605
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\monopoly\php\process_tile_action.php on line 605
+[27-May-2025 08:02:17 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 600 zł.
+[27-May-2025 08:04:23 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na opłacenie czynszu (21 zł)! Obecne saldo: 15 zł.
+[27-May-2025 08:26:36 Europe/Berlin] Karta o ID: 18 wróciła do puli.
+[27-May-2025 08:26:44 Europe/Berlin] Karta o ID: 16 wróciła do puli.
+[27-May-2025 08:26:48 Europe/Berlin] Karta o ID: 13 wróciła do puli.
+[27-May-2025 08:26:52 Europe/Berlin] Karta o ID: 10 wróciła do puli.
+[27-May-2025 08:28:51 Europe/Berlin] Karta o ID: 1 wróciła do puli.
+[27-May-2025 08:29:15 Europe/Berlin] Karta o ID: 20 wróciła do puli.
+[27-May-2025 08:29:23 Europe/Berlin] Karta o ID: 5 wróciła do puli.
+[27-May-2025 08:43:34 Europe/Berlin] Karta o ID: 5 wróciła do puli.
+>>>>>>> Stashed changes
+[27-May-2025 12:05:36 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 600 zł.
+[27-May-2025 12:10:53 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 840 zł.

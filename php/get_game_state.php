@@ -51,16 +51,56 @@ try {
         exit;
     }
 
-    // Pobierz wszystkich graczy w grze
+    // Pobierz wszystkich graczy w grze wraz z ich statystykami i informacjami o postaciach
     $players = [];
-    $stmt = $mysqli->prepare("SELECT id, name, coins, location, is_current_turn FROM players WHERE game_id = ? ORDER BY turn_order ASC");
+    $stmt = $mysqli->prepare("
+        SELECT 
+            p.id, 
+            p.name, 
+            p.coins, 
+            p.location, 
+            p.is_current_turn,
+            p.turn_order,
+            p.cook_skill,
+            p.tolerance,
+            p.business_acumen,
+            p.belly_capacity,
+            p.spice_sense,
+            p.prep_time,
+            p.tradition_affinity,
+            p.turns_to_miss,
+            p.color as player_color,
+            c.name as character_name
+        FROM players p
+        LEFT JOIN characters c ON p.character_id = c.id
+        WHERE p.game_id = ? 
+        ORDER BY p.turn_order ASC
+    ");
+    
     if (!$stmt) {
         throw new Exception("Błąd przygotowania zapytania dla graczy: " . $mysqli->error);
     }
+    
     $stmt->bind_param('i', $gameId);
     $stmt->execute();
     $result = $stmt->get_result();
+    
     while ($row = $result->fetch_assoc()) {
+        // Konwertuj wartości na odpowiednie typy
+        $row['id'] = (int)$row['id'];
+        $row['coins'] = (int)$row['coins'];
+        $row['location'] = (int)$row['location'];
+        $row['is_current_turn'] = (int)$row['is_current_turn'];
+        $row['turn_order'] = (int)$row['turn_order'];
+        $row['cook_skill'] = (int)$row['cook_skill'];
+        $row['tolerance'] = (int)$row['tolerance'];
+        $row['business_acumen'] = (int)$row['business_acumen'];
+        $row['belly_capacity'] = (int)$row['belly_capacity'];
+        $row['spice_sense'] = (int)$row['spice_sense'];
+        $row['prep_time'] = (int)$row['prep_time'];
+        $row['tradition_affinity'] = (int)$row['tradition_affinity'];
+        $row['turns_to_miss'] = (int)$row['turns_to_miss'];
+        
         $players[] = $row;
     }
     $stmt->close();
@@ -74,10 +114,28 @@ try {
         }
     }
 
+    // Alternatywnie, pobierz z tabeli games (jeśli używasz tego pola)
+    if ($currentTurnPlayerId === null) {
+        $stmt = $mysqli->prepare("SELECT current_player_id FROM games WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('i', $gameId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $currentTurnPlayerId = (int)$row['current_player_id'];
+            }
+            $stmt->close();
+        }
+    }
+
     $response['success'] = true;
     $response['message'] = 'Stan gry pobrany pomyślnie.';
     $response['players'] = $players;
     $response['current_turn_player_id'] = $currentTurnPlayerId;
+
+    // Debug log
+    error_log('get_game_state.php: Zwrócono ' . count($players) . ' graczy dla gry ' . $gameId);
+    error_log('get_game_state.php: current_turn_player_id = ' . ($currentTurnPlayerId ?? 'null'));
 
 } catch (Exception $e) {
     error_log('Błąd w get_game_state.php: ' . $e->getMessage());
