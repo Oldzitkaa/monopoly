@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerInfoBoxes = document.querySelectorAll('.player-info-box');
     const cardSlotText = document.querySelector('.card-slot.card-text');
     const cardSlotChoose = document.querySelector('.card-slot.card-choose');
-    let currentTurnPlayerId = initialCurrentTurnPlayerId;
+    let currentTurnPlayerId;
     const GAME_STATE_REFRESH_INTERVAL = 1000;
     let gameStateInterval;
 
@@ -51,10 +51,52 @@ document.addEventListener('DOMContentLoaded', () => {
         initialCurrentTurnPlayerId: initialCurrentTurnPlayerId
     });
 
-    updateRollButtonState();
-    updateCurrentPlayerIndicator(currentTurnPlayerId);
-    startGameStateRefresh();
+    async function initializeGameState() {
+
+        try {
+            const response = await fetch('get_game_state.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ game_id: gameId })
+            });
+
+            if (!response.ok) throw new Error(`Błąd HTTP: ${response.status}`);
+
+            const data = await response.json();
+            console.log('[Init] Stan gry:', data);
+
+            if (data.success && data.current_turn_player_id) {
+                console.log('[DEBUG] Aktualny gracz z serwera:', data.current_turn_player_id);
+                console.log('[DEBUG] Obecny przeglądający:', currentPlayerId);
+
+
+                if (data.current_turn_player_id === currentPlayerId) {
+                    currentTurnPlayerId = data.current_turn_player_id;
+                    updateRollButtonState();
+                    updateCurrentPlayerIndicator(currentTurnPlayerId);
+                } else {
+                    console.log('[Init] Tura należy do innego gracza. Przechodzę dalej.');
+                    await passTurnToNextPlayer(data.current_turn_player_id);
+                }
+            } else {
+                console.warn('Nie udało się ustawić currentTurnPlayerId z danych gry:', data);
+            }
+        } catch (err) {
+            console.error('Błąd podczas inicjalizacji stanu gry:', err);
+        }
+    }
+
+
+
+    initializeGameState().then(() => {
+        startGameStateRefresh();
+    });
+
     rollDiceButton.addEventListener('click', handleRollDice);
+
+
 
     function startDiceAnimation() {
         if (diceImage) {
@@ -155,6 +197,51 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPlayerBox.classList.add('active-turn');
         }
     }
+
+    async function passTurnToNextPlayer(currentTurnId) {
+        const players = Array.from(document.querySelectorAll('.player-info-box'))
+            .sort((a, b) => parseInt(a.dataset.playerId) - parseInt(b.dataset.playerId))
+            .map(box => ({
+                id: parseInt(box.dataset.playerId),
+                name: box.querySelector('.player-name')?.textContent || ''
+            }));
+
+
+        const currentIndex = players.findIndex(p => p.id === currentTurnId);
+        const nextIndex = (currentIndex + 1) % players.length;
+        const nextPlayer = players[nextIndex];
+
+        if (!nextPlayer) {
+            console.error('[Tura] Nie znaleziono następnego gracza.');
+            return;
+        }
+
+        currentTurnPlayerId = nextPlayer.id;
+        currentPlayerId = nextPlayer.id;
+        console.log('[TURA] Przejście na gracza:', nextPlayer.id, nextPlayer.name);
+        updateCurrentPlayerIndicator(currentTurnPlayerId);
+        updateRollButtonState();
+
+        console.log(`[Tura] Tura przekazana na gracza ${nextPlayer.name} (ID: ${nextPlayer.id})`);
+        showNotification(`Tura została przekazana na: ${nextPlayer.name}`);
+
+        try {
+            await fetch('update_turn.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    game_id: gameId,
+                    new_turn_player_id: nextPlayer.id
+                })
+            });
+        } catch (err) {
+            console.warn('Nie udało się zapisać nowej tury w bazie:', err);
+        }
+    }
+
+
 
     async function handleRollDice() {
         rollDiceButton.disabled = true;
