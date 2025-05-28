@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 header('Content-Type: text/html; charset=utf-8'); 
 
 if (!isset($_SESSION['game_id'])) {
@@ -8,9 +7,6 @@ if (!isset($_SESSION['game_id'])) {
     exit();
 }
 $gameId = $_SESSION['game_id'];
-// $current_player_id = $_SESSION['player_id'];
-// losowe id narazie, potem poprawic trzeba
-// $current_player_id = 88;
 $current_player_id = isset($_GET['player_id']) ? (int)$_GET['player_id'] : null;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 
@@ -123,6 +119,7 @@ if (isset($_GET['location'])) {
     if ($location === 0) {
         $output_html_message .= '<h3 class = "entrance">' . htmlspecialchars($tile['description']) . '</h3>';
     } elseif (
+        // restauracja
         $location == 1 || $location == 3 || $location == 5 || $location == 6 ||
         $location == 8 || $location == 9 || $location == 12 || $location == 14 ||
         $location == 16 || $location == 18 || $location == 20 || $location == 21 ||
@@ -148,28 +145,33 @@ if (isset($_GET['location'])) {
             }
         } 
     } elseif (
+        // pojedynek
         $location === 2 || $location === 13 || $location === 17 ||
         $location === 26 || $location === 34 || $location === 41
     ) {
         $output_html_message .= "Stajesz do pojedynku kulinarnego! Wybierz swojego rywala!";
     } elseif (
+        // niespodzianka
         $location === 4 || $location === 10 || $location === 19 ||
         $location === 23 || $location === 35 || $location === 38
     ) {
         $output_html_message .= '<h3 class = "suprise">Niespodzianka</h3>';
         
     } elseif (
+        // wejscie do kontynentu
         $location === 7 || $location === 15 || $location === 22 || $location === 29 || $location === 37
     ) {
         if ($tile && isset($tile['name'])) {
             $output_html_message .= '<h3 class = "entrance">' . htmlspecialchars($tile['description']) . '</h3>';
         }
     } elseif ( 
+        // szkolenie
         $location === 11
     ) {
         $output_html_message .= '<h3 class = "traning">Szkolenie</h3><p class = "traning">' . htmlspecialchars($tile['description']) . '</p>';
     
     } elseif ( 
+        // urlop
         $location === 33
     ) {
         $output_html_message .= '<h3 class = "vacation">Urlop</h3><p class = "vacation">' . htmlspecialchars($tile['description']) . '</p>';

@@ -17,12 +17,11 @@ include_once './database_connect.php';
     <title>Potęga Smaku</title>
     <link rel="stylesheet" href="../css/styl.css"> 
     <link rel="stylesheet" href="../css/rule.css"> 
+    <link rel="stylesheet" href="../css/main.css"> 
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
     </head>
 <body>
-    <a href="./rule.php"><div class="info-div rule"><p class="info">Zasady</p></div></a>
-    <a href=""><div class="info-div author"><p class="info">U・ᴥ・U</p></div></a>
     <div class="logo_div step1">
         <p class="step-title">MONOPOLY</p>
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
@@ -40,18 +39,18 @@ include_once './database_connect.php';
     </div>
     <div class="logo_div step2" style="display: none; opacity: 0;">
         <p class="step-title">Podaj liczbę graczy</p> <div class="player-selection"> <div class="quantity-container"> <label for="quantity">Liczba graczy:</label>
-                <span id="playerCount">2</span>
-                <input type="range" class="rangeplayer" name="quantity" id="quantity" min="2" max="4" value="2">
-            </div>
-            <div class="buttons-container"> 
-                <button class="back-button" onclick='(function(){ window.location.href="./index.php"; goBackToStepOne(); })()'>&larr; WSTECZ</button>
-                <button class="next-button" onclick="goToNicknameStep()">DALEJ &rarr;</button>
-            </div>
-        </div>
+        <span id="playerCount">2</span>
+        <input type="range" class="rangeplayer" name="quantity" id="quantity" min="2" max="4" value="2">
     </div>
-    <div class="logo_div step3 nick" style="display: none; opacity: 0;">
-        <p class="step-title">Utwórz graczy: <br> Podaj nicki</p> <div id="nicknameInputsContainer">
-            </div>
+    <div class="buttons-container"> 
+        <button class="back-button" onclick='(function(){ window.location.href="./index.php"; goBackToStepOne(); })()'>&larr; WSTECZ</button>
+        <button class="next-button" onclick="goToNicknameStep()">DALEJ &rarr;</button>
+    </div>
+</div>
+</div>
+<div class="logo_div step3 nick" style="display: none; opacity: 0;">
+    <p class="step-title">Utwórz graczy: <br> Podaj nicki</p> <div id="nicknameInputsContainer">
+        </div>
         <div class="buttons-container"> 
             <button class="back-button" onclick="goBackToStepTwo()">&larr; WSTECZ</button>
             <button class="next-button" onclick="goToCharacterStep()">DALEJ &rarr;</button>
@@ -62,26 +61,28 @@ include_once './database_connect.php';
         <div class="player-setup-container">
             <div class="player-list" id="playerSetupList">
                 </div>
-           <div class="character-details-panel">
-    <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
-    <h3 id="selectedCharacterName">Wybierz postać</h3>
-    <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
-    <div class="character-stats-details">
-        <table>
-            </table>
-    </div>
-   <button id="confirmCharacterButton" class="next-button" style="width: 300px; margin-top: 10px;">Zatwierdź</button>
-</div>
-        </div>
-        <div class="character-carousel">
-            <div id="characterCardsContainer" class="character-cards-container">
+                <div class="character-details-panel">
+                    <img id="selectedCharacterImage" src="../zdj/postacie/placeholder.png" alt="Wybierz postać" class="character-preview">
+                    <h3 id="selectedCharacterName">Wybierz postać</h3>
+                    <p id="selectedCharacterDescription">Kliknij na postać, aby zobaczyć jej opis i statystyki.</p>
+                    <div class="character-stats-details">
+                        <table>
+                            </table>
+                        </div>
+                        <button id="confirmCharacterButton" class="next-button" style="width: 300px; margin-top: 10px;">Zatwierdź</button>
+                    </div>
+                </div>
+                <div class="character-carousel">
+                    <div id="characterCardsContainer" class="character-cards-container">
+                        </div>
+                    </div>
+                    <div class="buttons-container"> <button class="back-button" onclick="goBackToNicknameStep()">&larr; WSTECZ</button>
+                    <button class="start-button" id="startGameButton" onclick="submitGameSetup()" style="width: 300px;">ROZPOCZNIJ GRĘ!</button>
+                </div>
             </div>
-        </div>
-        <div class="buttons-container"> <button class="back-button" onclick="goBackToNicknameStep()">&larr; WSTECZ</button>
-            <button class="start-button" id="startGameButton" onclick="submitGameSetup()" style="width: 300px;">ROZPOCZNIJ GRĘ!</button>
-        </div>
-        </div>
-    <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
+            <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
+            <a href="./rule.php"><div class="info-div rule" style="z-index: 120"><p class="info">Zasady</p></div></a>
+            <a href=""><div class="info-div author"><p class="info" style="z-index: 121">U・ᴥ・U</p></div></a>
     <script src="../js/script_main.js"></script>
 </body>
 </html>

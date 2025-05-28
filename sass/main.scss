@@ -1,0 +1,16 @@
+@use "./_color" as c;
+
+body{
+    color: c.$text;
+}
+p, h3{
+    color: c.$text;
+}
+p::selection, h3::selection, td::selection, th::selection, b::selection, strong::selection{
+    background-color: c.$red3;
+    color: c.$mint;
+}
+.name::selection, .tile-name-text::selection, .card-slot ::selection{
+    background-color: c.$red3;
+    color: c.$mint;
+}

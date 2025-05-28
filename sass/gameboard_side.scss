@@ -7,24 +7,20 @@ $spacing-lg: 20px;
 $spacing-xl: 30px;
 $spacing-xxl: 50px;
 
-// Border Radius
 $border-radius-sm: 8px;
 $border-radius-md: 10px;
 $border-radius-lg: 15px;
 $border-radius-round: 50%;
 
-// Shadows
 $shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
 $shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
 $shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
 $shadow-button: 0px 0px 10px c.$mint;
 
-// Transitions
 $transition-duration: 0.5s;
 $transition-ease: ease-in-out;
 $transition-fast: 0.3s;
 
-// Layout
 $max-board-size: 800px;
 $breakpoint-desktop: 768px;
 
@@ -40,8 +36,8 @@ $breakpoint-desktop: 768px;
     box-shadow: $shadow-md;
     min-width: 280px;
     align-items: center;
-    max-height: 100vh; // Added
-    overflow-y: auto;  // Added
+    max-height: 100vh;
+    overflow-y: auto;
 
     @media (min-width: $breakpoint-desktop) {
         width: 50%;
@@ -112,7 +108,6 @@ $breakpoint-desktop: 768px;
             flex-basis: 0;
             max-width: 0;
         }
-
         .player-info-box.active {
             flex-basis: 100%;
             max-width: 100%;
@@ -121,7 +116,6 @@ $breakpoint-desktop: 768px;
         }
     }
 }
-
 .player-info-box {
     flex-shrink: 0;
     flex-grow: 0;
@@ -170,7 +164,6 @@ $breakpoint-desktop: 768px;
         padding: $spacing-lg;
 
         .name {
-            // font-size: 1.6em;
             font-size: 1em;
             text-align: center;
             width: 90%;
@@ -186,7 +179,6 @@ $breakpoint-desktop: 768px;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
             &.name-player1{
                 color: c.$player1dark;
-                // font-size: 1.5em;
             }
             &.name-player2{
                 color: c.$player2dark;
@@ -206,7 +198,7 @@ $breakpoint-desktop: 768px;
             text-align: left;
             flex-grow: 1;
             overflow-y: visible;
-            max-height: none; // Adjusted
+            max-height: none;
             opacity: 1;
             visibility: visible;
             transition: none;
@@ -227,7 +219,6 @@ $breakpoint-desktop: 768px;
             border-radius: $border-radius-sm;
             padding: $spacing-sm $spacing-md;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-
             &::before {
                 content: '';
                 width: 5px;
@@ -237,19 +228,16 @@ $breakpoint-desktop: 768px;
                 border-radius: 2px;
             }
         }
-
         .skills-content h3::before {
             background-color: #2ecc71;
         }
     }
 }
-
 .player-info-box.current-turn-player {
     border: 2px solid #4CAF50;
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
     background-color: #e8ffe8;
 }
-
 .player-info-box .name {
     font-weight: 600;
     font-size: 0.95em;
@@ -263,7 +251,6 @@ $breakpoint-desktop: 768px;
     width: 100%;
     color: #2c3e50;
 }
-
 .player-info-box p {
     font-size: 0.85em;
     color: #495057;
@@ -287,7 +274,6 @@ $breakpoint-desktop: 768px;
         color: c.$player2dark;
     }
 }
-
 .properties-and-skills-wrapper {
     display: block;
     padding-top: $spacing-xs;
@@ -298,7 +284,7 @@ $breakpoint-desktop: 768px;
     flex-grow: 1;
     line-height: 1.4;
     font-family: 'Poppins', Arial, sans-serif;
-    max-height: 0; // Adjusted
+    max-height: 0;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
@@ -311,8 +297,6 @@ $breakpoint-desktop: 768px;
         overflow-y: auto;
         flex-grow: 1;
         padding: 0;
-        // background-color: transparent;
-        // background-color: c.$white2;
         border-radius: 0;
         margin-top: 0;
     }
@@ -474,7 +458,6 @@ $breakpoint-desktop: 768px;
     flex-shrink: 0;
     align-items: stretch;
 }
-
 .card-slot {
     flex: 1 1 200px;
     min-height: 160px;
@@ -496,7 +479,6 @@ $breakpoint-desktop: 768px;
     white-space: normal;
     overflow: hidden;
     max-width: 100%;
-
     &.card-text {
         text-align: center;
         color: black;
@@ -508,7 +490,6 @@ $breakpoint-desktop: 768px;
         max-width: 100%;
     }
 }
-
 .text-message {
     color: black;
     font-size: 1rem;
@@ -520,8 +501,6 @@ $breakpoint-desktop: 768px;
     overflow: hidden;
     max-width: 100%;
 }
-
-
 .action-button {
     padding: 0.6em 1.2em;
     margin: 0.3em;
@@ -543,26 +522,21 @@ $breakpoint-desktop: 768px;
         transform: scale(1.05);
         box-shadow: $shadow-md;
     }
-
     &:active {
         transform: scale(0.98);
     }
-
     &.accept {
         background-color: c.$buton;
     }
-
     &.restaurant-buy-button {
         background-color: c.$mint;
         color: c.$mint2;
     }
-
     &.restaurant-notbuy-button,
     &.pay {
         background-color: c.$red3;
         color: c.$lightred;
     }
-
     &.btn-player1,
     &.btn-player2,
     &.btn-player3,
@@ -572,11 +546,18 @@ $breakpoint-desktop: 768px;
         width: 80%;
     }
 
-    &.btn-player1 { background-color: c.$player1; }
-    &.btn-player2 { background-color: c.$player2; }
-    &.btn-player3 { background-color: c.$player3; }
-    &.btn-player4 { background-color: c.$player4; }
-
+    &.btn-player1 { 
+        background-color: c.$player1; 
+    }
+    &.btn-player2 { 
+        background-color: c.$player2; 
+    }
+    &.btn-player3 { 
+        background-color: c.$player3; 
+    }
+    &.btn-player4 { 
+        background-color: c.$player4; 
+    }
     &.btn-duel-description {
         background-color: red;
         color: #fff;
@@ -594,7 +575,6 @@ $breakpoint-desktop: 768px;
         padding: 0.5em 1em;
     }
 }
-
 @media (max-width: 480px) {
     .card-slot {
         flex: 1 1 100%;
@@ -607,7 +587,3 @@ $breakpoint-desktop: 768px;
         padding: 0.4em 0.8em;
     }
 }
-
-
-
-

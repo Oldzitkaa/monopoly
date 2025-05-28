@@ -1,5 +1,5 @@
 <?php
-ini_set('display_errors', 0); // Set to 1 for development, 0 for production
+ini_set('display_errors', 0);
 error_reporting(E_ALL);
 header('Content-Type: application/json');
 
@@ -95,7 +95,6 @@ try {
 
     try {
         $currentDate = date("Y-m-d H:i:s");
-        // Initialize game with current_turn = 1
         $sqlGame = 'INSERT INTO games (current_turn, status, created_at) VALUES (1, "active", ?)';
         $stmtGame = $mysqli->prepare($sqlGame);
         if (!$stmtGame) {
@@ -226,14 +225,12 @@ try {
                 'isTurn' => (bool)$isCurrentTurn
             ];
 
-            // Store player data for turn_queue insertion
             $playersForTurnQueue[] = [
                 'player_id' => $playerId,
                 'queue_position' => $turnOrder
             ];
         }
 
-        // Set the current_player_id in the games table
         $sqlUpdateGame = "UPDATE games SET current_player_id = ? WHERE id = ?";
         $stmtUpdateGame = $mysqli->prepare($sqlUpdateGame);
         if (!$stmtUpdateGame) {
@@ -244,7 +241,6 @@ try {
             throw new Exception("Błąd wykonania zapytania aktualizacji gry: " . $stmtUpdateGame->error);
         }
 
-        // Initialize game_tiles for restaurant tiles
         $sqlInitTiles = "INSERT INTO game_tiles (game_id, tile_id, current_level, is_mortgaged)
                             SELECT ?, id, 0, 0 FROM tiles WHERE type = 'restaurant'";
         $stmtInitTiles = $mysqli->prepare($sqlInitTiles);
@@ -256,7 +252,6 @@ try {
             throw new Exception("Błąd wykonania zapytania inicjalizacji pól gry: " . $stmtInitTiles->error);
         }
 
-        // NEW: Initialize turn_queue for the first round (turn_number = 1)
         $sqlInitTurnQueue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, 1, ?, 0, 0)";
         $stmtInitTurnQueue = $mysqli->prepare($sqlInitTurnQueue);
         if (!$stmtInitTurnQueue) {
@@ -279,15 +274,11 @@ try {
         $response['gameId'] = $gameId;
         $response['players'] = $playerIds;
 
-        // --- WAŻNA ZMIANA TUTAJ ---
-        // Upewnij się, że sesja jest uruchomiona ZANIM ustawisz zmienne sesji
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         $_SESSION['game_id'] = $gameId;
-        // DODANA LINIA: Ustawiamy ID gracza w sesji, aby gameboard.php wiedział, który gracz ogląda
         $_SESSION['player_id'] = $firstPlayerId; 
-        // --- KONIEC ZMIANY ---
 
     } catch (Exception $e) {
         $mysqli->rollback();
@@ -302,7 +293,7 @@ try {
         if (isset($stmtPlayer) && $stmtPlayer instanceof mysqli_stmt) $stmtPlayer->close();
         if (isset($stmtUpdateGame) && $stmtUpdateGame instanceof mysqli_stmt) $stmtUpdateGame->close();
         if (isset($stmtInitTiles) && $stmtInitTiles instanceof mysqli_stmt) $stmtInitTiles->close();
-        if (isset($stmtInitTurnQueue) && $stmtInitTurnQueue instanceof mysqli_stmt) $stmtInitTurnQueue->close(); // Close new statement
+        if (isset($stmtInitTurnQueue) && $stmtInitTurnQueue instanceof mysqli_stmt) $stmtInitTurnQueue->close();
 
         if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
             $mysqli->close();

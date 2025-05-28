@@ -949,11 +949,10 @@ function updateCenterPlayerStats(playerData) {
                         valueCell.textContent = newValueStr;
                         console.log(`[DEBUG] Zaktualizowano ${statName} dla gracza ${playerData.id}: ${oldValue} -> ${newValueStr}`);
                         
-                        // Dodaj wizualny efekt zmiany
-                        valueCell.style.backgroundColor = '#ffff99';
-                        setTimeout(() => {
-                            valueCell.style.backgroundColor = '';
-                        }, 1000);
+                        // valueCell.style.backgroundColor = '#ffff99';
+                        // setTimeout(() => {
+                        //     valueCell.style.backgroundColor = '';
+                        // }, 1000);
                     }
                 } else {
                     console.log(`[DEBUG] Brak danych dla statystyki ${statName}, otrzymano:`, newValue);
@@ -1091,7 +1090,7 @@ function updatePlayerNameElement(element, currentPlayerId, players) {
         return;
     }
     
-    // ZMIENIONE: Aktualizuj nazwę gracza - tylko name bez character_name
+    // Aktualizuj nazwę gracza - tylko name bez character_name
     const playerName = currentPlayer.name || 'Nieznany gracz';
     const displayName = playerName; // Usunięto character_name
     
@@ -1101,11 +1100,10 @@ function updatePlayerNameElement(element, currentPlayerId, players) {
         element.textContent = displayName;
         console.log(`[DEBUG] Zaktualizowano aktualnego gracza w centrum: ${currentText} -> ${displayName}`);
         
-        // Dodaj efekt wizualny zmiany
-        element.style.backgroundColor = '#ffff99';
-        setTimeout(() => {
-            element.style.backgroundColor = '';
-        }, 1000);
+        // element.style.backgroundColor = '#ffff99';
+        // setTimeout(() => {
+        //     element.style.backgroundColor = '';
+        // }, 1000);
     }
 }
 });

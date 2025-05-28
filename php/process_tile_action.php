@@ -392,7 +392,6 @@ try {
     }
 
     $cardInfo = $result['card'];
-    // $actionMessage = "🎴 Karta akcji: \"{$cardInfo['name']}\"\n📜 {$cardInfo['description']}\n\n";
     $actionMessage = "{$cardInfo['name']}\"{$cardInfo['description']}\n\n";
     $newPlayerCoins = $playerCoins;
     $newPlayerLocation = $playerLocation;

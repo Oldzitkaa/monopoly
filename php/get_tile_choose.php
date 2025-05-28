@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 header('Content-Type: text/html; charset=utf-8');
 
 if (!isset($_SESSION['game_id'])) {
@@ -8,8 +7,6 @@ if (!isset($_SESSION['game_id'])) {
     exit();
 }
 $gameId = $_SESSION['game_id'];
-// $current_player_id = $_SESSION['player_id'];
-// $current_player_id = 37;
 $current_player_id = isset($_GET['player_id']) ? (int)$_GET['player_id'] : null;
 $location = isset($_GET['location']) ? (int)$_GET['location'] : -1;
 $duel_action = isset($_GET['duel']) ? $_GET['duel'] : '';
@@ -20,7 +17,6 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
     exit();
 }
 $mysqli->set_charset("utf8");
-
 include_once './random_duel.php';
 
 // gracze
@@ -170,7 +166,7 @@ if (
                     return false;
                 }
 
-                $regionName = $tile['group_name']; // Dodaj tę linię
+                $regionName = $tile['group_name'];
                 $stmt->bind_param('sii', $regionName, $current_player_id, $gameId);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -189,12 +185,12 @@ if (
                 }
 
             } else {
-                // czyjaś restauracja - płać czynsz
+                // czyjas restauracja
                 $output_html .= '<p>Musisz zapłacić za posiłek ' . htmlspecialchars($tile['name']) . '.</p>';
                 $output_html .= '<button class="action-button pay" data-action-type="pay_rent" data-property-id="' . htmlspecialchars($location) . '">Płacę</button>';
             }
         } else {
-            // niezakupiona restauracja
+            // niezakupiona restauarcja
             $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
             $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
             $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';

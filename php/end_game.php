@@ -88,7 +88,6 @@ if ($stmt_game_tiles) {
 
 // wycena
 $final_player_results = [];
-// $winner_name = "Nikt";
 $max_final_value = -1;
 
 foreach ($players_data as $player) {
@@ -117,8 +116,6 @@ foreach ($players_data as $player) {
         'final_value' => $all_income
     ];
 
-    // zwyciesca
-
     if ($all_income > $max_final_value) {
         $max_final_value = $all_income;
     }
@@ -140,6 +137,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Potęga Smaku - Wyniki</title>
+    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/end_game.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
