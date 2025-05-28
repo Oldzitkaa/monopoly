@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardSlotText = document.querySelector('.card-slot.card-text');
     const cardSlotChoose = document.querySelector('.card-slot.card-choose');
     let currentTurnPlayerId = initialCurrentTurnPlayerId;
-    const GAME_STATE_REFRESH_INTERVAL = 1000;
+    const GAME_STATE_REFRESH_INTERVAL = 500;
     let gameStateInterval;
 
     function translatePropertyType(type) {
@@ -184,7 +184,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Błąd serwera (${response.status}): ${errorBody.message}`);
             }
 
-            const result = await response.json();
+            const result = await response.json();if (result.player_bankrupt === true) {
+    console.log('Gracz zbankrutował!', result);
+    
+    // Wyświetl komunikat o bankructwie
+    if (result.message) {
+        alert(result.message);
+    }
+    
+    // Przekieruj na stronę końca gry
+    const redirectUrl = result.redirect_to || 'end_game.php';
+    
+    // Dodaj parametry do URL
+    if (gameId && currentPlayerId) {
+        const separator = redirectUrl.includes('?') ? '&' : '?';
+        window.location.href = `${redirectUrl}${separator}game_id=${gameId}&player_id=${currentPlayerId}&reason=bankrupt`;
+    } else {
+        window.location.href = redirectUrl;
+    }
+    
+    return; // WAŻNE: Przerwij dalsze przetwarzanie
+}
             console.log('Pełna odpowiedź z roll_dice_api.php:', result);
 
             if (result.success) {
@@ -787,8 +807,57 @@ async function refreshPlayerStats() {
         const data = await response.json();
         console.log('[DEBUG] Otrzymane dane z get_game_state.php:', data);
         
+        // NOWE: Sprawdź czy gra się zakończyła lub ktoś zbankrutował
+        if (data.game_ended === true || data.player_bankrupt === true) {
+            console.log('[DEBUG] Wykryto koniec gry lub bankructwo gracza');
+            
+            // Zatrzymaj odświeżanie
+            stopGameStateRefresh();
+            
+            // Wyświetl komunikat
+            if (data.message) {
+                alert(data.message);
+            }
+            
+            // Przekieruj na stronę końca gry
+            const redirectUrl = data.redirect_to || 'end_game.php';
+            
+            // Dodaj parametry do URL
+            if (gameId && currentPlayerId) {
+                const separator = redirectUrl.includes('?') ? '&' : '?';
+                const reason = data.player_bankrupt ? 'bankrupt' : 'ended';
+                window.location.href = `${redirectUrl}${separator}game_id=${gameId}&player_id=${currentPlayerId}&reason=${reason}`;
+            } else {
+                window.location.href = redirectUrl;
+            }
+            
+            return; // Przerwij dalsze przetwarzanie
+        }
+        
         if (data.success && data.players) {
             console.log(`[DEBUG] Aktualizacja ${data.players.length} graczy`);
+            
+            // NOWE: Sprawdź czy któryś z graczy ma ujemne monety
+            const bankruptPlayer = data.players.find(player => player.coins < 0);
+            if (bankruptPlayer) {
+                console.log('[DEBUG] Wykryto gracza z ujemnymi monetami:', bankruptPlayer);
+                
+                // Zatrzymaj odświeżanie
+                stopGameStateRefresh();
+                
+                // Wyświetl komunikat o bankructwie
+                alert(`Gracz ${bankruptPlayer.name} zbankrutował!`);
+                
+                // Przekieruj na stronę końca gry
+                const redirectUrl = 'end_game.php';
+                if (gameId && currentPlayerId) {
+                    window.location.href = `${redirectUrl}?game_id=${gameId}&player_id=${currentPlayerId}&reason=bankrupt&bankrupt_player=${bankruptPlayer.id}`;
+                } else {
+                    window.location.href = redirectUrl;
+                }
+                
+                return;
+            }
             
             // Update displayed player information
             data.players.forEach((player, index) => {
@@ -1029,7 +1098,7 @@ function testPlayerStatsUpdate() {
     setTimeout(() => {
         console.log('[TEST] Uruchamianie refreshPlayerStats...');
         refreshPlayerStats();
-    }, 1000);
+    }, 500);
 }
 
 function updateCurrentPlayerInfo(currentPlayerId, players) {
