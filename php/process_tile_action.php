@@ -897,23 +897,78 @@ try {
             $response['new_round_started'] = $newRoundStarted;
             break;
 
-        case 'accept_training':
-            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
-            $response['success'] = true;
-            $response['message'] = 'Szkolenie rozpoczęte!';
-            $response['new_coins'] = $playerCoins;
-            $response['next_player_id'] = $nextPlayerId;
-            $response['new_round_started'] = $newRoundStarted;
-            break;
+       case 'accept_training':
+    // Szkolenie: ulepsza losową umiejętność o 2 i gracz czeka 2 kolejki
+    $skills = ['cook_skill', 'tolerance', 'business_acumen', 'belly_capacity', 'spice_sense', 'prep_time', 'tradition_affinity'];
+    $randomSkill = $skills[array_rand($skills)];
+    
+    // Pobierz aktualną wartość umiejętności
+    $stmt = $mysqli->prepare("SELECT {$randomSkill} FROM players WHERE id = ? AND game_id = ?");
+    if (!$stmt) {
+        throw new Exception("Błąd pobierania umiejętności: " . $mysqli->error);
+    }
+    $stmt->bind_param('ii', $playerId, $gameId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $currentSkillValue = $result->fetch_assoc()[$randomSkill];
+    $stmt->close();
+    
+    // Ulepsz umiejętność o 2
+    $newSkillValue = $currentSkillValue + 2;
+    $stmt = $mysqli->prepare("UPDATE players SET {$randomSkill} = ?, turns_to_miss = 2 WHERE id = ? AND game_id = ?");
+    if (!$stmt) {
+        throw new Exception("Błąd aktualizacji umiejętności: " . $mysqli->error);
+    }
+    $stmt->bind_param('iii', $newSkillValue, $playerId, $gameId);
+    if (!$stmt->execute()) {
+        throw new Exception("Błąd wykonania aktualizacji umiejętności: " . $stmt->error);
+    }
+    $stmt->close();
+    
+    $skillNames = [
+        'cook_skill' => 'Umiejętności gotowania',
+        'tolerance' => 'Tolerancja ostrości', 
+        'business_acumen' => 'Łeb do biznesu',
+        'belly_capacity' => 'Pojemność brzucha',
+        'spice_sense' => 'Zmysł do przypraw',
+        'prep_time' => 'Czas przygotowania',
+        'tradition_affinity' => 'Tradycyjne powiązania'
+    ];
+    
+    $skillDisplayName = $skillNames[$randomSkill] ?? $randomSkill;
+    
+    $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+    $response['success'] = true;
+    $response['message'] = "Szkolenie rozpoczęte! Twoja umiejętność '{$skillDisplayName}' wzrosła o 2 (z {$currentSkillValue} na {$newSkillValue}). Przegapisz następne 2 tury.";
+    $response['new_coins'] = $playerCoins;
+    $response['next_player_id'] = $nextPlayerId;
+    $response['new_round_started'] = $newRoundStarted;
+    break;
 
-        case 'accept_vacation':
-            $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
-            $response['success'] = true;
-            $response['message'] = 'Miłego urlopu!';
-            $response['new_coins'] = $playerCoins;
-            $response['next_player_id'] = $nextPlayerId;
-            $response['new_round_started'] = $newRoundStarted;
-            break;
+      case 'accept_vacation':
+    // Urlop: gracz przegapia kolejkę ale zostaje przeniesiony na losowe pole (7, 15, 22, 29 lub 37)
+    $vacationTiles = [7, 15, 22, 29, 37];
+    $randomTile = $vacationTiles[array_rand($vacationTiles)];
+    
+    // Aktualizuj pozycję gracza i ustaw przegapienie 1 tury
+    $stmt = $mysqli->prepare("UPDATE players SET location = ?, turns_to_miss = 1 WHERE id = ? AND game_id = ?");
+    if (!$stmt) {
+        throw new Exception("Błąd aktualizacji pozycji gracza podczas urlopu: " . $mysqli->error);
+    }
+    $stmt->bind_param('iii', $randomTile, $playerId, $gameId);
+    if (!$stmt->execute()) {
+        throw new Exception("Błąd wykonania aktualizacji pozycji podczas urlopu: " . $stmt->error);
+    }
+    $stmt->close();
+    
+    $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
+    $response['success'] = true;
+    $response['message'] = "Miłego urlopu! Przeniesiono Cię na pole {$randomTile}. Przegapisz następną turę.";
+    $response['new_coins'] = $playerCoins;
+    $response['new_location'] = $randomTile;
+    $response['next_player_id'] = $nextPlayerId;
+    $response['new_round_started'] = $newRoundStarted;
+    break;
 
         case 'accept_start_tile':
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);

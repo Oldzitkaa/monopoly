@@ -44,6 +44,90 @@ function getCurrentPlayerId($gameId, $mysqli) {
     return $row ? (int)$row['current_player_id'] : null;
 }
 
+function handleAllPlayersWithTurnsToMiss($gameId, $mysqli) {
+    // Sprawdź czy wszyscy gracze mają tury do przegapienia (turns_to_miss > 0)
+    $sql_check_all_skip = "SELECT COUNT(*) as total_players, 
+                          COUNT(CASE WHEN turns_to_miss > 0 THEN 1 END) as players_with_skip
+                          FROM players WHERE game_id = ?";
+    $stmt_check = $mysqli->prepare($sql_check_all_skip);
+    if (!$stmt_check) {
+        throw new Exception("Błąd przygotowania zapytania sprawdzania tur do przegapienia: " . $mysqli->error);
+    }
+    
+    $stmt_check->bind_param('i', $gameId);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
+    $check_row = $result_check->fetch_assoc();
+    $stmt_check->close();
+    
+    $totalPlayers = (int)$check_row['total_players'];
+    $playersWithSkip = (int)$check_row['players_with_skip'];
+    
+    // Jeśli wszyscy gracze mają tury do przegapienia
+    if ($totalPlayers > 0 && $totalPlayers === $playersWithSkip) {
+        // Odejmij po jednej turze do przegapienia wszystkim graczom
+        $sql_reduce_skip = "UPDATE players SET turns_to_miss = turns_to_miss - 1 
+                           WHERE game_id = ? AND turns_to_miss > 0";
+        $stmt_reduce = $mysqli->prepare($sql_reduce_skip);
+        if (!$stmt_reduce) {
+            throw new Exception("Błąd przygotowania zapytania redukcji tur do przegapienia: " . $mysqli->error);
+        }
+        
+        $stmt_reduce->bind_param('i', $gameId);
+        $stmt_reduce->execute();
+        $affected_rows = $stmt_reduce->affected_rows;
+        $stmt_reduce->close();
+        
+        if ($affected_rows > 0) {
+            error_log("Zredukowano tury do przegapienia dla $affected_rows graczy w grze $gameId");
+            return true; // Oznacza, że dokonano redukcji
+        }
+    }
+    
+    return false; // Nie dokonano redukcji
+}
+
+function getAvailablePlayers($gameId, $mysqli) {
+    $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
+    $stmt_get_players = $mysqli->prepare($sql_get_players);
+    if (!$stmt_get_players) {
+        throw new Exception("Błąd przygotowania zapytania o graczy: " . $mysqli->error);
+    }
+    $stmt_get_players->bind_param('i', $gameId);
+    $stmt_get_players->execute();
+    $result_get_players = $stmt_get_players->get_result();
+    
+    $players = [];
+    while ($player_row = $result_get_players->fetch_assoc()) {
+        $players[] = $player_row;
+    }
+    $stmt_get_players->close();
+    
+    return $players;
+}
+
+function createTurnQueue($gameId, $players, $turnNumber, $mysqli) {
+    if (empty($players)) {
+        return false;
+    }
+    
+    $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
+    $stmt_create_queue = $mysqli->prepare($sql_create_queue);
+    if (!$stmt_create_queue) {
+        throw new Exception("Błąd przygotowania zapytania tworzenia kolejki: " . $mysqli->error);
+    }
+    
+    $queuePosition = 1;
+    foreach ($players as $player) {
+        $stmt_create_queue->bind_param('iiii', $gameId, $player['id'], $turnNumber, $queuePosition);
+        $stmt_create_queue->execute();
+        $queuePosition++;
+    }
+    $stmt_create_queue->close();
+    
+    return true;
+}
+
 try {
     $sql_get_turn = "SELECT current_turn FROM games WHERE id = ? LIMIT 1";
     $stmt_get_turn = $mysqli->prepare($sql_get_turn);
@@ -60,6 +144,7 @@ try {
         throw new Exception("Nie znaleziono gry o podanym ID.");
     }
     $currentTurnNumber = (int)$turn_row['current_turn'];
+    
     $sql_check_queue_exists = "SELECT COUNT(*) as queue_count FROM turn_queue WHERE game_id = ? AND turn_number = ?";
     $stmt_check_queue = $mysqli->prepare($sql_check_queue_exists);
     if (!$stmt_check_queue) {
@@ -72,49 +157,67 @@ try {
     $stmt_check_queue->close();
 
     if ($queue_row['queue_count'] == 0) {
-        $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
-        $stmt_get_players = $mysqli->prepare($sql_get_players);
-        if (!$stmt_get_players) {
-            throw new Exception("Błąd przygotowania zapytania o graczy: " . $mysqli->error);
-        }
-        $stmt_get_players->bind_param('i', $gameId);
-        $stmt_get_players->execute();
-        $result_get_players = $stmt_get_players->get_result();
+        // Najpierw sprawdź i obsłuż sytuację gdy wszyscy mają tury do przegapienia
+        $reducedTurns = handleAllPlayersWithTurnsToMiss($gameId, $mysqli);
         
-        $players = [];
-        while ($player_row = $result_get_players->fetch_assoc()) {
-            $players[] = $player_row;
-        }
-        $stmt_get_players->close();
+        // Pobierz dostępnych graczy
+        $players = getAvailablePlayers($gameId, $mysqli);
         
-        if (!empty($players)) {
-            $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
-            $stmt_create_queue = $mysqli->prepare($sql_create_queue);
-            if (!$stmt_create_queue) {
-                throw new Exception("Błąd przygotowania zapytania tworzenia kolejki: " . $mysqli->error);
-            }
+        // Jeśli nadal brak graczy po redukcji, ale redukcja została wykonana, spróbuj ponownie
+        if (empty($players) && $reducedTurns) {
+            $players = getAvailablePlayers($gameId, $mysqli);
+        }
+        
+        // Jeśli nadal brak graczy, to oznacza problem z logiką gry
+        if (empty($players)) {
+            // Sprawdź czy są w ogóle jacyś gracze w grze
+            $sql_check_any_players = "SELECT COUNT(*) as player_count FROM players WHERE game_id = ?";
+            $stmt_check_any = $mysqli->prepare($sql_check_any_players);
+            $stmt_check_any->bind_param('i', $gameId);
+            $stmt_check_any->execute();
+            $result_any = $stmt_check_any->get_result();
+            $any_row = $result_any->fetch_assoc();
+            $stmt_check_any->close();
             
-            $queuePosition = 1;
-            foreach ($players as $player) {
-                $stmt_create_queue->bind_param('iiii', $gameId, $player['id'], $currentTurnNumber, $queuePosition);
-                $stmt_create_queue->execute();
-                $queuePosition++;
-            }
-            $stmt_create_queue->close();
-          
-            if (!empty($players)) {
-                $firstPlayerId = $players[0]['id'];
-                $sql_set_current_player = "UPDATE games SET current_player_id = ? WHERE id = ?";
-                $stmt_set_current_player = $mysqli->prepare($sql_set_current_player);
-                if ($stmt_set_current_player) {
-                    $stmt_set_current_player->bind_param('ii', $firstPlayerId, $gameId);
-                    $stmt_set_current_player->execute();
-                    $stmt_set_current_player->close();
+            if ($any_row['player_count'] == 0) {
+                throw new Exception("Brak graczy w grze.");
+            } else {
+                // Jeśli są gracze, ale wszyscy mają turns_to_miss, wymuś reset
+                $sql_force_reset = "UPDATE players SET turns_to_miss = 0 WHERE game_id = ?";
+                $stmt_force_reset = $mysqli->prepare($sql_force_reset);
+                $stmt_force_reset->bind_param('i', $gameId);
+                $stmt_force_reset->execute();
+                $stmt_force_reset->close();
+                
+                // Ponownie pobierz graczy
+                $players = getAvailablePlayers($gameId, $mysqli);
+                
+                if (empty($players)) {
+                    throw new Exception("Nie można znaleźć dostępnych graczy nawet po resecie turns_to_miss.");
                 }
+                
+                error_log("Wymuszono reset turns_to_miss dla wszystkich graczy w grze $gameId");
             }
-
+        }
+        
+        // Utwórz kolejkę
+        if (!createTurnQueue($gameId, $players, $currentTurnNumber, $mysqli)) {
+            throw new Exception("Nie udało się utworzyć kolejki graczy.");
+        }
+        
+        // Ustaw pierwszego gracza jako aktualnego
+        if (!empty($players)) {
+            $firstPlayerId = $players[0]['id'];
+            $sql_set_current_player = "UPDATE games SET current_player_id = ? WHERE id = ?";
+            $stmt_set_current_player = $mysqli->prepare($sql_set_current_player);
+            if ($stmt_set_current_player) {
+                $stmt_set_current_player->bind_param('ii', $firstPlayerId, $gameId);
+                $stmt_set_current_player->execute();
+                $stmt_set_current_player->close();
+            }
         }
     }
+    
     $sql_ensure_player_in_queue = "INSERT IGNORE INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) 
                                    SELECT ?, ?, ?, 
                                           COALESCE((SELECT MAX(queue_position) FROM turn_queue tq WHERE tq.game_id = ? AND tq.turn_number = ?), 0) + 1,
@@ -127,6 +230,7 @@ try {
     $stmt_ensure_player->bind_param('iiiiiiii', $gameId, $playerId, $currentTurnNumber, $gameId, $currentTurnNumber, $gameId, $playerId, $currentTurnNumber);
     $stmt_ensure_player->execute();
     $stmt_ensure_player->close();
+    
     $sql_check_played = "SELECT has_played FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ? LIMIT 1";
     $stmt_check_played = $mysqli->prepare($sql_check_played);
     if (!$stmt_check_played) {
@@ -164,19 +268,18 @@ try {
         $currentLocation = (int)$row['location'];
         $currentCoins = (int)$row['coins'];
 
+        $newLocation = ($currentLocation + $rollResult);
+        $boardSize = 44;
+        $passGoBonus = 200;
+        if ($newLocation >= $boardSize) {
+            $newLocation = $newLocation % $boardSize;
+            $currentCoins += $passGoBonus;
+            $passedGo = true;
+        }
 
-$newLocation = ($currentLocation + $rollResult);
-$boardSize = 44;
-$passGoBonus = 200;
-if ($newLocation >= $boardSize) {
-    $newLocation = $newLocation % $boardSize;
-    $currentCoins += $passGoBonus;
-    $passedGo = true;
-}
-
-if (isset($passedGo) && $passedGo) {
-    $passGoMessage = "Gracz przeszedł całą planszę i otrzymał bonus $passGoBonus monet!";
-}
+        if (isset($passedGo) && $passedGo) {
+            $passGoMessage = "Gracz przeszedł całą planszę i otrzymał bonus $passGoBonus monet!";
+        }
 
         $sql_update_location = "UPDATE players SET location = ?, coins = ? WHERE id = ? AND game_id = ?";
         $stmt_update_location = $mysqli->prepare($sql_update_location);
@@ -188,6 +291,7 @@ if (isset($passedGo) && $passedGo) {
         $stmt_update_location->bind_param('iiii', $newLocation, $currentCoins, $playerId, $gameId);
         $stmt_update_location->execute();
         $stmt_update_location->close();
+        
         $sql_mark_played = "UPDATE turn_queue SET has_played = 1, last_roll = ? WHERE game_id = ? AND player_id = ? AND turn_number = ? AND has_played = 0";
         $stmt_mark_played = $mysqli->prepare($sql_mark_played);
 
@@ -196,23 +300,14 @@ if (isset($passedGo) && $passedGo) {
         }
 
         $stmt_mark_played->bind_param('iiii', $rollResult, $gameId, $playerId, $currentTurnNumber);
-
         $stmt_mark_played->execute();
         $affected_rows = $stmt_mark_played->affected_rows;
         $stmt_mark_played->close();
         
         if ($affected_rows === 0) {
             error_log("WARNING: No rows affected when marking player $playerId as played in game $gameId, turn $currentTurnNumber");
-            $sql_debug = "SELECT * FROM turn_queue WHERE game_id = ? AND player_id = ? AND turn_number = ?";
-            $stmt_debug = $mysqli->prepare($sql_debug);
-            $stmt_debug->bind_param('iii', $gameId, $playerId, $currentTurnNumber);
-            $stmt_debug->execute();
-            $debug_result = $stmt_debug->get_result();
-            $debug_row = $debug_result->fetch_assoc();
-            $stmt_debug->close();
-            
-            error_log("Current queue state for player $playerId: " . json_encode($debug_row));
         }
+        
         $sql_next_player = "SELECT player_id FROM turn_queue 
                            WHERE game_id = ? AND turn_number = ? AND has_played = 0 AND is_skipped = 0 
                            ORDER BY queue_position ASC LIMIT 1";
@@ -241,35 +336,34 @@ if (isset($passedGo) && $passedGo) {
         } else {
             $nextTurnNumber = $currentTurnNumber + 1;
             
-            $sql_get_players = "SELECT id, turn_order FROM players WHERE game_id = ? AND turns_to_miss <= 0 ORDER BY turn_order ASC";
-            $stmt_get_players = $mysqli->prepare($sql_get_players);
-            if (!$stmt_get_players) {
-                throw new Exception("Błąd przygotowania zapytania o graczy: " . $mysqli->error);
-            }
-            $stmt_get_players->bind_param('i', $gameId);
-            $stmt_get_players->execute();
-            $result_get_players = $stmt_get_players->get_result();
+            // Sprawdź i obsłuż sytuację gdy wszyscy mają tury do przegapienia dla nowej tury
+            $reducedTurns = handleAllPlayersWithTurnsToMiss($gameId, $mysqli);
             
-            $players = [];
-            while ($player_row = $result_get_players->fetch_assoc()) {
-                $players[] = $player_row;
+            // Pobierz dostępnych graczy dla nowej tury
+            $players = getAvailablePlayers($gameId, $mysqli);
+            
+            // Jeśli nadal brak graczy po redukcji, ale redukcja została wykonana
+            if (empty($players) && $reducedTurns) {
+                $players = getAvailablePlayers($gameId, $mysqli);
             }
-            $stmt_get_players->close();
+            
+            // Jeśli nadal brak graczy, wymuś reset
+            if (empty($players)) {
+                $sql_force_reset = "UPDATE players SET turns_to_miss = 0 WHERE game_id = ?";
+                $stmt_force_reset = $mysqli->prepare($sql_force_reset);
+                $stmt_force_reset->bind_param('i', $gameId);
+                $stmt_force_reset->execute();
+                $stmt_force_reset->close();
+                
+                $players = getAvailablePlayers($gameId, $mysqli);
+                error_log("Wymuszono reset turns_to_miss dla nowej tury w grze $gameId");
+            }
             
             if (!empty($players)) {
-                $sql_create_queue = "INSERT INTO turn_queue (game_id, player_id, turn_number, queue_position, has_played, is_skipped) VALUES (?, ?, ?, ?, 0, 0)";
-                $stmt_create_queue = $mysqli->prepare($sql_create_queue);
-                if (!$stmt_create_queue) {
-                    throw new Exception("Błąd przygotowania zapytania tworzenia kolejki: " . $mysqli->error);
+                if (!createTurnQueue($gameId, $players, $nextTurnNumber, $mysqli)) {
+                    throw new Exception("Nie udało się utworzyć kolejki dla nowej tury.");
                 }
                 
-                $queuePosition = 1;
-                foreach ($players as $player) {
-                    $stmt_create_queue->bind_param('iiii', $gameId, $player['id'], $nextTurnNumber, $queuePosition);
-                    $stmt_create_queue->execute();
-                    $queuePosition++;
-                }
-                $stmt_create_queue->close();
                 $firstPlayerId = $players[0]['id'];
                 $sql_update_game = "UPDATE games SET current_turn = ?, current_player_id = ? WHERE id = ?";
                 $stmt_update_game = $mysqli->prepare($sql_update_game);
@@ -281,10 +375,12 @@ if (isset($passedGo) && $passedGo) {
                 
                 $response['current_player_id'] = $firstPlayerId;
                 $response['turn_info'] = "Nowa tura " . $nextTurnNumber . " rozpoczęta. Pierwszy gracz: " . $firstPlayerId;
+                $response['new_round_started'] = true;
             } else {
-                throw new Exception("Brak aktywnych graczy do utworzenia nowej tury.");
+                throw new Exception("Nie można utworzyć nowej tury - brak dostępnych graczy.");
             }
         }
+        
         $sql_get_updated_coins = "SELECT coins FROM players WHERE id = ? AND game_id = ? LIMIT 1";
         $stmt_get_updated_coins = $mysqli->prepare($sql_get_updated_coins);
 
@@ -323,7 +419,6 @@ if (isset($passedGo) && $passedGo) {
     $mysqli->commit();
 
     $response['current_player_id_db'] = getCurrentPlayerId($gameId, $mysqli);
-
 
 } catch (Exception $e) {
     $mysqli->rollback();

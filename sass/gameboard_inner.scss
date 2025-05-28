@@ -44,14 +44,26 @@
     border-top-left-radius: 0.5vw;
     background-color: c.$player4;
 }
-.current-player{
+.current-player {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     color: c.$text;
+    
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
 }
 
+.current-player .label {
+    white-space: nowrap;
+}
+.current-player h3 {
+    white-space: nowrap;
+    margin: 0;
+}
 .card {
     background-color: #fff;
     // width: 15vw;
