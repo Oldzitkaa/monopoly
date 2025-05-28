@@ -1,5 +1,4 @@
 <?php
-// get_game_state.php
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
@@ -51,7 +50,7 @@ try {
         exit;
     }
 
-    // Pobierz wszystkich graczy w grze wraz z ich statystykami i informacjami o postaciach
+    // gracze
     $players = [];
     $stmt = $mysqli->prepare("
         SELECT 
@@ -86,7 +85,6 @@ try {
     $result = $stmt->get_result();
     
     while ($row = $result->fetch_assoc()) {
-        // Konwertuj wartości na odpowiednie typy
         $row['id'] = (int)$row['id'];
         $row['coins'] = (int)$row['coins'];
         $row['location'] = (int)$row['location'];
@@ -105,7 +103,6 @@ try {
     }
     $stmt->close();
 
-    // Pobierz ID gracza, którego jest aktualnie tura
     $currentTurnPlayerId = null;
     foreach ($players as $player) {
         if ($player['is_current_turn'] == 1) {
@@ -114,7 +111,6 @@ try {
         }
     }
 
-    // Alternatywnie, pobierz z tabeli games (jeśli używasz tego pola)
     if ($currentTurnPlayerId === null) {
         $stmt = $mysqli->prepare("SELECT current_player_id FROM games WHERE id = ?");
         if ($stmt) {
@@ -133,7 +129,6 @@ try {
     $response['players'] = $players;
     $response['current_turn_player_id'] = $currentTurnPlayerId;
 
-    // Debug log
     error_log('get_game_state.php: Zwrócono ' . count($players) . ' graczy dla gry ' . $gameId);
     error_log('get_game_state.php: current_turn_player_id = ' . ($currentTurnPlayerId ?? 'null'));
 
@@ -147,6 +142,5 @@ try {
         $mysqli->close();
     }
 }
-
 echo json_encode($response);
 ?>

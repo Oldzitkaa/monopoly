@@ -1,51 +1,37 @@
 <?php
 
-// Ustawienia raportowania błędów
-ini_set('display_errors', 0); // Wyłącz wyświetlanie błędów na stronie
-error_reporting(E_ALL); // Raportuj wszystkie błędy
-ini_set('log_errors', 1); // Włącz logowanie błędów
-ini_set('error_log', __DIR__ . '/php_errors.log'); // Ścieżka do pliku logu błędów
-
-// Ustawienie nagłówka odpowiedzi na JSON
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/php_errors.log');
 header('Content-Type: application/json');
-
-// Początkowa struktura odpowiedzi
 $response = [
     'success' => false,
     'message' => 'Nieznany błąd serwera podczas akcji na polu.'
 ];
 
-// Zmienne do śledzenia stanu gry
 $nextPlayerId = null;
 $newRoundStarted = false;
 
 try {
-    // Sprawdzenie i załadowanie pliku połączenia z bazą danych
     $dbConnectPath = __DIR__ . '/database_connect.php';
     if (!file_exists($dbConnectPath)) {
         throw new Exception('Plik database_connect.php nie został znaleziony.');
     }
     require_once $dbConnectPath;
-
-    // Sprawdzenie poprawności połączenia z bazą danych
     if (!isset($mysqli) || $mysqli->connect_error) {
         throw new Exception('Błąd połączenia z bazą danych: ' . ($mysqli->connect_error ?? 'Nieznany błąd'));
     }
-
-    // Wymagaj metody POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         $response['message'] = 'Nieprawidłowa metoda żądania. Wymagana metoda POST.';
         http_response_code(405);
         echo json_encode($response);
         exit;
     }
-
-    // Odczytanie danych wejściowych JSON
     $inputData = file_get_contents('php://input');
     if ($inputData === false) {
         throw new Exception('Nie można odczytać danych wejściowych.');
     }
-
     $data = json_decode($inputData, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         $response['message'] = 'Nieprawidłowy format danych JSON: ' . json_last_error_msg();
@@ -53,25 +39,20 @@ try {
         echo json_encode($response);
         exit;
     }
-
-    // Walidacja wymaganych parametrów
     $actionType = $data['action_type'] ?? null;
     $playerId = $data['player_id'] ?? null;
     $gameId = $data['game_id'] ?? null;
     $location = $data['location'] ?? null;
-
     if (!$actionType || $playerId === null || $gameId === null || $location === null) {
         $response['message'] = 'Brak wymaganych parametrów (action_type, player_id, game_id, location).';
-        $response['received_data'] = $data; // Dodaj otrzymane dane do debugowania
+        $response['received_data'] = $data;
         http_response_code(400);
         echo json_encode($response);
         exit;
     }
-
-    // Rozpoczęcie transakcji bazy danych
     $mysqli->begin_transaction();
-
-    // Pobranie danych gracza
+    $nextPlayerId = null;
+    $newRoundStarted = false;
     $stmt = $mysqli->prepare("SELECT coins, location FROM players WHERE id = ? AND game_id = ?");
     if (!$stmt) {
         throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -81,27 +62,19 @@ try {
     $result = $stmt->get_result();
     $playerData = $result->fetch_assoc();
     $stmt->close();
-
     if (!$playerData) {
         throw new Exception("Gracz o ID {$playerId} lub gra o ID {$gameId} nie istnieje.");
     }
-
     $playerCoins = $playerData['coins'];
     $playerLocation = $playerData['location'];
-
-    // Akcje, które nie są ściśle związane z aktualną lokalizacją gracza
     $actionsNotStrictlyBoundToLocation = [
         'duel', 'not_interested', 'skip_action',
         'accept_surprise', 'accept_training', 'accept_vacation',
         'accept_start_tile', 'accept_special_tile', 'accept_continent_entry'
     ];
-
-    // Sprawdzenie, czy gracz znajduje się na właściwym polu, chyba że akcja nie wymaga konkretnej lokalizacji
     if ((int)$playerLocation !== (int)$location && !in_array($actionType, $actionsNotStrictlyBoundToLocation)) {
         throw new Exception("Gracz o ID {$playerId} nie znajduje się na polu {$location}. Znajduje się na polu {$playerLocation}.");
     }
-
-    // Obsługa różnych typów akcji
     switch ($actionType) {
         case 'buy_property':
         case 'buy_restaurant':
@@ -116,19 +89,16 @@ try {
             $result = $stmt->get_result();
             $tileData = $result->fetch_assoc();
             $stmt->close();
-
             if (!$tileData) {
                 throw new Exception("Pole o ID {$propertyId} nie istnieje.");
             }
             if ($tileData['current_owner_id'] !== null) {
                 throw new Exception("Nieruchomość na polu {$propertyId} ma już właściciela.");
             }
-
             $purchasePrice = $tileData['cost'];
             if ($purchasePrice === null || $purchasePrice <= 0) {
                 throw new Exception("To pole nie może być kupione.");
             }
-
             $tileType = $tileData['type'];
             if ($actionType === 'buy_restaurant' && $tileType !== 'restaurant') {
                 throw new Exception("Nie można kupić restauracji na tym polu - to nie jest restauracja.");
@@ -136,13 +106,9 @@ try {
             if ($actionType === 'buy_hotel' && $tileType !== 'hotel') {
                 throw new Exception("Nie można kupić hotelu na tym polu - to nie jest hotel.");
             }
-
-            // Przy zakupie nieruchomości gracz MA WYBÓR, więc brak pieniędzy nie prowadzi do bankructwa
             if ($playerCoins < $purchasePrice) {
                 throw new Exception("Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz {$purchasePrice} $.");
             }
-
-            // Sprawdzenie, czy wpis game_tiles już istnieje, aby zaktualizować lub wstawić
             $stmt = $mysqli->prepare("SELECT COUNT(*) FROM game_tiles WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania: " . $mysqli->error);
@@ -151,7 +117,6 @@ try {
             $stmt->execute();
             $exists = $stmt->get_result()->fetch_row()[0];
             $stmt->close();
-
             if ($exists > 0) {
                 $stmt = $mysqli->prepare("UPDATE game_tiles SET current_owner_id = ?, is_mortgaged = 0, current_level = 0 WHERE game_id = ? AND tile_id = ?");
                 if (!$stmt) {
@@ -165,12 +130,10 @@ try {
                 }
                 $stmt->bind_param('iii', $gameId, $propertyId, $playerId);
             }
-
             if (!$stmt->execute()) {
                 throw new Exception("Błąd wykonania zapytania game_tiles: " . $stmt->error);
             }
             $stmt->close();
-
             $newPlayerCoins = $playerCoins - $purchasePrice;
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
@@ -181,18 +144,14 @@ try {
                 throw new Exception("Błąd aktualizacji salda gracza: " . $stmt->error);
             }
             $stmt->close();
-
             $propertyTypeName = ($tileType === 'restaurant') ? 'restaurację' : (($tileType === 'hotel') ? 'hotel' : 'nieruchomość');
             $response['success'] = true;
             $response['message'] = "Kupiłeś {$propertyTypeName} \"{$tileData['name']}\" za {$purchasePrice} $.";
             $response['new_coins'] = $newPlayerCoins;
-            
-            // Przejście tury po zakupie
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
-
         case 'pay_rent':
             $propertyId = $data['property_id'] ?? $location;
             $stmt = $mysqli->prepare("
@@ -217,19 +176,16 @@ try {
             $result = $stmt->get_result();
             $tileInfo = $result->fetch_assoc();
             $stmt->close();
-
             if (!$tileInfo) {
                 throw new Exception("Informacje o polu dla ID {$propertyId} w grze {$gameId} nie zostały znalezione.");
             }
             $ownerId = $tileInfo['current_owner_id'];
             $level = $tileInfo['current_level'];
             $isMortgaged = $tileInfo['is_mortgaged'];
-
             if ($ownerId === null) {
                 $response['success'] = true;
                 $response['message'] = 'Pole nie ma właściciela, nie trzeba płacić czynszu.';
                 $response['new_coins'] = $playerCoins;
-                // Przejście tury, jeśli nie ma właściciela
                 $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
                 $response['next_player_id'] = $nextPlayerId;
                 $response['new_round_started'] = $newRoundStarted;
@@ -239,7 +195,6 @@ try {
                 $response['success'] = true;
                 $response['message'] = 'Jesteś właścicielem tego pola, nie musisz płacić czynszu.';
                 $response['new_coins'] = $playerCoins;
-                // Przejście tury, jeśli gracz jest właścicielem
                 $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
                 $response['next_player_id'] = $nextPlayerId;
                 $response['new_round_started'] = $newRoundStarted;
@@ -249,7 +204,6 @@ try {
                 $response['success'] = true;
                 $response['message'] = 'Nieruchomość jest zastawiona, nie trzeba płacić czynszu.';
                 $response['new_coins'] = $playerCoins;
-                // Przejście tury, jeśli nieruchomość jest zastawiona
                 $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
                 $response['next_player_id'] = $nextPlayerId;
                 $response['new_round_started'] = $newRoundStarted;
@@ -329,7 +283,7 @@ try {
                 $response['affected_player_new_coins'] = $ownerData['coins'] ?? null;
                 $stmt->close();
             }
-            
+
             // Przejście tury po zapłaceniu czynszu
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
@@ -338,11 +292,10 @@ try {
 
         case 'pass_turn':
         case 'skip_action':
-            // Logika pomijania tur jest teraz obsługiwana w getNextPlayerAndAdvanceTurn
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Tura zakończona pomyślnie.';
-            $response['new_coins'] = $playerCoins; // Saldo gracza nie zmienia się przy przekazaniu tury
+            $response['new_coins'] = $playerCoins;
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
@@ -394,7 +347,6 @@ try {
             if ($playerCoins < $upgradeCost) {
                 throw new Exception("Masz za mało pieniędzy na ulepszenie ({$upgradeCost} $).");
             }
-
             $newLevel = $upgradeInfo['current_level'] + 1;
             $stmt = $mysqli->prepare("UPDATE game_tiles SET current_level = ? WHERE game_id = ? AND tile_id = ?");
             if (!$stmt) {
@@ -420,7 +372,7 @@ try {
             $response['success'] = true;
             $response['message'] = "Ulepszono \"{$upgradeInfo['name']}\" do poziomu {$newLevel} za {$upgradeCost} $.";
             $response['new_coins'] = $newPlayerCoins;
-            
+
             // Przejście tury po ulepszeniu
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
@@ -488,18 +440,15 @@ try {
             $response['success'] = true;
             $response['message'] = "Zastawiono \"{$mortgageInfo['name']}\" za {$mortgageValue} $.";
             $response['new_coins'] = $newPlayerCoins;
-            // Zastawienie nie kończy tury, gracz może wykonać inne akcje
             break;
-
-        case 'accept_surprise':
-            // Włącz sesję, jeśli jeszcze nie jest włączona
-            if (session_status() == PHP_SESSION_NONE) {
-                session_start();
-            }
+       case 'accept_surprise':
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
 
             $actionCardHandlerPath = __DIR__ . '/random_action.php';
             if (!file_exists($actionCardHandlerPath)) {
-                throw new Exception('Plik random_action.php nie został znaleziony.'); // Zmieniono nazwę pliku
+                throw new Exception('Plik random_action.php nie został znaleziony.');
             }
             require_once $actionCardHandlerPath;
 
@@ -510,12 +459,12 @@ try {
                 throw new Exception($result['message']);
             }
 
-            $cardInfo = $result['card'];
-            $actionMessage = "🎴 Karta akcji: \"{$cardInfo['name']}\"\n📜 {$cardInfo['description']}\n\n";
-            $newPlayerCoins = $playerCoins;
-            $newPlayerLocation = $playerLocation;
-            $affectedPlayerId = null;
-            $affectedPlayerNewCoins = null;
+    $cardInfo = $result['card'];
+    $actionMessage = "{$cardInfo['name']}\"{$cardInfo['description']}\n\n";
+    $newPlayerCoins = $playerCoins;
+    $newPlayerLocation = $playerLocation;
+    $affectedPlayerId = null;
+    $affectedPlayerNewCoins = null;
 
             foreach ($result['effects'] as $effect) {
                 switch ($effect['type']) {
@@ -553,7 +502,7 @@ try {
                             $response['new_coins'] = $newPlayerCoins;
                             $response['player_bankrupt'] = true; // Flaga dla frontend'u
                             $response['redirect_to'] = 'end_game.php'; // Sygnalizuj frontendowi przekierowanie
-                            
+
                             // Zaktualizuj saldo gracza na ujemne
                             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                             if (!$stmt) {
@@ -799,7 +748,7 @@ try {
                 $playerRoll = rand(1, 6);
                 $targetRoll = rand(1, 6);
                 $duelMessage .= "Twój rzut: {$playerRoll}, rzut {$targetPlayer['name']}: {$targetRoll}\n";
-                
+
                 if ($playerRoll > $targetRoll) {
                     $newPlayerCoins = $currentPlayer['coins'] + $duelAmount;
                     $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
@@ -827,7 +776,7 @@ try {
                 $response['new_coins'] = $newPlayerCoins;
                 $response['player_bankrupt'] = true; // Flaga dla frontend'u
                 $response['redirect_to'] = 'end_game.php'; // Sygnalizuj frontendowi przekierowanie
-                
+
                 // Zaktualizuj saldo gracza na ujemne
                 $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                 if (!$stmt) {
@@ -866,7 +815,7 @@ try {
                 $response['affected_player_new_coins'] = $newTargetPlayerCoins;
                 $response['player_bankrupt'] = true; // Flaga dla frontend'u
                 $response['redirect_to'] = 'end_game.php'; // Sygnalizuj frontendowi przekierowanie
-                
+
                 // Zaktualizuj saldo rywala na ujemne
                 $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                 if (!$stmt) {
@@ -949,7 +898,6 @@ try {
             break;
 
         case 'accept_training':
-            // Przywrócono oryginalny komunikat
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Szkolenie rozpoczęte!';
@@ -959,7 +907,6 @@ try {
             break;
 
         case 'accept_vacation':
-            // Przywrócono oryginalny komunikat
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Miłego urlopu!';
@@ -969,7 +916,6 @@ try {
             break;
 
         case 'accept_start_tile':
-            // Przywrócono oryginalny komunikat
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Wróciłeś na pole start.';
@@ -979,10 +925,9 @@ try {
             break;
 
         case 'accept_special_tile':
-            // Przywrócono oryginalny komunikat
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
-            $response['message'] = 'Pole specjalne zaakceptowane.';
+            $response['message'] = 'Witaj na nowym kontynencie!';
             $response['new_coins'] = $playerCoins;
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
@@ -1058,23 +1003,16 @@ try {
             throw new Exception('Nieznany typ akcji: ' . $actionType . '. Dostępne akcje: buy_property, buy_restaurant, buy_hotel, pay_rent, pass_turn, skip_action, upgrade_property, mortgage_property, duel, not_interested, accept_surprise, accept_training, accept_vacation, accept_start_tile, accept_special_tile, accept_continent_entry');
     }
 
-    // Zatwierdzenie transakcji, jeśli wszystko przebiegło pomyślnie
     $mysqli->commit();
-
 } catch (Exception $e) {
-    // Wycofanie transakcji w przypadku błędu
     if (isset($mysqli) && $mysqli instanceof mysqli) {
         $mysqli->rollback();
     }
 
     // Logowanie błędu
     error_log('Błąd w process_tile_action.php: ' . $e->getMessage());
-
-    // Ustawienie odpowiedzi na błąd
     $response['success'] = false;
     $response['message'] = 'Wystąpił błąd serwera: ' . $e->getMessage();
-    
-    // Dodatkowe informacje debugowania, jeśli wyświetlanie błędów jest włączone
     if (ini_get('display_errors')) {
         $response['debug_info'] = [
             'error_message' => $e->getMessage(),
@@ -1082,15 +1020,12 @@ try {
             'line' => $e->getLine()
         ];
     }
-    http_response_code(500); // Ustawienie kodu statusu HTTP na błąd serwera
+    http_response_code(500);
 } finally {
-    // Zamknięcie połączenia z bazą danych
     if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
         $mysqli->close();
     }
 }
-
-// Odesłanie odpowiedzi JSON do klienta
 echo json_encode($response);
 
 /**

@@ -233,5 +233,4 @@ class ActionCardHandler {
         return $card;
     }
 }
-
 ?>

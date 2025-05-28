@@ -1,6 +1,5 @@
 @use "./_color" as c;
 
-// Spacing
 $spacing-xs: 5px;
 $spacing-sm: 10px;
 $spacing-md: 15px;
@@ -8,24 +7,20 @@ $spacing-lg: 20px;
 $spacing-xl: 30px;
 $spacing-xxl: 50px;
 
-// Border Radius
 $border-radius-sm: 8px;
 $border-radius-md: 10px;
 $border-radius-lg: 15px;
 $border-radius-round: 50%;
 
-// Shadows
 $shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.3);
 $shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
 $shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.5);
 $shadow-button: 0px 0px 10px c.$mint;
 
-// Transitions
 $transition-duration: 0.5s;
 $transition-ease: ease-in-out;
 $transition-fast: 0.3s;
 
-// Layout
 $max-board-size: 800px;
 $breakpoint-desktop: 768px;
 
@@ -81,8 +76,8 @@ a {
     box-shadow: $shadow-md;
     min-width: 280px;
     align-items: center;
-    max-height: 100vh; // Added
-    overflow-y: auto;  // Added
+    max-height: 100vh; 
+    overflow-y: auto;
 
     @media (min-width: $breakpoint-desktop) {
         width: 50%;
@@ -104,7 +99,7 @@ a {
     width: 100%;
     margin-bottom: $spacing-lg;
     gap: $spacing-sm;
-    flex-grow: 1; // Changed from 0
+    flex-grow: 1;
     flex-shrink: 0;
     height: auto;
     min-height: 100px;
@@ -179,7 +174,7 @@ a {
     align-items: flex-start;
     height: auto;
     min-height: 70px;
-    max-height: 70px; // Minimal height for header
+    max-height: 70px; 
     cursor: pointer;
     z-index: 10;
 
@@ -191,11 +186,11 @@ a {
 
     &.active {
         min-height: 350px;
-        max-height: 90vh; // Adjusted to reduce max height
+        max-height: 90vh; 
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         z-index: 100;
         background-color: c.$white1;
-        overflow-y: auto; // Added for player info box scrolling
+        overflow-y: auto; 
         opacity: 1;
         transform: scale(1);
         border: 2px solid #3498db;
@@ -232,7 +227,7 @@ a {
             text-align: left;
             flex-grow: 1;
             overflow-y: visible;
-            max-height: none; // Adjusted
+            max-height: none;
             opacity: 1;
             visibility: visible;
             transition: none;
@@ -316,7 +311,7 @@ a {
     flex-grow: 1;
     line-height: 1.4;
     font-family: 'Poppins', Arial, sans-serif;
-    max-height: 0; // Adjusted
+    max-height: 0;
     overflow: hidden;
     opacity: 0;
     visibility: hidden;
@@ -493,8 +488,6 @@ a {
 .card-slot {
     flex: 1;
     height: 100px;
-    // border: 3px dashed #9c997f;;
-    // border-radius: $border-radius-md;
     border: 1px solid #e0e0e0;
     border-radius: $border-radius-md;
     display: flex;
@@ -588,7 +581,6 @@ a {
         width: 100%;
         height: 100%;
     }
-
     .tile-id,
     .tile-name,
     .tile-name-text,
@@ -601,7 +593,6 @@ a {
         position: relative;
         z-index: 2;
     }
-
     .tile-name {
         position: relative;
         z-index: 1;
@@ -624,6 +615,7 @@ a {
     .tile-name-text {
         background: rgba(c.$white1, 0.3);
         padding: 2px;
+        color: #000;
     }
 
     .tile-tile {
@@ -635,20 +627,6 @@ a {
         bottom: 0;
         left: 0;
         z-index: 3;
-        // The following lines were removed to allow inline PHP styles to control background-color
-        // &.azja_restaurant .tile-tile { background-color: c.$azja; }
-        // &.afryka_restaurant .tile-tile { background-color: c.$afr; }
-        // &.australia_restaurant .tile-tile { background-color: c.$aus; }
-        // &.amerykan_restaurant .tile-tile { background-color: c.$amen; }
-        // &.amerykas_restaurant .tile-tile { background-color: c.$ames; }
-        // &.europa_restaurant .tile-tile { background-color: c.$euro; }
-        // &.region_entrance .tile-tile { background-color: c.$start; }
-        // &.special .tile-tile { background-color: c.$start; }
-        // &.duel .tile-tile { background-color: c.$duel; }
-        // &.event .tile-tile { background-color: c.$action; }
-        // &.start .tile-tile,
-        // &.training .tile-tile,
-        // &.vacation .tile-tile { background-color: c.$start; }
     }
 
     .title-id {
@@ -696,7 +674,6 @@ a {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    // border: 3px solid #000;
     z-index: 10;
 }
 .player-pawn1{
@@ -715,16 +692,6 @@ a {
     background-color: c.$player4;
     border: c.$player4dark 4px solid;
 }
-
-// .player-token.player-1 {
-//     background-color: red; }
-// .player-token.player-2 {
-//     background-color: blue; }
-// .player-token.player-3 {
-//     background-color: green; }
-// .player-token.player-4 {
-//     background-color: yellow; }
-
 @keyframes move-token {
     0% { transform: translate(0, 0); }
     100% { transform: translate(var(--x), var(--y)); }
@@ -760,7 +727,7 @@ a {
     max-width: 300px;
     box-sizing: border-box;
     position: relative;
-    flex-shrink: 0; // Added
+    flex-shrink: 0;
 
     @media (min-width: $breakpoint-desktop) {
         display: block;
@@ -818,7 +785,6 @@ a {
     text-align: center;
     font-size: clamp(1em, 4vw, 1.5em);
     font-weight: bold;
-    color: c.$red1;
     margin-top: 5px;
     margin-bottom: 10px;
     min-height: 1.8em;
@@ -942,7 +908,6 @@ a {
         }
     }
 }
-
 @media (max-width: $breakpoint-desktop) {
     .player-info-box.active {
         .properties,
@@ -962,8 +927,6 @@ a {
         }
     }
 }
-
-
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -974,7 +937,6 @@ a {
         transform: translateY(0);
     }
 }
-
 .player-info-box.active {
     .properties,
     .skills-content {
@@ -989,7 +951,6 @@ a {
             }
         }
     }
-
     .player-stats-table,
     .player-properties-table {
         width: 100%;
@@ -1063,5 +1024,3 @@ a {
         }
     }
 }
-
-

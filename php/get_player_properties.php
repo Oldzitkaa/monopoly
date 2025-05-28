@@ -8,7 +8,6 @@ if (!isset($_SESSION['game_id'])) {
 }
 
 $gameId = $_SESSION['game_id'];
-
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!isset($data['player_id'])) {
@@ -28,7 +27,6 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
 $mysqli->set_charset("utf8mb4");
 
 $properties = [];
-
 $sql_properties = "
     SELECT
         t.name AS property_name,
@@ -55,8 +53,6 @@ if ($stmt_properties = $mysqli->prepare($sql_properties)) {
             $level = $row['current_level'];
             $calculated_rent = $base_rent;
 
-            // OGRANICZENIE MAKSYMALNEGO POZIOMU DO 5
-            // Jeśli poziom jest wyższy niż 5, traktujemy go jako poziom 5 do celów obliczeniowych czynszu.
             $effective_level = min($level, 5);
 
             switch ($effective_level) {
@@ -87,10 +83,6 @@ if ($stmt_properties = $mysqli->prepare($sql_properties)) {
                     $calculated_rent = $current_iterative_rent;
                     break;
                 default:
-                    // Jeśli jakimś cudem effective_level jest > 5 (co nie powinno się zdarzyć dzięki min())
-                    // lub inna nieprzewidziana sytuacja, możemy zastosować domyślną logikę.
-                    // Obecnie min($level, 5) zapobiega temu, więc ten 'default' jest bardziej zabezpieczeniem.
-                    $calculated_rent = $base_rent; // Domyślnie, jeśli coś pójdzie nie tak.
                     break;
             }
 
@@ -102,7 +94,7 @@ if ($stmt_properties = $mysqli->prepare($sql_properties)) {
                 'type' => $row['property_type'],
                 'region' => $row['property_group_name'] ? $row['property_group_name'] : 'Specjalne',
                 'color' => $row['property_group_color'],
-                'level' => $level, // Zwracamy rzeczywisty poziom z bazy
+                'level' => $level,
                 'is_mortgaged' => (bool)$row['is_mortgaged'],
                 'upgrade_cost' => $row['property_upgrade_cost']
             ];
@@ -154,5 +146,4 @@ if ($stmt_stats = $mysqli->prepare($sql_player_stats)) {
 }
 
 $mysqli->close();
-
 echo json_encode(['success' => true, 'properties' => $properties, 'player_stats' => $playerStats]);

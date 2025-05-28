@@ -6,7 +6,7 @@ if (!isset($_SESSION['game_id'])) {
     exit();
 }
 $gameId = $_SESSION['game_id'];
-include_once './database_connect.php'; // Upewnij się, że ten plik prawidłowo łączy się z bazą danych i zwraca obiekt $mysqli
+include_once './database_connect.php';
 
 if (!isset($mysqli) || $mysqli->connect_errno) {
     die("Brak aktywnego połączenia z bazą danych po dołączeniu pliku database_connect.php: " . ($mysqli->connect_error ?? 'Brak szczegółów błędu.'));
@@ -305,6 +305,7 @@ function generatePlayerPropertiesTable($properties) {
     <link rel="stylesheet" href="../css/roll_dice.css">
     <link rel="stylesheet" href="../css/gameboard_inner.css">
     <link rel="stylesheet" href="../css/gameboard_side.css">
+    <link rel="stylesheet" href="../css/main.css">
     <link rel="icon" href="../zdj/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../zdj/favicon.ico" type="image/x-icon">
 </head>
@@ -335,24 +336,20 @@ function generatePlayerPropertiesTable($properties) {
                 } else {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
-            //    if (!empty($current_player_turn_data)) {
-            //         echo "<div class='current-player current-player" . htmlspecialchars($initialCurrentTurnPlayerId) . "'>";
-            //         echo htmlspecialchars($current_player_turn_data['name']);
-            //         echo "</div>";
-            //     } else {
-            //         echo "<div class='current-player current-player-display'>Ładowanie...</div>";
-            //     }
-                ?><div class="current-player">
-    <h3 id="current-player-name">
-<?php         
-if (!empty($current_player_turn_data)) {              
-    echo htmlspecialchars($current_player_turn_data['name']);
-} else {              
-    echo "Ładowanie...";          
-}          
-?>
-    </h3>
-</div>
+                ?>
+                <!-- <div class="current-player current-player">
+                    <h3 id="current-player-name"> -->
+                    <?php 
+                    echo '<div class="current-player">
+                    <h3 id="current-player-name">'   ;     
+                        if (!empty($current_player_turn_data)) {              
+                            echo htmlspecialchars($current_player_turn_data['name']);
+                        } else {              
+                            echo "Ładowanie...";          
+                        }          
+                    ?>
+                    </h3>
+                </div>
             </div>
 
             <?php

@@ -1,7 +1,7 @@
 <?php
 // session_start();
-
 // include_once './database_connect.php';
+
 function getRandomDuelCard($mysqli) {
     if ($mysqli->connect_errno) {
         echo "Nie udało sie połączyć z MySQL: " . $mysqli->connect_error;
@@ -16,9 +16,6 @@ function getRandomDuelCard($mysqli) {
 
     if (count($_SESSION['drawn_duel_card_ids']) >= $max_drawn_cards) {
         $removed_card_id = array_shift($_SESSION['drawn_duel_card_ids']);
-
-    // karta wracajaca 
-        // echo "Karta pojedynku o ID: " . $removed_card_id . " wróciła do puli.<br>";
     }
 
     $drawnIds = $_SESSION['drawn_duel_card_ids'];
@@ -85,24 +82,12 @@ function getRandomDuelCard($mysqli) {
     $result_duel = $stmt_duel->get_result();
     $row_duel = $result_duel->fetch_object();
 
-
-    // potem to bedzie out
-    // if ($row_duel) {
-    //     echo $row_duel->description . "<br>";
-    //     $_SESSION['drawn_duel_card_ids'][] = $row_duel->id;
-    //     echo "Obecnie wyciągnięte karty pojedynku (ID): " . implode(', ', $_SESSION['drawn_duel_card_ids']) . "<br>";
-    //     echo "Liczba wyciągniętych kart pojedynku: " . count($_SESSION['drawn_duel_card_ids']) . "<br>";
-    // } else {
-    //     echo "Nie znaleziono karty pojedynku.";
-    // }
-
     if ($row_duel) {
         return $row_duel;
     } else {
         error_log("Nie znaleziono karty pojedynku o wylosowanym offsetcie.");
         return null;
     }
-
     $stmt_duel->close();
     $mysqli->close();
 }

@@ -1310,25 +1310,20 @@ input[type="range"]:active::-ms-thumb {
     overflow: hidden;
     border-radius: 5px;
 }
-
-// === Zmodyfikowany styl dla przycisku Zatwierdź Wybór ===
-// To jest kluczowe, aby umieścić ten selektor ID PO selektorach klasowych,
-// aby zapewnić wyższą specyfikę.
 #confirmCharacterButton {
-    width: 300px; /* Zwiększona szerokość do 300px */
-    max-width: 90%; /* Zapewnia, że przycisk nie będzie szerszy niż 90% rodzica */
-    display: block !important; /* Wymusza wyświetlanie jako blok, co jest kluczowe dla width i margin:auto */
-    margin-left: auto; /* Wyśrodkowanie przycisku */
-    margin-right: auto; /* Wyśrodkowanie przycisku */
-    margin-top: 30px; /* Odstęp od góry */
-    padding: $spacing-md $spacing-xl; /* Zachowanie paddingu */
-    height: auto; /* Pozostawiamy wysokość dynamiczną */
-    border-radius: $border-radius-lg; /* Dopasuj border-radius, jeśli chcesz, np. do 15px */
-    font-size: 22px; /* Zwiększona czcionka */
-    box-sizing: border-box; /* Ważne, aby padding i border nie powiększały elementu poza zadaną szerokość */
+    width: 300px;
+    max-width: 90%;
+    display: block !important;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    padding: $spacing-md $spacing-xl;
+    height: auto;
+    border-radius: $border-radius-lg;
+    font-size: 22px;
+    box-sizing: border-box;
 }
 
-// Dodatkowe style, które przesłałeś, dodaję na końcu.
 .stat-fill {
     background-color: #a03a3a;
     height: 100%;
@@ -1348,6 +1343,7 @@ input[type="range"]:active::-ms-thumb {
 }
 .name-tabel{
     width: auto;
+    color: c.$white1;
 }
 .value-table{
     width: 100%;

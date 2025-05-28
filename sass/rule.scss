@@ -6,7 +6,6 @@ body, html {
     font-family: 'Poppins', Arial, sans-serif;
     height: 100%;
     background: linear-gradient(90deg,rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgba(255, 255, 255, 1) 100%);
-    // overflow: hidden;
     color: c.$white1;
 }
 .info-div{
@@ -14,18 +13,26 @@ body, html {
     border: 2px solid c.$mint;
     box-shadow: 0px 0px 10px c.$mint;
     height: 30px;
-    position: absolute;
+    // position: absolute;
     display: flex;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
+    font-weight: 800; 
+    position: fixed;
     &.rule{
-        width: 80px;
+        width: 90px;
+        top: 10px;
+        right: 10px;
+        border-radius: 40%;
+    }
+    &.back{
+        width: 90px;
         top: 10px;
         right: 10px;
         border-radius: 40%;
     }
     &.author{
-        width: 80px;
+        width: 90px;
         top: 50px;
         right: 10px;
         border-radius: 40%;
@@ -38,6 +45,7 @@ body, html {
 }
 .info{
     color: c.$white1;
+    text-decoration-thickness: bold;
 }
 .backg {
     position: relative;
@@ -79,15 +87,28 @@ body, html {
 .rule-text{
     padding-left: 20%;
     padding-right: 20%;
+    color: c.$white1;
 }
 .inner-rule{
     padding-left: 30px;
 }
 .xd{
-    height: 150px;
+    height: auto;
 }
 .easter-egg{
     width: 100%;
     color: c.$red1;
     text-align: center;
+}
+p::selection,h3::selection,h2::selection,label::selection,span::selection{
+    background-color: c.$red2;
+    color: c.$text2;
+}
+.selection-player::selection, .selection-character::selection{
+    background-color: c.$red2;
+    color: c.$text2;
+}
+.easter-egg::selection{
+    background-color: c.$red1;
+    color: c.$text;
 }

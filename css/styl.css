@@ -1338,17 +1338,17 @@ input[type=range]:active::-ms-thumb {
 }
 
 #confirmCharacterButton {
-  width: 300px; /* Zwiększona szerokość do 300px */
-  max-width: 90%; /* Zapewnia, że przycisk nie będzie szerszy niż 90% rodzica */
-  display: block !important; /* Wymusza wyświetlanie jako blok, co jest kluczowe dla width i margin:auto */
-  margin-left: auto; /* Wyśrodkowanie przycisku */
-  margin-right: auto; /* Wyśrodkowanie przycisku */
-  margin-top: 30px; /* Odstęp od góry */
-  padding: 15px 30px; /* Zachowanie paddingu */
-  height: auto; /* Pozostawiamy wysokość dynamiczną */
-  border-radius: 15px; /* Dopasuj border-radius, jeśli chcesz, np. do 15px */
-  font-size: 22px; /* Zwiększona czcionka */
-  box-sizing: border-box; /* Ważne, aby padding i border nie powiększały elementu poza zadaną szerokość */
+  width: 300px;
+  max-width: 90%;
+  display: block !important;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+  padding: 15px 30px;
+  height: auto;
+  border-radius: 15px;
+  font-size: 22px;
+  box-sizing: border-box;
 }
 
 .stat-fill {
@@ -1373,6 +1373,7 @@ input[type=range]:active::-ms-thumb {
 
 .name-tabel {
   width: auto;
+  color: #fcf9de;
 }
 
 .value-table {

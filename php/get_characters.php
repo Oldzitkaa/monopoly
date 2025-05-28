@@ -1,11 +1,8 @@
 <?php
-
 header('Content-Type: application/json');
-
 require_once './database_connect.php';
 
 $response = [];
-
 try {
     $sql = "SELECT
                 id,
@@ -39,25 +36,18 @@ try {
 
     $characters = [];
     $baseCharacterImagePath = '../zdj/postacie/';
-
     $mainPlaceholderPath = '../zdj/placeholder.png';
-
 
     while ($row = $result->fetch_assoc()) {
         $characterData = $row;
-
         if (!empty($characterData['plik'])) {
             $characterData['image_path'] = $baseCharacterImagePath . $characterData['plik'];
         } else {
             $characterData['image_path'] = $mainPlaceholderPath;
         }
-
         unset($characterData['plik']);
-
         $characters[] = $characterData;
     }
-
-
     $response = $characters;
 
 } catch (Exception $e) {
@@ -65,7 +55,6 @@ try {
     $response = [
         'error' => true,
     ];
-
     error_log('Błąd w get_characters.php: ' . $e->getMessage());
 
 } finally {

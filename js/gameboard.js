@@ -297,14 +297,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 const rollResult = result.roll_result;
                 const newLocation = result.new_location;
-                // const newLocation = 2;
                 const playerWhoRolledId = currentPlayerId;
 
                 console.log(`Gracz ID: ${playerWhoRolledId}, nowa pozycja: ${newLocation}`);
                 diceImage.src = `../zdj/kostki/${rollResult}.png`;
                 diceImage.alt = `Wynik: ${rollResult}`;
-                movePlayerToken(playerWhoRolledId, newLocation);
-                updatePlayerDisplay(playerWhoRolledId, result.new_coins, newLocation);
+                setTimeout(() => {
+                    movePlayerToken(playerWhoRolledId, newLocation);
+                    updatePlayerDisplay(playerWhoRolledId, result.new_coins, newLocation);
+                }, 2250);
                 console.log('PRZED aktualizacją tury - currentTurnPlayerId:', currentTurnPlayerId);
                 let nextPlayerIdFromServer = result.next_player_id || result.current_player_id || result.turn_player_id;
 
@@ -1105,11 +1106,10 @@ function updateCenterPlayerStats(playerData) {
                         valueCell.textContent = newValueStr;
                         console.log(`[DEBUG] Zaktualizowano ${statName} dla gracza ${playerData.id}: ${oldValue} -> ${newValueStr}`);
                         
-                        // Dodaj wizualny efekt zmiany
-                        valueCell.style.backgroundColor = '#ffff99';
-                        setTimeout(() => {
-                            valueCell.style.backgroundColor = '';
-                        }, 1000);
+                        // valueCell.style.backgroundColor = '#ffff99';
+                        // setTimeout(() => {
+                        //     valueCell.style.backgroundColor = '';
+                        // }, 1000);
                     }
                 } else {
                     console.log(`[DEBUG] Brak danych dla statystyki ${statName}, otrzymano:`, newValue);
@@ -1247,7 +1247,7 @@ function updatePlayerNameElement(element, currentPlayerId, players) {
         return;
     }
     
-    // ZMIENIONE: Aktualizuj nazwę gracza - tylko name bez character_name
+    // Aktualizuj nazwę gracza - tylko name bez character_name
     const playerName = currentPlayer.name || 'Nieznany gracz';
     const displayName = playerName; // Usunięto character_name
     
@@ -1257,11 +1257,10 @@ function updatePlayerNameElement(element, currentPlayerId, players) {
         element.textContent = displayName;
         console.log(`[DEBUG] Zaktualizowano aktualnego gracza w centrum: ${currentText} -> ${displayName}`);
         
-        // Dodaj efekt wizualny zmiany
-        element.style.backgroundColor = '#ffff99';
-        setTimeout(() => {
-            element.style.backgroundColor = '';
-        }, 1000);
+        // element.style.backgroundColor = '#ffff99';
+        // setTimeout(() => {
+        //     element.style.backgroundColor = '';
+        // }, 1000);
     }
 }
 });

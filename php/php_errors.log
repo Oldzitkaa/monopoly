@@ -1,10 +1,4 @@
 [22-May-2025 23:47:14 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 710 zł.
 [23-May-2025 12:58:05 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 1 ma już właściciela.
 [23-May-2025 13:11:14 Europe/Berlin] Błąd w process_tile_action.php: Nieruchomość na polu 8 ma już właściciela.
-[28-May-2025 10:13:37 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 770 $.
-[28-May-2025 10:18:10 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 550 $.
-[28-May-2025 11:03:07 Europe/Berlin] Karta o ID: 6 wróciła do puli.
-[28-May-2025 11:03:20 Europe/Berlin] Karta o ID: 12 wróciła do puli.
-[28-May-2025 11:04:04 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 430 $.
-[28-May-2025 11:04:43 Europe/Berlin] Karta o ID: 19 wróciła do puli.
-[28-May-2025 11:05:44 Europe/Berlin] Błąd w process_tile_action.php: Masz za mało pieniędzy na zakup tej nieruchomości. Potrzebujesz 300 $.
+[28-May-2025 08:28:00 Europe/Berlin] Błąd w process_tile_action.php: Nie można nawiązać połączenia, ponieważ komputer docelowy aktywnie go odmawia
