@@ -48,5 +48,6 @@
         </div>
         
         <a href="./index.php"><div class="info-div back"><p class="info">Powrót</p></div></a>
+        <a href="./rule.php"><div class="info-div author" style="z-index: 120"><p class="info">Zasady</p></div></a>
     </body>
     </html>

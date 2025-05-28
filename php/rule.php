@@ -106,7 +106,6 @@
                 </div>
             </div>
             <div class="xd">
-                <!-- <p class="easter-egg">☭<br>☭<br>☭<br>☭</p> -->
                 <p class="easter-egg">
                     ░░░░░░░░▄██▄░░░░░░▄▄░░ <br>
                     ░░░░░░░▐███▀░░░░░▄███▌ <br>
@@ -124,5 +123,6 @@
             </div>
         </div>
         <a href="./index.php"><div class="info-div back"><p class="info">Powrót</p></div></a>
+        <a href="./author.php"><div class="info-div author" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
     </body>
     </html>

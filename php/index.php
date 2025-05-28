@@ -24,7 +24,7 @@ include_once './database_connect.php';
 <body>
     <div class="logo_div step1">
         <p class="step-title">MONOPOLY</p>
-        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj">
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo_zdj" onclick="logoPrompt()">
         <div class="buttons-container">
             <?php
             if (isset($_SESSION['game_id']) && is_numeric($_SESSION['game_id']) && !is_null($_SESSION['game_id'])) {
@@ -84,5 +84,6 @@ include_once './database_connect.php';
             <a href="./rule.php"><div class="info-div rule" style="z-index: 120"><p class="info">Zasady</p></div></a>
             <a href="./author.php"><div class="info-div author" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
     <script src="../js/script_main.js"></script>
+    <script src="../js/main_foto.js"></script>
 </body>
 </html>
