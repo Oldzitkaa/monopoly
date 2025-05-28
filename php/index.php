@@ -82,7 +82,7 @@ include_once './database_connect.php';
             </div>
             <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
             <a href="./rule.php"><div class="info-div rule" style="z-index: 120"><p class="info">Zasady</p></div></a>
-            <a href=""><div class="info-div author"><p class="info" style="z-index: 121">U・ᴥ・U</p></div></a>
+            <a href="./author.php"><div class="info-div author" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
     <script src="../js/script_main.js"></script>
 </body>
 </html>

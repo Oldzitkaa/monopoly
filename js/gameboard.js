@@ -190,14 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 const rollResult = result.roll_result;
                 const newLocation = result.new_location;
-                // const newLocation = 2;
                 const playerWhoRolledId = currentPlayerId;
 
                 console.log(`Gracz ID: ${playerWhoRolledId}, nowa pozycja: ${newLocation}`);
                 diceImage.src = `../zdj/kostki/${rollResult}.png`;
                 diceImage.alt = `Wynik: ${rollResult}`;
-                movePlayerToken(playerWhoRolledId, newLocation);
-                updatePlayerDisplay(playerWhoRolledId, result.new_coins, newLocation);
+                setTimeout(() => {
+                    movePlayerToken(playerWhoRolledId, newLocation);
+                    updatePlayerDisplay(playerWhoRolledId, result.new_coins, newLocation);
+                }, 2250);
                 console.log('PRZED aktualizacją tury - currentTurnPlayerId:', currentTurnPlayerId);
                 let nextPlayerIdFromServer = result.next_player_id || result.current_player_id || result.turn_player_id;
 
