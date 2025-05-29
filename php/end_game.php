@@ -152,7 +152,6 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
 </head>
 <body>
     <div class="logo-div">
-        <!-- <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj"> -->
         <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj" onclick="logoPrompt()">
          <p class="win-player"> 
             <?php
