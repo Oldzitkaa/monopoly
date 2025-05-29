@@ -474,10 +474,10 @@ try {
 
                         if ($direction === 'back') {
                             $newPlayerLocation = max(0, $playerLocation - $moveValue);
-                            $actionMessage .= "⬅️ Cofasz się o {$moveValue} pól (z pola {$playerLocation} na pole {$newPlayerLocation}).";
+                            $actionMessage .= "⬅️ Cofasz się o {$moveValue} pól.";
                         } else {
                             $newPlayerLocation = $playerLocation + $moveValue;
-                            $actionMessage .= "➡️ Przesuwasz się o {$moveValue} pól do przodu (z pola {$playerLocation} na pole {$newPlayerLocation}).";
+                            $actionMessage .= "➡️ Przesuwasz się o {$moveValue} pól do przodu.";
                         }
 
                         $stmt = $mysqli->prepare("UPDATE players SET location = ? WHERE id = ? AND game_id = ?");
