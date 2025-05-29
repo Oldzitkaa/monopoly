@@ -337,11 +337,9 @@ function generatePlayerPropertiesTable($properties) {
                     echo "<p>Brak graczy w bazie danych dla tej gry lub błąd ładowania.</p>";
                 }
                 ?>
-                <!-- <div class="current-player current-player">
-                    <h3 id="current-player-name"> -->
-                    <?php 
-                    echo '<div class="current-player">
-                    <h3 id="current-player-name">'   ;     
+                <div class="current-player"><p>Obecny gracz:</p>
+                    <h3 id="current-player-name">
+                    <?php   
                         if (!empty($current_player_turn_data)) {              
                             echo htmlspecialchars($current_player_turn_data['name']);
                         } else {              
