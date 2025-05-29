@@ -110,8 +110,6 @@ if ($stmt_tiles_all) {
 $tile = $tiles_all[$location] ?? null; 
 $output_html_message = '';
 
-
-
 // sprawdzanie pola
 if (isset($_GET['location'])) {
     $location = (int)$_GET['location'];

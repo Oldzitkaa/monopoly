@@ -868,10 +868,7 @@ function stopGameStateRefresh() {
         console.log('Zatrzymano odświeżanie stanu gry.');
     }
 }
-/**
- * Function to refresh player stats and their positions on the board.
- * Fetches full game state from the server.
- */
+
 async function refreshPlayerStats() {
     console.log('[DEBUG] refreshPlayerStats - rozpoczęcie');
     
@@ -895,22 +892,17 @@ async function refreshPlayerStats() {
         const data = await response.json();
         console.log('[DEBUG] Otrzymane dane z get_game_state.php:', data);
         
-        // NOWE: Sprawdź czy gra się zakończyła lub ktoś zbankrutował
         if (data.game_ended === true || data.player_bankrupt === true) {
             console.log('[DEBUG] Wykryto koniec gry lub bankructwo gracza');
 
-            // Zatrzymaj odświeżanie
             stopGameStateRefresh();
 
-            // Wyświetl komunikat
             if (data.message) {
                 alert(data.message);
             }
 
-            // Przekieruj na stronę końca gry
             const redirectUrl = data.redirect_to || 'end_game.php';
 
-            // Dodaj parametry do URL
             if (gameId && currentPlayerId) {
                 const separator = redirectUrl.includes('?') ? '&' : '?';
                 const reason = data.player_bankrupt ? 'bankrupt' : 'ended';
@@ -919,24 +911,20 @@ async function refreshPlayerStats() {
                 window.location.href = redirectUrl;
             }
 
-            return; // Przerwij dalsze przetwarzanie
+            return; 
         }
 
         if (data.success && data.players) {
             console.log(`[DEBUG] Aktualizacja ${data.players.length} graczy`);
             
-            // NOWE: Sprawdź czy któryś z graczy ma ujemne monety
             const bankruptPlayer = data.players.find(player => player.coins < 0);
             if (bankruptPlayer) {
                 console.log('[DEBUG] Wykryto gracza z ujemnymi monetami:', bankruptPlayer);
 
-                // Zatrzymaj odświeżanie
                 stopGameStateRefresh();
 
-                // Wyświetl komunikat o bankructwie
                 alert(`Gracz ${bankruptPlayer.name} zbankrutował!`);
 
-                // Przekieruj na stronę końca gry
                 const redirectUrl = 'end_game.php';
                 if (gameId && currentPlayerId) {
                     window.location.href = `${redirectUrl}?game_id=${gameId}&player_id=${currentPlayerId}&reason=bankrupt&bankrupt_player=${bankruptPlayer.id}`;
@@ -947,21 +935,16 @@ async function refreshPlayerStats() {
                 return;
             }
 
-            // Update displayed player information
             data.players.forEach((player, index) => {
                 console.log(`[DEBUG] Aktualizacja gracza ${index + 1}/${data.players.length}:`, player);
                 
-                // Update coins and location in player panel
                 updatePlayerDisplay(player.id, player.coins, player.location);
                 
-                // Move player token on the board
                 movePlayerToken(player.id, player.location);
                 
-                // Update center stats
                 updateCenterPlayerStats(player);
             });
             
-            // Update currentTurnPlayerId from server
             if (data.current_turn_player_id !== undefined && data.current_turn_player_id !== currentTurnPlayerId) {
                 console.log(`[DEBUG] Polling: Zmiana currentTurnPlayerId z ${currentTurnPlayerId} na ${data.current_turn_player_id}`);
                 currentTurnPlayerId = data.current_turn_player_id;
@@ -969,11 +952,9 @@ async function refreshPlayerStats() {
                 updateCurrentPlayerIndicator(currentTurnPlayerId);
                 updateRollButtonState();
                 
-                // NOWE: Aktualizuj centrum planszy
                 updateCurrentPlayerCenterDisplay(currentTurnPlayerId, data.players);
             }
             
-            // Zawsze aktualizuj centrum planszy (nawet jeśli gracz się nie zmienił)
             updateCurrentPlayerCenterDisplay(currentTurnPlayerId || data.current_turn_player_id, data.players);
             
             console.log('[DEBUG] refreshPlayerStats - zakończone pomyślnie');
@@ -987,20 +968,16 @@ async function refreshPlayerStats() {
 function updateCenterPlayerStats(playerData) {
     console.log(`[DEBUG] updateCenterPlayerStats dla gracza:`, playerData);
     
-    // Spróbuj różnych selektorów w kolejności priorytetów
     let playerContainer = null;
     
-    // Selektor 1: Oryginalny z kodu
     playerContainer = document.querySelector(`.player-info.player${playerData.turn_order}`);
     
     if (!playerContainer) {
-        // Selektor 2: Na podstawie data-player-id
         playerContainer = document.querySelector(`.player-info[data-player-id="${playerData.id}"]`);
         console.log(`[DEBUG] Używam selektora data-player-id dla gracza ${playerData.id}`);
     }
     
     if (!playerContainer) {
-        // Selektor 3: Szukaj w kontenerach z nazwą gracza
         const allPlayerInfos = document.querySelectorAll('.player-info');
         allPlayerInfos.forEach(container => {
             const nameElement = container.querySelector('p b');

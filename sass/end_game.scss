@@ -315,6 +315,11 @@ a {
         margin-top: $spacing-md;
         margin-bottom: $spacing-xl;
     }
+    .loose-player {
+        font-size: clamp(25px, 4vw, 30px);
+        margin-top: $spacing-md;
+        margin-bottom: $spacing-xl;
+    }
 
     .player-result {
         width: 90%;

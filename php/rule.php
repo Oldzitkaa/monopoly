@@ -11,7 +11,8 @@
 <body>
     <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
     <div class="logo-div">
-        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
+        <!-- <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj"> -->
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj" onclick="logoPrompt()">
         <h2 class="step-title">MONOPOLY - ZASADY</h2>
         <div class="rule-text">
                 <h3>Cel Gry:</h3>
@@ -105,6 +106,9 @@
                     </p>
                 </div>
             </div>
+            <br>
+            <a href="./library.php"><div class="info-div library"><p class="info">Biblioteka kart</p></div></a>
+            <br><br>
             <div class="xd">
                 <p class="easter-egg">
                     ░░░░░░░░▄██▄░░░░░░▄▄░░ <br>
@@ -122,7 +126,8 @@
             </p>
             </div>
         </div>
-        <a href="./index.php"><div class="info-div back"><p class="info">Powrót</p></div></a>
+        <a href="./end_game.php"><div class="info-div back" style="z-index: 120"><p class="info">Powrót</p></div></a>
         <a href="./author.php"><div class="info-div author" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
+        <script src="../js/main_foto.js"></script>
     </body>
     </html>

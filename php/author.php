@@ -11,7 +11,7 @@
 <body>
     <img src="../zdj/tlo3.png" alt="Tło gry" class="backg"> 
     <div class="logo-div">
-        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj" onclick="logoPrompt()">
         <h2 class="step-title">MONOPOLY - AUTORZY</h2>
         <div class="rule-text">
                 <h3>Od Twórczyń</h3>
@@ -47,7 +47,8 @@
             </div>
         </div>
         
-        <a href="./index.php"><div class="info-div back"><p class="info">Powrót</p></div></a>
+        <a href="./end_game.php"><div class="info-div back" style="z-index: 120"><p class="info">Powrót</p></div></a>
         <a href="./rule.php"><div class="info-div author" style="z-index: 120"><p class="info">Zasady</p></div></a>
+        <script src="../js/main_foto.js"></script>
     </body>
     </html>
