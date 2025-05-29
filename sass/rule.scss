@@ -37,6 +37,13 @@ body, html {
         right: 10px;
         border-radius: 40%;
     }
+    &.library {
+        position: absolute;
+        width: 150px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 40%;
+    }
 }
 .info-div:hover{
     background-color: c.$red2;
@@ -111,4 +118,13 @@ p::selection,h3::selection,h2::selection,label::selection,span::selection{
 .easter-egg::selection{
     background-color: c.$red1;
     color: c.$text;
+}
+td:first-child{
+    width: 100px;
+}
+td{
+    height: 35px;
+}
+.cards-table__row2{
+    height: 65px;
 }

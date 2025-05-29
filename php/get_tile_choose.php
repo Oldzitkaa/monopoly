@@ -17,9 +17,11 @@ if (!isset($mysqli) || $mysqli->connect_errno) {
     exit();
 }
 $mysqli->set_charset("utf8");
+
 include_once './random_duel.php';
 
 // gracze
+$current_player_coins = 0;
 $players = [];
 $sql_all_players = "SELECT
                 p.id as id_player,
@@ -185,15 +187,25 @@ if (
                 }
 
             } else {
-                // czyjas restauracja
+                // czyjaś restauracj
                 $output_html .= '<p>Musisz zapłacić za posiłek ' . htmlspecialchars($tile['name']) . '.</p>';
                 $output_html .= '<button class="action-button pay" data-action-type="pay_rent" data-property-id="' . htmlspecialchars($location) . '">Płacę</button>';
             }
         } else {
-            // niezakupiona restauarcja
-            $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
-            $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
-            $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            $current_player_coins = (int)$players[$current_player_id]['coins'];
+            // niezakupiona restauracja
+            if ($tile['cost'] > $current_player_coins){ 
+                $output_html .= '<p>Jesteś za biedny!</p>';
+                $output_html .= '<button class="action-button accept" data-action-type="not_interested">A to sory</button>';
+            } elseif ($tile['cost'] == $current_player_coins){
+                $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '? Zostanie Ci 0 dolarsów!</p>';
+                $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            } else {
+                $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
+                $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+            }
         }
     }
 } elseif (

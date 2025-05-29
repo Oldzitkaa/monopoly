@@ -29,7 +29,6 @@ body, html {
     font-family: 'Poppins', Arial, sans-serif;
     height: 100%;
     background: linear-gradient(40deg,rgb(17, 54, 139) 0%, rgb(100, 132, 213) 50%, rgba(255, 255, 255, 1) 100%);
-    overflow: hidden;
     color: c.$white1;
 }
 
@@ -311,6 +310,11 @@ a {
     }
 
     .win-player {
+        font-size: clamp(25px, 4vw, 30px);
+        margin-top: $spacing-md;
+        margin-bottom: $spacing-xl;
+    }
+    .loose-player {
         font-size: clamp(25px, 4vw, 30px);
         margin-top: $spacing-md;
         margin-bottom: $spacing-xl;

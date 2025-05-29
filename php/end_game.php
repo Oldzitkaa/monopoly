@@ -127,6 +127,13 @@ foreach ($final_player_results as $player_result) {
         $winners[] = $player_result['name'];
     }
 }
+// przegrani
+$bankrupt_players = [];
+foreach ($players_data as $player) {
+    if ($player['coins'] < 0) {
+        $bankrupt_players[] = $player['name_player'];
+    }
+}
 if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
     $mysqli->close();
 }
@@ -145,7 +152,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
 </head>
 <body>
     <div class="logo-div">
-        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj">
+        <img src="../zdj/logo.png" alt="Potega Smakow" class="logo-zdj" onclick="logoPrompt()">
          <p class="win-player"> 
             <?php
                 if (!empty($winners)) {
@@ -174,10 +181,22 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
             }
             ?>
         </table>
+        <p class="loose-player"> 
+            <?php
+                if (!empty($bankrupt_players)) {
+                    if (count($bankrupt_players) == 1) {
+                        echo "Przegrany &rarr; " . htmlspecialchars($bankrupt_players[0]);
+                    } else {
+                        echo "Przegrani &rarr; " . implode(', ', $bankrupt_players);
+                    }
+                }
+            ?>
+         </p>
         <button class="end-btn" id="endGameButton">OK</button>
     </div>
     <img src="../zdj/tlo3.png" alt="Tło gry" class="backg">
-    <a href="./author.php"><div class="info-div rule" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
+    <a href="./rule.php"><div class="info-div rule" style="z-index: 120"><p class="info">Zasady</p></div></a>
+    <a href="./author.php"><div class="info-div author" style="z-index: 121"><p class="info">U・ᴥ・U</p></div></a>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -206,5 +225,6 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
             }
         });
     </script>
+    <script src="../js/main_foto.js"></script>
 </body>
 </html>

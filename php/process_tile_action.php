@@ -1,5 +1,4 @@
 <?php
-
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
@@ -495,15 +494,13 @@ try {
                         $moneyValue = $effect['value'];
                         $newPlayerCoins = $playerCoins + $moneyValue;
 
-                        // LOGIKA BANKRUCTWA DLA OBOWIĄZKOWEJ PŁATNOŚCI (KARTA NIESPODZIANKI)
                         if ($newPlayerCoins < 0) {
                             $response['success'] = true;
                             $response['message'] = "Zbankrutowałeś! Karta akcji spowodowała, że nie masz wystarczająco pieniędzy. Twoje saldo wynosi teraz {$newPlayerCoins} $.";
                             $response['new_coins'] = $newPlayerCoins;
-                            $response['player_bankrupt'] = true; // Flaga dla frontend'u
-                            $response['redirect_to'] = 'end_game.php'; // Sygnalizuj frontendowi przekierowanie
+                            $response['player_bankrupt'] = true; 
+                            $response['redirect_to'] = 'end_game.php';
 
-                            // Zaktualizuj saldo gracza na ujemne
                             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                             if (!$stmt) {
                                 throw new Exception("Błąd aktualizacji pieniędzy gracza (bankructwo z karty akcji): " . $mysqli->error);
@@ -514,11 +511,10 @@ try {
                             }
                             $stmt->close();
 
-                            $mysqli->commit(); // Zatwierdź zmiany przed wyjściem
+                            $mysqli->commit();
                             echo json_encode($response);
-                            exit; // Zakończ skrypt, ponieważ stan gry się zmienia
+                            exit;
                         }
-                        // KONIEC LOGIKI BANKRUCTWA
 
                         $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                         if (!$stmt) {
@@ -603,7 +599,7 @@ try {
 
                         if ($turnsValue > 0) {
                             $turnText = $turnsValue == 1 ? 'turę' : ($turnsValue <= 4 ? 'tury' : 'tur');
-                            $actionMessage .= "⏸️ Będziesz musiał przegapić następne {$turnsValue} {$turnText}! (Łącznie: {$newTurnsToMiss})";
+                            $actionMessage .= "⏸️ Będziesz musiał przegapić następne {$turnsValue} {$turnText}!";
                         } else if ($turnsValue < 0) {
                             $turnText = abs($turnsValue) == 1 ? 'turę' : (abs($turnsValue) <= 4 ? 'tury' : 'tur');
                             if ($currentTurnsToMiss > 0) {
@@ -735,13 +731,13 @@ try {
                 $newTargetPlayerCoins = $targetPlayer['coins'] - $duelAmount;
                 $affectedPlayerId = $targetPlayerId;
                 $affectedPlayerNewCoins = $newTargetPlayerCoins;
-                $duelMessage .= "Wygrałeś pojedynek!";
+                $duelMessage .= "Wygrywa {$currentPlayer['name']}";
             } elseif ($targetWins) {
                 $newPlayerCoins = $currentPlayer['coins'] - $duelAmount;
                 $newTargetPlayerCoins = $targetPlayer['coins'] + $duelAmount;
                 $affectedPlayerId = $targetPlayerId;
                 $affectedPlayerNewCoins = $newTargetPlayerCoins;
-                $duelMessage .= "Przegrałeś pojedynek!";
+                $duelMessage .= "Wygrywa {$targetPlayer['name']}";
             } else {
                 // Remis, dodatkowy rzut kostką
                 $duelMessage .= "Remis! Dodatkowy rzut kostką:\n";
@@ -788,8 +784,7 @@ try {
                 }
                 $stmt->close();
 
-                // Jeśli rywal miał otrzymać pieniądze, nadal je otrzymuje
-                if ($newTargetPlayerCoins > $targetPlayer['coins']) { // Rywal wygrywa
+                if ($newTargetPlayerCoins > $targetPlayer['coins']) {
                     $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                     if (!$stmt) {
                         throw new Exception("Błąd przygotowania zapytania UPDATE rywala (bankructwo w pojedynku): " . $mysqli->error);
@@ -801,22 +796,20 @@ try {
                     $stmt->close();
                 }
 
-                $mysqli->commit(); // Zatwierdź zmiany przed wyjściem
+                $mysqli->commit();
                 echo json_encode($response);
-                exit; // Zakończ skrypt, ponieważ stan gry się zmienia
+                exit;
             }
 
-            // Sprawdź, czy rywal zbankrutował
             if ($newTargetPlayerCoins < 0) {
                 $response['success'] = true;
                 $response['message'] = "{$targetPlayer['name']} zbankrutował! Nie ma wystarczająco pieniędzy na opłacenie pojedynku ({$duelAmount} $)! Jego saldo wynosi teraz {$newTargetPlayerCoins} $.";
-                $response['new_coins'] = $newPlayerCoins; // Saldo gracza inicjującego pojedynek (jeśli wygrał)
+                $response['new_coins'] = $newPlayerCoins; 
                 $response['affected_player_id'] = $targetPlayerId;
                 $response['affected_player_new_coins'] = $newTargetPlayerCoins;
-                $response['player_bankrupt'] = true; // Flaga dla frontend'u
-                $response['redirect_to'] = 'end_game.php'; // Sygnalizuj frontendowi przekierowanie
+                $response['player_bankrupt'] = true;
+                $response['redirect_to'] = 'end_game.php';
 
-                // Zaktualizuj saldo rywala na ujemne
                 $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                 if (!$stmt) {
                     throw new Exception("Błąd przygotowania zapytania UPDATE rywala (bankructwo w pojedynku): " . $mysqli->error);
@@ -827,8 +820,7 @@ try {
                 }
                 $stmt->close();
 
-                // Jeśli gracz inicjujący miał otrzymać pieniądze, nadal je otrzymuje
-                if ($newPlayerCoins > $currentPlayer['coins']) { // Gracz inicjujący wygrywa
+                if ($newPlayerCoins > $currentPlayer['coins']) { 
                     $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                     if (!$stmt) {
                         throw new Exception("Błąd przygotowania zapytania UPDATE gracza (bankructwo w pojedynku): " . $mysqli->error);
@@ -840,13 +832,11 @@ try {
                     $stmt->close();
                 }
 
-                $mysqli->commit(); // Zatwierdź zmiany przed wyjściem
+                $mysqli->commit(); 
                 echo json_encode($response);
-                exit; // Zakończ skrypt, ponieważ stan gry się zmienia
+                exit; 
             }
-            // KONIEC LOGIKI BANKRUCTWA
-
-            // Zaktualizuj salda graczy, jeśli nie nastąpiło bankructwo
+            
             $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
             if (!$stmt) {
                 throw new Exception("Błąd przygotowania zapytania aktualizacji monet gracza: " . $mysqli->error);
@@ -857,7 +847,7 @@ try {
             }
             $stmt->close();
 
-            if ($newTargetPlayerCoins !== $targetPlayer['coins']) { // Zaktualizuj tylko jeśli saldo rywala się zmieniło
+            if ($newTargetPlayerCoins !== $targetPlayer['coins']) {
                 $stmt = $mysqli->prepare("UPDATE players SET coins = ? WHERE id = ? AND game_id = ?");
                 if (!$stmt) {
                     throw new Exception("Błąd przygotowania zapytania aktualizacji monet rywala: " . $mysqli->error);
@@ -881,14 +871,14 @@ try {
                 'effect_json' => $duelCard['effect_json']
             ];
 
-            // Przejście tury po pojedynku
+            
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['next_player_id'] = $nextPlayerId;
             $response['new_round_started'] = $newRoundStarted;
             break;
 
         case 'not_interested':
-            // Rezygnacja z zakupu, przechodzi tura
+            
             $nextPlayerId = getNextPlayerAndAdvanceTurn($mysqli, $gameId, $playerId, $newRoundStarted);
             $response['success'] = true;
             $response['message'] = 'Rezygnacja z zakupu!';

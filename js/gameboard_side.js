@@ -10,5 +10,3 @@ function randomCard() {
     gameActions.style.opacity = '0';
     duelCardResult.style.opacity = '1';
 };
-
-// socket, boostrap
