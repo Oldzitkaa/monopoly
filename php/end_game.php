@@ -181,7 +181,7 @@ if (isset($mysqli) && $mysqli instanceof mysqli && !$mysqli->connect_errno) {
             }
             ?>
         </table>
-        <p class="loose-player"> 
+        <p class="win-player"> 
             <?php
                 if (!empty($bankrupt_players)) {
                     if (count($bankrupt_players) == 1) {

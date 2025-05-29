@@ -135,11 +135,11 @@ if (isset($_GET['location'])) {
                     $output_html_message .= '<h3 class="restaurant">Restauracja ' . htmlspecialchars($tile['name']) . '</h3>';
                     if ($ownerName !== null && $ownerName !== '') {
                         $output_html_message .= '<p class="restaurant-owner">Właściciel: ' . htmlspecialchars($ownerName) . '</p>';
+                        $output_html_message .= '<p class="restaurant-cost">Koszty za jedzenie wyniosły Cię: ' . htmlspecialchars($tile['base_rent']) . ' $</p>';
                     }
-                    $output_html_message .= '<p class="restaurant-cost">Koszty za jedzenie wyniosły Cię: ' . htmlspecialchars($tile['base_rent']) . ' $</p>';
                 }
             } else {
-                $output_html_message .= '<h3 class="restaurant">Restauracja ' . htmlspecialchars($tile['name']) . ' - ' . htmlspecialchars($tile['cost']) . ' $</h3><p class="restaurant spec">' . htmlspecialchars($tile['specialization']) . '</p>';
+                $output_html_message .= '<h3 class="restaurant">Restauracja ' . htmlspecialchars($tile['name']) . '<br>' . htmlspecialchars($tile['cost']) . ' $</h3><p class="restaurant spec">' . htmlspecialchars($tile['specialization']) . '</p>';
             }
         } 
     } elseif (

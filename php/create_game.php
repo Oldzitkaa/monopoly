@@ -184,7 +184,7 @@ try {
 
             $charStats = $charactersBaseStats[$characterId];
 
-            $initialCoins = 1500;
+            $initialCoins = 2500;
             $initialPopularity = 0;
             $initialLocation = 0;
             $initialTurnsToMiss = 0;

@@ -183,7 +183,7 @@ if (
                     $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie teraz</button>';
                 } else {
                     $output_html .= '<p>Kup wszystkie restauracje z tego kontynentu by móc je ulepszyć.</p>';
-                    $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">OK</button>';
+                    $output_html .= '<button class="action-button accept" data-action-type="not_interested">OK</button>';
                 }
 
             } else {
@@ -200,11 +200,11 @@ if (
             } elseif ($tile['cost'] == $current_player_coins){
                 $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '? Zostanie Ci 0 dolarsów!</p>';
                 $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
-                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie dzięki</button>';
             } else {
                 $output_html .= '<p>Chcesz kupić restaurację ' . htmlspecialchars($tile['name']) . '?</p>';
                 $output_html .= '<button class="action-button restaurant-buy-button" data-action-type="buy_restaurant" data-property-id="' . htmlspecialchars($location) . '">Tak, kupuję</button>';
-                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie jestem zainteresowana</button>';
+                $output_html .= '<button class="action-button restaurant-notbuy-button" data-action-type="not_interested">Nie dzięki</button>';
             }
         }
     }

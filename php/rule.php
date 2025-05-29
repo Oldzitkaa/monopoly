@@ -34,7 +34,7 @@
                 <div class="inner-rule">
                     <p>
                         Każdy z graczy dostaje: <br><br>
-                        ★  Monety: Startowe 1500$. <br>
+                        ★  Monety: Startowe 2500$. <br>
                         ★  Pionek: Pionek w kolorze przypisanym do gracza, ustawiony na polu "Start". <br>
                         ★  Umiejętności Specjalne: Zestaw specjalnych umiejętności, które zależą od wybranej postaci. 
                         Umiejętności te mogą być zdobywane lub tracone w trakcie rozgrywki.<br>
